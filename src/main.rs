@@ -95,7 +95,7 @@ fn get_name_maps() -> anyhow::Result<(
     Ok((star_id_to_name, star_name_to_id))
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     use env_logger::Env;
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
@@ -109,7 +109,7 @@ fn main() {
             info!("Building star map");
             let mut star_map: HashMap<u64, Star> = HashMap::new();
             for (id_str, raw_star) in raw_star_data.solar_systems.iter() {
-                let id = id_str.parse().unwrap();
+                let id = id_str.parse()?;
                 let star = Star {
                     id,
                     x: raw_star.center[0],
@@ -122,8 +122,8 @@ fn main() {
 
             info!("Building connections");
             for raw_jump in raw_star_data.jumps.iter() {
-                let to_star = star_map.get(&raw_jump.to_system_id).unwrap().clone();
-                let from_star = star_map.get_mut(&raw_jump.from_system_id).unwrap();
+                let to_star = star_map.get(&raw_jump.to_system_id)?.clone();
+                let from_star = star_map.get_mut(&raw_jump.from_system_id)?;
                 let distance = from_star.distance(&to_star);
                 from_star.connections.push(Connection {
                     conn_type: ConnType::NpcGate,
@@ -162,8 +162,8 @@ fn main() {
             }
 
             info!("Saving star map");
-            let star_map_json = serde_json::to_string_pretty(&star_map).unwrap();
-            std::fs::write("data/star_map.json", star_map_json).unwrap();
+            let star_map_json = serde_json::to_string_pretty(&star_map)?;
+            std::fs::write("data/star_map.json", star_map_json)?;
             info!("Complete");
         }
         Some(Commands::Dist {
@@ -171,10 +171,9 @@ fn main() {
             star_name_2,
         }) => {
             info!("Loading star map");
-            let (star_id_to_name, star_name_to_id) = get_name_maps().unwrap();
+            let (star_id_to_name, star_name_to_id) = get_name_maps()?;
             let star_map: HashMap<u64, Star> =
-                serde_json::from_str(&std::fs::read_to_string("data/star_map.json").unwrap())
-                    .unwrap();
+                serde_json::from_str(&std::fs::read_to_string("data/star_map.json")?)?;
             info!("Loaded star map");
 
             let start = star_map
@@ -198,10 +197,9 @@ fn main() {
             jump_distance,
         }) => {
             info!("Loading star map");
-            let (star_id_to_name, star_name_to_id) = get_name_maps().unwrap();
+            let (star_id_to_name, star_name_to_id) = get_name_maps()?;
             let star_map: HashMap<String, Star> =
-                serde_json::from_str(&std::fs::read_to_string("data/star_map.json").unwrap())
-                    .unwrap();
+                serde_json::from_str(&std::fs::read_to_string("data/star_map.json")?)?;
             info!("Loaded star map");
             /*
             let start = star_map
@@ -256,4 +254,6 @@ fn main() {
             warn!("No command specified");
         }
     }
+
+    Ok(())
 }
