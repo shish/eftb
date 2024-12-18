@@ -10,10 +10,9 @@ use rocket::serde::json::Json;
 use rocket::State;
 use uom::si::f64::Length;
 
-mod calcs;
-mod data;
-mod raw;
-mod web_error;
+use eftb::calcs;
+use eftb::data;
+use eftb::web_error;
 
 struct Db {
     star_map: HashMap<u64, data::Star>,

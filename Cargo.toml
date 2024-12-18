@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 default-run = "cli"
 
+[lib]
+name = "eftb"
+path = "backend/lib.rs"
+
 [[bin]]
 name = "cli"
 path = "backend/cli.rs"

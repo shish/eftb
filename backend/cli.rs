@@ -7,9 +7,9 @@ use std::collections::HashMap;
 use uom::si::f64::*;
 use uom::si::length::light_year;
 
-mod calcs;
-mod data;
-mod raw;
+use eftb::calcs;
+use eftb::data;
+use eftb::raw;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
