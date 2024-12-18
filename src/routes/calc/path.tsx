@@ -85,13 +85,17 @@ function PathFinder() {
               </td>
               <td>
                 {path && (
-                  <ul>
-                    {path.map((p) => (
-                      <li key={p[0]}>
-                        {p[0]} ({p[1].toFixed(2)} ly)
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul>
+                      {path.map((p) => (
+                        <li key={p[0]}>
+                          {p[0]} ({p[1].toFixed(2)} ly)
+                        </li>
+                      ))}
+                    </ul>
+                    {path.length} jumps,{" "}
+                    {path.reduce((a, b) => a + b[1], 0).toFixed(2)} ly travelled
+                  </>
                 )}
                 {error && error.message}
               </td>
