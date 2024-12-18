@@ -7,7 +7,6 @@ use log::{info, warn};
 use uom::si::f64::*;
 use uom::si::length::light_year;
 
-use eftb::calcs;
 use eftb::data;
 use eftb::raw;
 
@@ -45,7 +44,7 @@ enum Commands {
         #[clap(short, long, default_value = "100.0")]
         jump_distance: f64,
         #[clap(short, long, default_value = "fuel")]
-        optimize: calcs::PathOptimize,
+        optimize: eftb::PathOptimize,
     },
     /// Figure out how far a given ship can jump
     Jump {
@@ -187,7 +186,7 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
-            let path = calcs::calc_path(&star_map, start, end, jump_distance, *optimize);
+            let path = eftb::calc_path(&star_map, start, end, jump_distance, *optimize);
             if let Some(path) = path {
                 let mut last = start.clone();
                 for star in path {
@@ -207,7 +206,7 @@ fn main() -> anyhow::Result<()> {
             fuel,
             efficiency,
         }) => {
-            let dist: Length = calcs::calc_jump(*mass, *fuel, *efficiency);
+            let dist: Length = eftb::calc_jump(*mass, *fuel, *efficiency);
             println!("Jump distance: {:.0} ly", dist.get::<light_year>())
         }
         Some(Commands::Exits {
@@ -226,7 +225,7 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding exits");
-            let exits = calcs::calc_exits(&star_map, start, jump_distance);
+            let exits = eftb::calc_exits(&star_map, start, jump_distance);
             for (from, to) in exits {
                 println!(
                     "{} -> {} ({}) ({} ly)",
@@ -243,7 +242,7 @@ fn main() -> anyhow::Result<()> {
             efficiency,
         }) => {
             let dist: Length = Length::new::<light_year>(*dist);
-            let fuel = calcs::calc_fuel(dist, *mass, *efficiency);
+            let fuel = eftb::calc_fuel(dist, *mass, *efficiency);
             println!("Fuel needed: {:.0}", fuel)
         }
         None => {

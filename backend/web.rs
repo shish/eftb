@@ -14,7 +14,6 @@ use rocket::serde::json::Json;
 use rocket::State;
 use uom::si::f64::Length;
 
-use eftb::calcs;
 use eftb::data;
 
 //#[derive(Error)]
@@ -59,7 +58,7 @@ async fn index() -> Option<NamedFile> {
 
 #[get("/jump?<mass>&<fuel>&<efficiency>")]
 fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<f64> {
-    let dist: Length = calcs::calc_jump(mass, fuel, efficiency);
+    let dist: Length = eftb::calc_jump(mass, fuel, efficiency);
     Json(dist.get::<uom::si::length::light_year>())
 }
 
@@ -82,8 +81,8 @@ fn calc_path(
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let optimize = match optimize.as_str() {
-        "fuel" => calcs::PathOptimize::Fuel,
-        "distance" => calcs::PathOptimize::Distance,
+        "fuel" => eftb::PathOptimize::Fuel,
+        "distance" => eftb::PathOptimize::Distance,
         _ => {
             return Err(CustomError(
                 Status::BadRequest,
@@ -92,7 +91,7 @@ fn calc_path(
         }
     };
 
-    let path = calcs::calc_path(
+    let path = eftb::calc_path(
         &db.star_map,
         start,
         end,
@@ -117,7 +116,7 @@ fn calc_path(
 
 #[get("/fuel?<dist>&<mass>&<efficiency>")]
 fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<f64> {
-    Json(calcs::calc_fuel(
+    Json(eftb::calc_fuel(
         Length::new::<uom::si::length::light_year>(dist),
         mass,
         efficiency,
@@ -132,7 +131,7 @@ fn calc_exit(
 ) -> Result<Json<Vec<(String, String, f64)>>, CustomError> {
     let start = db.get_star(start)?;
 
-    let exits = calcs::calc_exits(
+    let exits = eftb::calc_exits(
         &db.star_map,
         start,
         Length::new::<uom::si::length::light_year>(jump),
