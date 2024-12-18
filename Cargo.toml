@@ -2,6 +2,15 @@
 name = "eve-frontiers-toolbox"
 version = "0.1.0"
 edition = "2021"
+default-run = "cli"
+
+[[bin]]
+name = "cli"
+path = "src/cli.rs"
+
+[[bin]]
+name = "web"
+path = "src/web.rs"
 
 [dependencies]
 anyhow = "1.0.94"
