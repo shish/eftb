@@ -10,7 +10,8 @@ pub enum ConnType {
     Jump = 2,
 }
 
-type SolarSystemId = u64;
+pub type SolarSystemId = u64;
+pub type RegionId = u64;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Connection {
@@ -22,6 +23,7 @@ pub struct Connection {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Star {
     pub id: SolarSystemId,
+    pub region_id: RegionId,
     pub x: f64,
     pub y: f64,
     pub z: f64,

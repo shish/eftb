@@ -63,8 +63,8 @@ pub struct RawSolarSystem {
     //pub planet_count_by_type: HashMap<String, u64>,
     //#[serde(rename(deserialize = "planetItemIDs"))]
     //pub planet_item_ids: Vec<u64>,
-    //#[serde(rename(deserialize = "regionID"))]
-    //pub region_id: u64,
+    #[serde(rename(deserialize = "regionID"))]
+    pub region_id: u64,
     //#[serde(rename(deserialize = "sunTypeID"))]
     //pub sun_type_id: u64,
 }

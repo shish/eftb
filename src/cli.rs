@@ -23,7 +23,7 @@ struct Cli {
 enum Commands {
     /// Build the starmap from star_data.json and star_names.json
     Build {
-        #[clap(default_value = "100.0")]
+        #[clap(default_value = "300.0")]
         max_jump_distance: f64,
     },
     /// Find the direct distance between two stars
@@ -45,6 +45,12 @@ enum Commands {
         #[clap(default_value = "0.4")]
         efficiency: f64,
     },
+    /// Find the exits from a given point
+    Exits {
+        start_name: String,
+        #[clap(default_value = "100.0")]
+        jump_distance: f64,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -65,6 +71,7 @@ fn main() -> anyhow::Result<()> {
                 let id = id_str.parse()?;
                 let star = data::Star {
                     id,
+                    region_id: raw_star.region_id,
                     x: raw_star.center[0],
                     y: raw_star.center[1],
                     z: raw_star.center[2],
@@ -181,6 +188,33 @@ fn main() -> anyhow::Result<()> {
         }) => {
             let dist: Length = calcs::calc_jump(*mass, *fuel, *efficiency);
             println!("Jump distance: {:.0} ly", dist.get::<light_year>())
+        }
+        Some(Commands::Exits {
+            start_name,
+            jump_distance,
+        }) => {
+            info!("Loading star map");
+            let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
+            let star_map: HashMap<u64, data::Star> =
+                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
+            info!("Loaded star map");
+
+            let start = star_map
+                .get(star_name_to_id.get(start_name).unwrap())
+                .unwrap();
+            let jump_distance: Length = Length::new::<light_year>(*jump_distance);
+
+            info!("Finding exits");
+            let exits = calcs::calc_exits(&star_map, start, jump_distance);
+            for (from, to) in exits {
+                println!(
+                    "{} -> {} ({}) ({} ly)",
+                    star_id_to_name[&from.id],
+                    star_id_to_name[&to.id],
+                    &to.region_id,
+                    from.distance(&to).get::<light_year>() as i32
+                );
+            }
         }
         None => {
             warn!("No command specified");

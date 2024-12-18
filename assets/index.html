@@ -1,0 +1,185 @@
+<html>
+    <head>
+        <title>Shish's EF Toolbox</title>
+    </head>
+    <style>
+SELECT {
+    width: 100%;
+}
+    </style>
+</html>
+<body>
+<h1>EF Toolbox</h1>
+Very much a work in progress, let Shish know if something seems off
+
+<h2>How far can I jump?</h2>
+<form action="/api/jump" method="get" id="jump">
+    <table>
+        <tr>
+            <td>Ship</td>
+            <td><select id="ship">
+                <option value="14000000,182">Juav</option>
+                <option value="28000000,539" selected>Val</option>
+                <option value="145000000,2990">Flegel</option>
+            </select></td>
+            <td>(Just a shortcut to set mass & fuel)</td>
+        </tr>
+        <tr>
+            <td>Mass (kg)</td>
+            <td><input type="number" id="mass" name="mass" value="28000000"></td>
+        </tr>
+        <tr>
+            <td>Fuel level</td>
+            <td><input type="number" id="fuel" name="fuel" value="539"></td>
+        </tr>
+        <tr>
+            <td>Fuel Type</td>
+            <td><select name="efficiency">
+                <option value="0.3">uSOF-30</option>
+                <option value="0.4" selected>SOF-40</option>
+                <option value="0.4">EU-40</option>
+                <option value="0.8">SOF-80</option>
+                <option value="0.9">EU-90</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Calculate"></td>
+            <td><div id="jump-result"></div></td>
+        </tr>
+    </table>
+</form>
+<script>
+    document.getElementById('jump').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var url = form.action + '?' + new URLSearchParams(new FormData(form)).toString();
+        fetch(url)
+            .then(response => response.ok ? response.json() : response.text().then(text => Promise.reject(text)))
+            .then(data => {
+                document.getElementById('jump-result').innerText = data.toFixed(2) + ' ly';
+            })
+            .catch(error => {
+                document.getElementById('jump-result').innerText = 'Error: ' + error;
+            });
+    });
+
+    document.getElementById('ship').addEventListener('change', function(e) {
+        let [mass, fuel] = e.target.value.split(',');
+        document.getElementById('mass').value = mass;
+        document.getElementById('fuel').value = fuel;
+    });
+</script>
+
+
+<h2>How far is it?</h2>
+<form action="/api/dist" method="get" id="dist">
+    <table>
+        <tr>
+            <td>Start</td>
+            <td><input type="text" name="start" value="E.G1G.6GD"></td>
+        </tr>
+        <tr>
+            <td>End</td>
+            <td><input type="text" name="end" value="Nod"></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Calculate"></td>
+            <td><div id="dist-result"></div></td>
+    </table>
+</form>
+<script>
+    document.getElementById('dist').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var url = form.action + '?' + new URLSearchParams(new FormData(form)).toString();
+        fetch(url)
+            .then(response => response.ok ? response.json() : response.text().then(text => Promise.reject(text)))
+            .then(data => {
+                document.getElementById('dist-result').innerText = data.toFixed(2) + ' ly';
+            })
+            .catch(error => {
+                document.getElementById('dist-result').innerText = 'Error: ' + error;
+            });
+    });
+</script>
+
+<h2>How do I get there?</h2>
+<form action="/api/path" method="get" id="path">
+    <table>
+        <tr>
+            <td>Start</td>
+            <td><input type="text" name="start" value="E.G1G.6GD"></td>
+        </tr>
+        <tr>
+            <td>End</td>
+            <td><input type="text" name="end" value="Nod"></td>
+        </tr>
+        <tr>
+            <td>Max Jump (ly)</td>
+            <td><input type="number" name="jump" value="120"></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Calculate"></td>
+            <td><div id="path-result"></div></td>
+        </tr>
+    </table>
+</form>
+<script>
+    document.getElementById('path').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var url = form.action + '?' + new URLSearchParams(new FormData(form)).toString();
+        fetch(url)
+            .then(response => response.ok ? response.json() : response.text().then(text => Promise.reject(text)))
+            .then(data => {
+                var text = '';
+                for (var i = 0; i < data.length; i++) {
+                    text += data[i][0] + ' (' + data[i][1].toFixed(2) + ' ly)<br>';
+                }
+                document.getElementById('path-result').innerHTML = text;
+            })
+            .catch(error => {
+                document.getElementById('path-result').innerText = 'Error: ' + error;
+            });
+    });
+</script>
+
+<h2>How do I get out of here?</h2>
+<form action="/api/exits" method="get" id="exits">
+    <table>
+        <tr>
+            <td>Start (System)</td>
+            <td><input type="text" name="start" value="E.G1G.6GD"></td>
+        </tr>
+        <tr>
+            <td>Max Jump (ly)</td>
+            <td><input type="number" name="jump" value="80"></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Calculate"></td>
+            <td><div id="exits-result"></div></td>
+        </tr>
+    </table>
+</form>
+<script>
+    document.getElementById('exits').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var url = form.action + '?' + new URLSearchParams(new FormData(form)).toString();
+        fetch(url)
+            .then(response => response.ok ? response.json() : response.text().then(text => Promise.reject(text)))
+            .then(data => {
+                var text = '';
+                for (var i = 0; i < data.length; i++) {
+                    text += data[i][0] + ' &rarr; ' + data[i][1]  + ' (' + data[i][2].toFixed(2) + ' ly)<br>';
+                }
+                document.getElementById('exits-result').innerHTML = text;
+            })
+            .catch(error => {
+                document.getElementById('exits-result').innerText = 'Error: ' + error;
+            });
+    });
+</script>
+
+</body>
+</html>
