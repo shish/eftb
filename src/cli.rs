@@ -2,59 +2,14 @@ use bincode;
 use clap::{Parser, Subcommand};
 use indicatif::ProgressIterator;
 use log::{info, warn};
-use pathfinding::prelude::astar;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use uom::si::f64::*;
-use uom::si::length::{light_year, meter};
+use uom::si::length::light_year;
 
+mod calcs;
+mod data;
 mod raw;
-
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
-enum ConnType {
-    NpcGate = 0,
-    SmartGate = 1,
-    Jump = 2,
-}
-
-type SolarSystemId = u64;
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-struct Connection {
-    conn_type: ConnType,
-    distance: Length,
-    target: SolarSystemId,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-struct Star {
-    id: SolarSystemId,
-    x: f64,
-    y: f64,
-    z: f64,
-    connections: Vec<Connection>,
-}
-
-impl Star {
-    fn distance(&self, other: &Star) -> Length {
-        Length::new::<meter>(
-            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
-                .sqrt(),
-        )
-    }
-}
-impl PartialEq for Star {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
-}
-impl Eq for Star {}
-impl std::hash::Hash for Star {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -83,23 +38,13 @@ enum Commands {
         #[clap(default_value = "100.0")]
         jump_distance: f64,
     },
-}
-
-fn get_name_maps() -> anyhow::Result<(
-    HashMap<SolarSystemId, String>,
-    HashMap<String, SolarSystemId>,
-)> {
-    let data = std::fs::read_to_string("data/star-names.json")?;
-    let json = serde_json::from_str::<HashMap<String, String>>(&data)?;
-    let star_id_to_name: HashMap<SolarSystemId, String> = json
-        .iter()
-        .map(|(k, v)| (k.clone().parse().unwrap(), v.clone()))
-        .collect();
-    let star_name_to_id: HashMap<String, SolarSystemId> = star_id_to_name
-        .iter()
-        .map(|(k, v)| (v.clone(), k.clone()))
-        .collect();
-    Ok((star_id_to_name, star_name_to_id))
+    /// Figure out how far a given ship can jump
+    Jump {
+        mass: f64,
+        fuel: f64,
+        #[clap(default_value = "0.4")]
+        efficiency: f64,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -115,10 +60,10 @@ fn main() -> anyhow::Result<()> {
             let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
 
             info!("Building star map");
-            let mut star_map: HashMap<u64, Star> = HashMap::new();
+            let mut star_map: HashMap<u64, data::Star> = HashMap::new();
             for (id_str, raw_star) in raw_star_data.solar_systems.iter() {
                 let id = id_str.parse()?;
-                let star = Star {
+                let star = data::Star {
                     id,
                     x: raw_star.center[0],
                     y: raw_star.center[1],
@@ -130,21 +75,21 @@ fn main() -> anyhow::Result<()> {
 
             info!("Building connections");
             for raw_jump in raw_star_data.jumps.iter() {
-                let to_star = star_map.get(&raw_jump.to_system_id).unwrap().clone();
-                let from_star = star_map.get_mut(&raw_jump.from_system_id).unwrap();
-                let distance: Length = from_star.distance(&to_star);
-                from_star.connections.push(Connection {
-                    conn_type: ConnType::NpcGate,
-                    distance,
-                    target: raw_jump.to_system_id,
-                });
-                /*
-                to_star.connections.push(Connection {
-                    conn_type: ConnType::NpcGate,
-                    distance,
-                    target: from_star.name.clone(),
-                });
-                */
+                // rust only lets us borrow one mutable star at a time, so we can't add
+                // from->to and to->from gates in the same block
+                for (fid, tid) in [
+                    (raw_jump.from_system_id, raw_jump.to_system_id),
+                    (raw_jump.to_system_id, raw_jump.from_system_id),
+                ] {
+                    let to_star = star_map.get(&tid).unwrap().clone();
+                    let from_star = star_map.get_mut(&fid).unwrap();
+                    let distance: Length = from_star.distance(&to_star);
+                    from_star.connections.push(data::Connection {
+                        conn_type: data::ConnType::NpcGate,
+                        distance,
+                        target: tid,
+                    });
+                }
             }
 
             let cloned_star_map = star_map.clone();
@@ -155,8 +100,8 @@ fn main() -> anyhow::Result<()> {
                     }
                     let distance: Length = star.distance(&other_star);
                     if distance < max_jump_dist {
-                        star.connections.push(Connection {
-                            conn_type: ConnType::Jump,
+                        star.connections.push(data::Connection {
+                            conn_type: data::ConnType::Jump,
                             distance,
                             target: other_star.id,
                         });
@@ -174,8 +119,8 @@ fn main() -> anyhow::Result<()> {
             end_name,
         }) => {
             info!("Loading star map");
-            let (star_id_to_name, star_name_to_id) = get_name_maps()?;
-            let star_map: HashMap<u64, Star> =
+            let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
+            let star_map: HashMap<u64, data::Star> =
                 bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
             info!("Loaded star map");
 
@@ -188,10 +133,10 @@ fn main() -> anyhow::Result<()> {
 
             let distance: Length = start.distance(end);
             println!(
-                "Distance between {} and {} is {:.2} LY",
+                "Distance between {} and {} is {} LY",
                 star_id_to_name[&start.id],
                 star_id_to_name[&end.id],
-                distance.get::<light_year>()
+                distance.get::<light_year>() as i32
             );
         }
         Some(Commands::Path {
@@ -200,8 +145,8 @@ fn main() -> anyhow::Result<()> {
             jump_distance,
         }) => {
             info!("Loading star map");
-            let (star_id_to_name, star_name_to_id) = get_name_maps()?;
-            let star_map: HashMap<u64, Star> =
+            let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
+            let star_map: HashMap<u64, data::Star> =
                 bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
             info!("Loaded star map");
 
@@ -214,43 +159,28 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
-            fn successors(
-                star_map: &HashMap<u64, Star>,
-                star: &Star,
-                jump_distance: Length,
-            ) -> Vec<(Star, i64)> {
-                star.connections
-                    .iter()
-                    .filter_map(|c| {
-                        if c.conn_type == ConnType::Jump && c.distance > jump_distance {
-                            return None;
-                        }
-                        Some((
-                            star_map.get(&c.target).unwrap().clone(),
-                            c.distance.get::<light_year>() as i64,
-                        ))
-                    })
-                    .collect()
-            }
-            let result = astar(
-                start,
-                |star| successors(&star_map, star, jump_distance),
-                |star| (star.distance(end).get::<light_year>() / 3.0) as i64,
-                |star| star.id == end.id,
-            );
-            if let Some((result, _)) = result {
+            let path = calcs::calc_path(&star_map, start, end, jump_distance);
+            if let Some(path) = path {
                 let mut last = start.clone();
-                for star in result {
+                for star in path {
                     println!(
-                        "{} ({} LY)",
+                        "{} ({} ly)",
                         star_id_to_name[&star.id],
-                        last.distance(&star).get::<light_year>()
+                        last.distance(&star).get::<light_year>() as i32
                     );
                     last = star;
                 }
             } else {
                 warn!("No path found");
             }
+        }
+        Some(Commands::Jump {
+            mass,
+            fuel,
+            efficiency,
+        }) => {
+            let dist: Length = calcs::calc_jump(*mass, *fuel, *efficiency);
+            println!("Jump distance: {:.0} ly", dist.get::<light_year>())
         }
         None => {
             warn!("No command specified");
