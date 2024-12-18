@@ -16,7 +16,7 @@ const TanStackRouterDevtools =
 export const Route = createRootRoute({
   component: () => (
     <>
-      <h1>Shish&apos;s EVE Frontier Toolbox</h1>
+      <h1>EVE Frontier Toolbox</h1>
       <p>
         Very much a work in progress, let Shish know if something seems off.
         Also let Shish know if things seem accurate TBH, right now a lot of this
