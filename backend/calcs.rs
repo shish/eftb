@@ -2,16 +2,16 @@ use pathfinding::prelude::astar;
 use std::collections::HashMap;
 
 use uom::si::f64::*;
-use uom::si::length::{light_year, meter};
+use uom::si::length::light_year;
 
 use crate::data;
 
 pub fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Length {
-    Length::new::<meter>((fuel / mass) * efficiency * 1e23)
+    Length::new::<light_year>((fuel / mass) * efficiency * 1e7)
 }
 
 pub fn calc_fuel(dist: Length, mass: f64, efficiency: f64) -> f64 {
-    return dist.get::<meter>() / (efficiency * 1e23) * mass;
+    return dist.get::<light_year>() / (efficiency * 1e7) * mass;
 }
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy)]
