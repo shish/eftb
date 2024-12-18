@@ -54,15 +54,15 @@ pub fn get_name_maps() -> anyhow::Result<(
     HashMap<SolarSystemId, String>,
     HashMap<String, SolarSystemId>,
 )> {
-    let data = std::fs::read_to_string("data/star-names.json")?;
-    let json = serde_json::from_str::<HashMap<String, String>>(&data)?;
+    let data = std::fs::read_to_string("data/star-data.json")?;
+    let json = serde_json::from_str::<HashMap<String, crate::raw::RawStar>>(&data)?;
     let star_id_to_name: HashMap<SolarSystemId, String> = json
-        .iter()
-        .map(|(k, v)| (k.clone().parse().unwrap(), v.clone()))
+        .values()
+        .map(|star| (star.solar_system_id, star.solar_system_name.clone()))
         .collect();
-    let star_name_to_id: HashMap<String, SolarSystemId> = star_id_to_name
-        .iter()
-        .map(|(k, v)| (v.clone(), k.clone()))
+    let star_name_to_id: HashMap<String, SolarSystemId> = json
+        .values()
+        .map(|star| (star.solar_system_name.clone(), star.solar_system_id))
         .collect();
     Ok((star_id_to_name, star_name_to_id))
 }

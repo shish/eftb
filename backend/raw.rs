@@ -1,6 +1,10 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
+// ====================================================================
+// Data structures for the starmap pickle extracted from the client
+// ====================================================================
+
 #[derive(Debug, Deserialize)]
 pub struct RawStarMap {
     //pub constellations: HashMap<String, RawConstellation>,
@@ -67,4 +71,17 @@ pub struct RawSolarSystem {
     pub region_id: u64,
     //#[serde(rename(deserialize = "sunTypeID"))]
     //pub sun_type_id: u64,
+}
+
+// ====================================================================
+// Data structures for the star json fetched from the API
+// ====================================================================
+
+#[derive(Debug, Deserialize)]
+pub struct RawStar {
+    #[serde(rename(deserialize = "solarSystemId"))]
+    pub solar_system_id: u64,
+    #[serde(rename(deserialize = "solarSystemName"))]
+    pub solar_system_name: String,
+    //pub location: RawLocation,
 }
