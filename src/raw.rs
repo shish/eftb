@@ -33,8 +33,8 @@ pub struct RawJump {
     // from_center: RawJumpCenter,
     #[serde(rename(deserialize = "fromSystemID"))]
     pub from_system_id: u64,
-    // #[serde(rename(deserialize = "jumpType"))]
-    // pub jump_type: u8,
+    #[serde(rename(deserialize = "jumpType"))]
+    pub jump_type: u8,
     // #[serde(rename(deserialize = "toCenter"))]
     // to_center: RawJumpCenter,
     #[serde(rename(deserialize = "toSystemID"))]

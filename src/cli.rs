@@ -91,8 +91,19 @@ fn main() -> anyhow::Result<()> {
                     let to_star = star_map.get(&tid).unwrap().clone();
                     let from_star = star_map.get_mut(&fid).unwrap();
                     let distance: Length = from_star.distance(&to_star);
+                    let conn_type = match raw_jump.jump_type {
+                        0 => data::ConnType::NpcGate,
+                        1 => data::ConnType::NpcGate, // What are these ???
+                        _ => {
+                            info!(
+                                "{} -> {} is an unknown jump type ({})",
+                                fid, tid, raw_jump.jump_type
+                            );
+                            continue;
+                        }
+                    };
                     from_star.connections.push(data::Connection {
-                        conn_type: data::ConnType::NpcGate,
+                        conn_type,
                         distance,
                         target: tid,
                     });
