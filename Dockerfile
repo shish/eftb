@@ -2,11 +2,11 @@
 FROM rust:1.81 AS build-backend
 COPY Cargo.toml Cargo.lock /app/
 WORKDIR /app
-RUN mkdir src && \
-    echo "fn main() {println!(\"stub\")}" > /app/src/web.rs && \
+RUN mkdir backend && \
+    echo "fn main() {println!(\"stub\")}" > /app/backend/web.rs && \
     cargo build --release --bin web && \
-    rm -rf src target/release/deps/web-*
-COPY src /app/src
+    rm -rf backend target/release/deps/web-*
+COPY backend /app/backend
 RUN cargo build --release --bin web
 
 FROM debian:stable-slim

@@ -6,11 +6,11 @@ default-run = "cli"
 
 [[bin]]
 name = "cli"
-path = "src/cli.rs"
+path = "backend/cli.rs"
 
 [[bin]]
 name = "web"
-path = "src/web.rs"
+path = "backend/web.rs"
 
 [dependencies]
 anyhow = "1.0.94"
