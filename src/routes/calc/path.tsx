@@ -6,7 +6,8 @@ export const Route = createFileRoute("/calc/path")({
   component: PathFinder,
 });
 
-type PathStep = [string, number];
+type ConnType = "npc_gate" | "smart_gate" | "jump";
+type PathStep = [string, string, ConnType, number];
 
 function PathFinder() {
   const [start, setStart] = useState("E.G1G.6GD");
@@ -89,12 +90,17 @@ function PathFinder() {
                     <ul>
                       {path.map((p) => (
                         <li key={p[0]}>
-                          {p[0]} ({p[1].toFixed(2)} ly)
+                          {p[0]} &rarr; {p[1]} ({p[2]}, {p[3].toFixed(2)} ly)
                         </li>
                       ))}
                     </ul>
                     {path.length} jumps,{" "}
-                    {path.reduce((a, b) => a + b[1], 0).toFixed(2)} ly travelled
+                    {path.reduce((a, b) => a + b[3], 0).toFixed(2)} ly
+                    travelled,{" "}
+                    {path
+                      .reduce((a, b) => a + (b[2] == "jump" ? b[3] : 0), 0)
+                      .toFixed(2)}{" "}
+                    ly jumped
                   </>
                 )}
                 {error && error.message}

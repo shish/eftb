@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 use uom::si::f64::*;
 use uom::si::length::meter;
 
+pub type ConnectionId = u64;
+pub type SolarSystemId = u64;
+pub type RegionId = u64;
+
 #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
 pub enum ConnType {
     NpcGate = 0,
@@ -11,14 +15,23 @@ pub enum ConnType {
     Jump = 2,
 }
 
-pub type SolarSystemId = u64;
-pub type RegionId = u64;
-
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Connection {
+    pub id: ConnectionId,
     pub conn_type: ConnType,
     pub distance: Length,
     pub target: SolarSystemId,
+}
+impl PartialEq for Connection {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+impl Eq for Connection {}
+impl std::hash::Hash for Connection {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

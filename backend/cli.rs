@@ -89,6 +89,7 @@ fn main() -> anyhow::Result<()> {
             }
 
             info!("Building connections");
+            let mut conn_count = 0;
             for raw_jump in raw_star_data.jumps.iter() {
                 // rust only lets us borrow one mutable star at a time, so we can't add
                 // from->to and to->from gates in the same block
@@ -111,10 +112,12 @@ fn main() -> anyhow::Result<()> {
                         }
                     };
                     from_star.connections.push(data::Connection {
+                        id: conn_count,
                         conn_type,
                         distance,
                         target: tid,
                     });
+                    conn_count += 1;
                 }
             }
 
@@ -127,10 +130,12 @@ fn main() -> anyhow::Result<()> {
                     let distance: Length = star.distance(&other_star);
                     if distance < max_jump_dist {
                         star.connections.push(data::Connection {
+                            id: conn_count,
                             conn_type: data::ConnType::Jump,
                             distance,
                             target: other_star.id,
                         });
+                        conn_count += 1;
                     }
                 }
             }
@@ -188,14 +193,16 @@ fn main() -> anyhow::Result<()> {
             info!("Finding path");
             let path = eftb::calc_path(&star_map, start, end, jump_distance, *optimize);
             if let Some(path) = path {
-                let mut last = start.clone();
-                for star in path {
+                let mut last_id = start.id;
+                for conn in path {
                     println!(
-                        "{} ({} ly)",
-                        star_id_to_name[&star.id],
-                        last.distance(&star).get::<light_year>() as i32
+                        "{} -> {} ({:?}, {} ly)",
+                        star_id_to_name[&last_id],
+                        star_id_to_name[&conn.target],
+                        conn.conn_type,
+                        conn.distance.get::<light_year>() as i32
                     );
-                    last = star;
+                    last_id = conn.target;
                 }
             } else {
                 warn!("No path found");

@@ -15,6 +15,7 @@ use rocket::State;
 use uom::si::f64::Length;
 
 use eftb::data;
+use uom::si::length::light_year;
 
 //#[derive(Error)]
 #[derive(Debug, Clone)]
@@ -77,7 +78,7 @@ fn calc_path(
     end: String,
     jump: f64,
     optimize: String,
-) -> Result<Json<Vec<(String, f64)>>, CustomError> {
+) -> Result<Json<Vec<(String, String, String, f64)>>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let optimize = match optimize.as_str() {
@@ -100,16 +101,20 @@ fn calc_path(
     )
     .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 
-    let mut result: Vec<(String, f64)> = Vec::new();
-    let mut last_star = start.clone();
-    for star in path {
+    let mut result: Vec<(String, String, String, f64)> = Vec::new();
+    let mut last_id = start.id;
+    for conn in path {
         result.push((
-            db.star_id_to_name[&star.id].clone(),
-            last_star
-                .distance(&star)
-                .get::<uom::si::length::light_year>(),
+            db.star_id_to_name[&last_id].clone(),
+            db.star_id_to_name[&conn.target].clone(),
+            match conn.conn_type {
+                data::ConnType::Jump => "jump".to_string(),
+                data::ConnType::NpcGate => "npc_gate".to_string(),
+                data::ConnType::SmartGate => "smart_gate".to_string(),
+            },
+            conn.distance.get::<light_year>() as f64,
         ));
-        last_star = star;
+        last_id = conn.target;
     }
     Ok(Json(result))
 }
