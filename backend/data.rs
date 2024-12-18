@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use uom::si::f64::*;
 use uom::si::length::meter;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
 pub enum ConnType {
     NpcGate = 0,
     SmartGate = 1,

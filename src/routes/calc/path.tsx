@@ -1,24 +1,25 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, FormEvent } from 'react'
-import { api } from '../../api'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, FormEvent } from "react";
+import { api } from "../../api";
 
-export const Route = createFileRoute('/calc/path')({
+export const Route = createFileRoute("/calc/path")({
   component: PathFinder,
-})
+});
 
-type PathStep = [string, number]
+type PathStep = [string, number];
 
 function PathFinder() {
-  const [start, setStart] = useState('E.G1G.6GD')
-  const [end, setEnd] = useState('Nod')
-  const [jump, setJump] = useState(120)
+  const [start, setStart] = useState("E.G1G.6GD");
+  const [end, setEnd] = useState("Nod");
+  const [jump, setJump] = useState(120);
+  const [optimize, setOptimize] = useState<"fuel" | "distance">("fuel");
 
-  const [path, setPath] = useState<null | PathStep[]>(null)
-  const [error, setError] = useState<null | Error>(null)
+  const [path, setPath] = useState<null | PathStep[]>(null);
+  const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    api(e.target as HTMLFormElement, setPath, setError)
+    e.preventDefault();
+    api(e.target as HTMLFormElement, setPath, setError);
   }
 
   return (
@@ -64,6 +65,21 @@ function PathFinder() {
               </td>
             </tr>
             <tr>
+              <td>Optimize for</td>
+              <td>
+                <select
+                  name="optimize"
+                  value={optimize}
+                  onChange={(e) =>
+                    setOptimize(e.target.value as "fuel" | "distance")
+                  }
+                >
+                  <option value="fuel">Fuel (Prefer gates)</option>
+                  <option value="distance">Distance (Prefer jumps)</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
               <td>
                 <input type="submit" value="Calculate" />
               </td>
@@ -84,5 +100,5 @@ function PathFinder() {
         </table>
       </form>
     </section>
-  )
+  );
 }

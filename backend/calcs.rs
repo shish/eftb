@@ -14,16 +14,24 @@ pub fn calc_fuel(dist: Length, mass: f64, efficiency: f64) -> f64 {
     return dist.get::<meter>() / (efficiency * 1e23) * mass;
 }
 
+#[derive(clap::ValueEnum, Debug, Clone, Copy)]
+pub enum PathOptimize {
+    Fuel,
+    Distance,
+}
+
 pub fn calc_path(
     star_map: &HashMap<u64, data::Star>,
     start: &data::Star,
     end: &data::Star,
     jump_distance: Length,
+    optimize: PathOptimize,
 ) -> Option<Vec<data::Star>> {
     fn successors(
         star_map: &HashMap<u64, data::Star>,
         star: &data::Star,
         jump_distance: Length,
+        optimize: PathOptimize,
     ) -> Vec<(data::Star, i64)> {
         star.connections
             .iter()
@@ -31,16 +39,25 @@ pub fn calc_path(
                 if c.conn_type == data::ConnType::Jump && c.distance > jump_distance {
                     return None;
                 }
-                Some((
-                    star_map.get(&c.target).unwrap().clone(),
-                    c.distance.get::<light_year>() as i64,
-                ))
+                let target = star_map.get(&c.target).unwrap().clone();
+                let distance = c.distance.get::<light_year>() as i64;
+                match (optimize, c.conn_type) {
+                    // For shortest path, we only care about the distance
+                    // and don't care about the type of connection
+                    (PathOptimize::Distance, _) => Some((target, distance)),
+                    // For fuel efficient, we only care about the distance
+                    // if it's a jump
+                    (PathOptimize::Fuel, data::ConnType::Jump) => Some((target, distance)),
+                    // Gate connections are free (-ish. It still takes a tiny
+                    // amount of fuel to warp to a gate)
+                    (PathOptimize::Fuel, _) => Some((target, 0)),
+                }
             })
             .collect()
     }
     astar(
         start,
-        |star| successors(&star_map, star, jump_distance),
+        |star| successors(&star_map, star, jump_distance, optimize),
         |star| (star.distance(end).get::<light_year>() / 3.0) as i64,
         |star| star.id == end.id,
     )

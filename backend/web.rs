@@ -62,21 +62,33 @@ fn calc_dist(
     Ok(Json(dist.get::<uom::si::length::light_year>()))
 }
 
-#[get("/path?<start>&<end>&<jump>")]
+#[get("/path?<start>&<end>&<jump>&<optimize>")]
 fn calc_path(
     db: &State<Db>,
     start: String,
     end: String,
     jump: f64,
+    optimize: String,
 ) -> Result<Json<Vec<(String, f64)>>, web_error::CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
+    let optimize = match optimize.as_str() {
+        "fuel" => calcs::PathOptimize::Fuel,
+        "distance" => calcs::PathOptimize::Distance,
+        _ => {
+            return Err(web_error::CustomError(
+                Status::BadRequest,
+                format!("Invalid optimize value"),
+            ))
+        }
+    };
 
     let path = calcs::calc_path(
         &db.star_map,
         start,
         end,
         Length::new::<uom::si::length::light_year>(jump),
+        optimize,
     )
     .ok_or(web_error::CustomError(
         Status::NotFound,

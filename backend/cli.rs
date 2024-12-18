@@ -35,27 +35,29 @@ enum Commands {
     Fuel {
         dist: f64,
         mass: f64,
-        #[clap(default_value = "0.4")]
+        #[clap(short, long, default_value = "0.4")]
         efficiency: f64,
     },
     /// Find the shortest path between two stars
     Path {
         start_name: String,
         end_name: String,
-        #[clap(default_value = "100.0")]
+        #[clap(short, long, default_value = "100.0")]
         jump_distance: f64,
+        #[clap(short, long, default_value = "fuel")]
+        optimize: calcs::PathOptimize,
     },
     /// Figure out how far a given ship can jump
     Jump {
         mass: f64,
         fuel: f64,
-        #[clap(default_value = "0.4")]
+        #[clap(short, long, default_value = "0.4")]
         efficiency: f64,
     },
     /// Find the exits from a given point
     Exits {
         start_name: String,
-        #[clap(default_value = "100.0")]
+        #[clap(short, long, default_value = "100.0")]
         jump_distance: f64,
     },
 }
@@ -168,6 +170,7 @@ fn main() -> anyhow::Result<()> {
             start_name,
             end_name,
             jump_distance,
+            optimize,
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
@@ -184,7 +187,7 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
-            let path = calcs::calc_path(&star_map, start, end, jump_distance);
+            let path = calcs::calc_path(&star_map, start, end, jump_distance, *optimize);
             if let Some(path) = path {
                 let mut last = start.clone();
                 for star in path {
