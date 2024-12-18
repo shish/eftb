@@ -23,6 +23,11 @@ export const Route = createRootRoute({
         stuff is theoretical and I&apos;d love to have some confirmation that it
         is working for people :)
       </p>
+      <p>
+        Also heads up this site is under active development - if you get an
+        error, please refresh the page and try again to make sure you&apos;re
+        running the latest code before reporting it &lt;3
+      </p>
       <hr />
       <Outlet />
       <hr />
