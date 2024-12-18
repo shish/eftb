@@ -1,9 +1,9 @@
+use std::collections::HashMap;
+
 use bincode;
 use clap::{Parser, Subcommand};
 use indicatif::ProgressIterator;
 use log::{info, warn};
-use std::collections::HashMap;
-
 use uom::si::f64::*;
 use uom::si::length::light_year;
 

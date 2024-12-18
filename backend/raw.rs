@@ -1,5 +1,6 @@
-use serde::Deserialize;
 use std::collections::HashMap;
+
+use serde::Deserialize;
 
 // ====================================================================
 // Data structures for the starmap pickle extracted from the client

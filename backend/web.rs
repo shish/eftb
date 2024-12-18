@@ -2,17 +2,34 @@
 extern crate rocket;
 
 use std::collections::HashMap;
+use std::io::Cursor;
 use std::path::Path;
 
 use rocket::fs::NamedFile;
+use rocket::http::ContentType;
 use rocket::http::Status;
+use rocket::request::Request;
+use rocket::response::{self, Responder, Response};
 use rocket::serde::json::Json;
 use rocket::State;
 use uom::si::f64::Length;
 
 use eftb::calcs;
 use eftb::data;
-use eftb::web_error;
+
+//#[derive(Error)]
+#[derive(Debug, Clone)]
+pub struct CustomError(pub Status, pub String);
+
+impl<'r> Responder<'r, 'static> for CustomError {
+    fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
+        Response::build()
+            .status(self.0)
+            .header(ContentType::Text)
+            .sized_body(self.1.len(), Cursor::new(self.1))
+            .ok()
+    }
+}
 
 struct Db {
     star_map: HashMap<u64, data::Star>,
@@ -20,15 +37,12 @@ struct Db {
     star_name_to_id: HashMap<String, u64>,
 }
 impl Db {
-    fn get_star(&self, name: String) -> Result<&data::Star, web_error::CustomError> {
-        let id = self
-            .star_name_to_id
-            .get(&name)
-            .ok_or(web_error::CustomError(
-                Status::NotFound,
-                format!("Solar system {} not found", name),
-            ))?;
-        let star = self.star_map.get(id).ok_or(web_error::CustomError(
+    fn get_star(&self, name: String) -> Result<&data::Star, CustomError> {
+        let id = self.star_name_to_id.get(&name).ok_or(CustomError(
+            Status::NotFound,
+            format!("Solar system {} not found", name),
+        ))?;
+        let star = self.star_map.get(id).ok_or(CustomError(
             Status::NotFound,
             format!("Solar system {} not found", name),
         ))?;
@@ -50,11 +64,7 @@ fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<f64> {
 }
 
 #[get("/dist?<start>&<end>")]
-fn calc_dist(
-    db: &State<Db>,
-    start: String,
-    end: String,
-) -> Result<Json<f64>, web_error::CustomError> {
+fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<f64>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let dist: Length = start.distance(end);
@@ -68,14 +78,14 @@ fn calc_path(
     end: String,
     jump: f64,
     optimize: String,
-) -> Result<Json<Vec<(String, f64)>>, web_error::CustomError> {
+) -> Result<Json<Vec<(String, f64)>>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let optimize = match optimize.as_str() {
         "fuel" => calcs::PathOptimize::Fuel,
         "distance" => calcs::PathOptimize::Distance,
         _ => {
-            return Err(web_error::CustomError(
+            return Err(CustomError(
                 Status::BadRequest,
                 format!("Invalid optimize value"),
             ))
@@ -89,10 +99,7 @@ fn calc_path(
         Length::new::<uom::si::length::light_year>(jump),
         optimize,
     )
-    .ok_or(web_error::CustomError(
-        Status::NotFound,
-        format!("No path found"),
-    ))?;
+    .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 
     let mut result: Vec<(String, f64)> = Vec::new();
     let mut last_star = start.clone();
@@ -122,7 +129,7 @@ fn calc_exit(
     db: &State<Db>,
     start: String,
     jump: f64,
-) -> Result<Json<Vec<(String, String, f64)>>, web_error::CustomError> {
+) -> Result<Json<Vec<(String, String, f64)>>, CustomError> {
     let start = db.get_star(start)?;
 
     let exits = calcs::calc_exits(

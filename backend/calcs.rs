@@ -1,6 +1,6 @@
-use pathfinding::prelude::astar;
 use std::collections::HashMap;
 
+use pathfinding::prelude::astar;
 use uom::si::f64::*;
 use uom::si::length::light_year;
 
