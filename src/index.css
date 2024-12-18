@@ -1,3 +1,18 @@
+:root {
+  color-scheme: light dark;
+}
+* {
+  box-sizing: border-box;
+}
+INPUT {
+  width: 100%;
+}
 SELECT {
-    width: 100%;
+  width: 100%;
+}
+TD:nth-child(2) {
+  min-width: 20em;
+}
+TD {
+  vertical-align: top;
 }
