@@ -3,9 +3,9 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct RawStarMap {
-    pub constellations: HashMap<String, RawConstellation>,
+    //pub constellations: HashMap<String, RawConstellation>,
     pub jumps: Vec<RawJump>,
-    pub regions: HashMap<String, RawRegion>,
+    //pub regions: HashMap<String, RawRegion>,
     #[serde(rename(deserialize = "solarSystems"))]
     pub solar_systems: HashMap<String, RawSolarSystem>,
 }

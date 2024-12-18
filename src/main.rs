@@ -1,3 +1,4 @@
+use bincode;
 use clap::{Parser, Subcommand};
 use indicatif::ProgressIterator;
 use log::{info, warn};
@@ -5,12 +6,12 @@ use pathfinding::prelude::astar;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use uom::si::f64::*;
+use uom::si::length::{light_year, meter};
+
 mod raw;
 
-const M_IN_LIGHT_YEAR: f64 = 9.461e15;
-const MAX_JUMP_DIST: f64 = 500.0 * M_IN_LIGHT_YEAR;
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 enum ConnType {
     NpcGate = 0,
     SmartGate = 1,
@@ -22,7 +23,7 @@ type SolarSystemId = u64;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct Connection {
     conn_type: ConnType,
-    distance: f64,
+    distance: Length,
     target: SolarSystemId,
 }
 
@@ -36,9 +37,11 @@ struct Star {
 }
 
 impl Star {
-    fn distance(&self, other: &Star) -> f64 {
-        ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
-            .sqrt()
+    fn distance(&self, other: &Star) -> Length {
+        Length::new::<meter>(
+            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
+                .sqrt(),
+        )
     }
 }
 impl PartialEq for Star {
@@ -64,17 +67,21 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Build the starmap from star_data.json and star_names.json
-    Build {},
+    Build {
+        #[clap(default_value = "100.0")]
+        max_jump_distance: f64,
+    },
     /// Find the direct distance between two stars
     Dist {
-        star_name_1: String,
-        star_name_2: String,
+        start_name: String,
+        end_name: String,
     },
     /// Find the shortest path between two stars
     Path {
-        star_name_1: String,
-        star_name_2: String,
-        jump_distance: Option<f64>,
+        start_name: String,
+        end_name: String,
+        #[clap(default_value = "100.0")]
+        jump_distance: f64,
     },
 }
 
@@ -102,9 +109,10 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::Build {}) => {
+        Some(Commands::Build { max_jump_distance }) => {
             info!("Loading raw data");
             let raw_star_data = raw::RawStarMap::from_file("data/extracted-starmap.json");
+            let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
 
             info!("Building star map");
             let mut star_map: HashMap<u64, Star> = HashMap::new();
@@ -122,9 +130,9 @@ fn main() -> anyhow::Result<()> {
 
             info!("Building connections");
             for raw_jump in raw_star_data.jumps.iter() {
-                let to_star = star_map.get(&raw_jump.to_system_id)?.clone();
-                let from_star = star_map.get_mut(&raw_jump.from_system_id)?;
-                let distance = from_star.distance(&to_star);
+                let to_star = star_map.get(&raw_jump.to_system_id).unwrap().clone();
+                let from_star = star_map.get_mut(&raw_jump.from_system_id).unwrap();
+                let distance: Length = from_star.distance(&to_star);
                 from_star.connections.push(Connection {
                     conn_type: ConnType::NpcGate,
                     distance,
@@ -141,99 +149,93 @@ fn main() -> anyhow::Result<()> {
 
             let cloned_star_map = star_map.clone();
             for star in star_map.values_mut().progress() {
-                let mut n = 0;
                 for other_star in cloned_star_map.values() {
                     if star.id == other_star.id {
                         continue;
                     }
-                    let distance = star.distance(&other_star);
-                    if distance < MAX_JUMP_DIST {
+                    let distance: Length = star.distance(&other_star);
+                    if distance < max_jump_dist {
                         star.connections.push(Connection {
                             conn_type: ConnType::Jump,
                             distance,
                             target: other_star.id,
                         });
-                        n += 1;
-                        if n > 100 {
-                            //    break;
-                        }
                     }
                 }
             }
 
             info!("Saving star map");
-            let star_map_json = serde_json::to_string_pretty(&star_map)?;
-            std::fs::write("data/star_map.json", star_map_json)?;
+            // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
+            std::fs::write("data/starmap.bin", bincode::serialize(&star_map)?)?;
             info!("Complete");
         }
         Some(Commands::Dist {
-            star_name_1,
-            star_name_2,
+            start_name,
+            end_name,
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = get_name_maps()?;
             let star_map: HashMap<u64, Star> =
-                serde_json::from_str(&std::fs::read_to_string("data/star_map.json")?)?;
+                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
             info!("Loaded star map");
 
             let start = star_map
-                .get(star_name_to_id.get(star_name_1).unwrap())
+                .get(star_name_to_id.get(start_name).unwrap())
                 .unwrap();
             let end = star_map
-                .get(star_name_to_id.get(star_name_2).unwrap())
+                .get(star_name_to_id.get(end_name).unwrap())
                 .unwrap();
 
-            let distance = start.distance(end);
+            let distance: Length = start.distance(end);
             println!(
                 "Distance between {} and {} is {:.2} LY",
                 star_id_to_name[&start.id],
                 star_id_to_name[&end.id],
-                distance / M_IN_LIGHT_YEAR
+                distance.get::<light_year>()
             );
         }
         Some(Commands::Path {
-            star_name_1,
-            star_name_2,
+            start_name,
+            end_name,
             jump_distance,
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = get_name_maps()?;
-            let star_map: HashMap<String, Star> =
-                serde_json::from_str(&std::fs::read_to_string("data/star_map.json")?)?;
+            let star_map: HashMap<u64, Star> =
+                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
             info!("Loaded star map");
-            /*
+
             let start = star_map
-                .get(star_name_to_id.get(star_name_1).unwrap())
+                .get(star_name_to_id.get(start_name).unwrap())
                 .unwrap();
             let end = star_map
-                .get(star_name_to_id.get(star_name_2).unwrap())
+                .get(star_name_to_id.get(end_name).unwrap())
                 .unwrap();
-            let _jump_distance = jump_distance.unwrap_or(MAX_JUMP_DIST) as i64;
-
-            let distance = start.distance(end);
-            println!(
-                "Distance between {} and {} is {:.2} LY",
-                star_id_to_name[&start.id],
-                star_id_to_name[&end.id],
-                distance / M_IN_LIGHT_YEAR
-            );
+            let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
-            fn successors(star_map: &HashMap<String, Star>, star: &Star) -> Vec<(Star, i64)> {
+            fn successors(
+                star_map: &HashMap<u64, Star>,
+                star: &Star,
+                jump_distance: Length,
+            ) -> Vec<(Star, i64)> {
                 star.connections
                     .iter()
-                    .map(|c| {
-                        (
+                    .filter_map(|c| {
+                        if c.conn_type == ConnType::Jump && c.distance > jump_distance {
+                            return None;
+                        }
+                        Some((
                             star_map.get(&c.target).unwrap().clone(),
-                            (c.distance / M_IN_LIGHT_YEAR) as i64,
-                        )
+                            c.distance.get::<light_year>() as i64,
+                        ))
                     })
                     .collect()
             }
             let result = astar(
                 start,
-                |star| successors(&star_map, star),
-                |star| (star.distance(end) / M_IN_LIGHT_YEAR / 3.0) as i64,
+                |star| successors(&star_map, star, jump_distance),
+                |star| (star.distance(end).get::<light_year>() / 3.0) as i64,
                 |star| star.id == end.id,
             );
             if let Some((result, _)) = result {
@@ -241,14 +243,14 @@ fn main() -> anyhow::Result<()> {
                 for star in result {
                     println!(
                         "{} ({} LY)",
-                        star.name,
-                        last.distance(&star) / M_IN_LIGHT_YEAR
+                        star_id_to_name[&star.id],
+                        last.distance(&star).get::<light_year>()
                     );
                     last = star;
                 }
             } else {
                 warn!("No path found");
-            }*/
+            }
         }
         None => {
             warn!("No command specified");
