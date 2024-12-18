@@ -35,27 +35,32 @@ export const Route = createRootRoute({
         <li>
           <Link to="/calc/jump" className="[&.active]:font-bold">
             Ship Jump Capability
-          </Link>
+          </Link>{" "}
+          - How far can I jump?
         </li>
         <li>
           <Link to="/calc/dist" className="[&.active]:font-bold">
             Distance Between Systems
-          </Link>
+          </Link>{" "}
+          - How far do I need to jump?
         </li>
         <li>
           <Link to="/calc/path" className="[&.active]:font-bold">
             Jump Route Planner
-          </Link>
+          </Link>{" "}
+          - How do I jump from A to B in several hops?
         </li>
         <li>
           <Link to="/calc/fuel" className="[&.active]:font-bold">
             Fuel Requirement
-          </Link>
+          </Link>{" "}
+          - How much fuel do I need to jump that far?
         </li>
         <li>
           <Link to="/calc/exit" className="[&.active]:font-bold">
             Region Exit Finder
-          </Link>
+          </Link>{" "}
+          - How do I get out of a trapped region?
         </li>
         <li>
           <a href="https://ko-fi.com/shish2k">Buy me a coffee?</a>
