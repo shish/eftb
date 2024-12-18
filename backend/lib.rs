@@ -1,3 +1,4 @@
+use std::cmp::min;
 use std::collections::HashMap;
 
 use pathfinding::prelude::astar;
@@ -15,10 +16,67 @@ pub fn calc_fuel(dist: Length, mass: f64, efficiency: f64) -> f64 {
     return dist.get::<light_year>() / (efficiency * 1e7) * mass;
 }
 
-#[derive(clap::ValueEnum, Debug, Clone, Copy)]
+#[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PathOptimize {
     Fuel,
     Distance,
+}
+
+/// Given a star, return a list of all possible stars that can be reached,
+/// and the distance to each of them
+fn successors(
+    star_map: &HashMap<u64, data::Star>,
+    star: &data::Star,
+    jump_distance: Length,
+    optimize: PathOptimize,
+) -> Vec<(data::Star, i64)> {
+    star.connections
+        .iter()
+        .filter_map(|c| {
+            // If we can't jump that far, don't consider it at all
+            if c.conn_type == data::ConnType::Jump && c.distance > jump_distance {
+                return None;
+            }
+            let target = star_map.get(&c.target).unwrap().clone();
+            let distance = c.distance.get::<light_year>() as i64;
+            match (optimize, c.conn_type) {
+                // For shortest path, we only care about the distance
+                // and don't care about the type of connection
+                (PathOptimize::Distance, _) => Some((target, distance)),
+                // For fuel efficient, we only care about the distance
+                // if it's a jump
+                (PathOptimize::Fuel, data::ConnType::Jump) => Some((target, distance)),
+                // Gate connections are free (-ish. It still takes a tiny
+                // amount of fuel to warp to a gate)
+                (PathOptimize::Fuel, data::ConnType::NpcGate) => Some((target, 1)),
+                // Smart gates are slightly more expensive than NPC gates
+                (PathOptimize::Fuel, data::ConnType::SmartGate) => Some((target, 2)),
+            }
+        })
+        .collect()
+}
+
+/// Heuristic function for A* pathfinding
+/// Given multiple possibe paths forward, which one is probably the best?
+pub fn heuristic(star: &data::Star, end: &data::Star, optimize: PathOptimize) -> i64 {
+    let mut min_distance = i64::MAX;
+    if optimize == PathOptimize::Fuel {
+        // If we're optimizing for fuel, give stars with gate
+        // connections to the goal higher priority
+        for conn in &star.connections {
+            if conn.target == end.id {
+                if conn.conn_type == data::ConnType::NpcGate {
+                    min_distance = min(min_distance, 1);
+                }
+                if conn.conn_type == data::ConnType::SmartGate {
+                    min_distance = min(min_distance, 2);
+                }
+            }
+        }
+    }
+    let min_jump = (star.distance(end).get::<light_year>() / 2.0) as i64;
+    min_distance = min(min_distance, min_jump);
+    return min_distance;
 }
 
 pub fn calc_path(
@@ -28,38 +86,10 @@ pub fn calc_path(
     jump_distance: Length,
     optimize: PathOptimize,
 ) -> Option<Vec<data::Star>> {
-    fn successors(
-        star_map: &HashMap<u64, data::Star>,
-        star: &data::Star,
-        jump_distance: Length,
-        optimize: PathOptimize,
-    ) -> Vec<(data::Star, i64)> {
-        star.connections
-            .iter()
-            .filter_map(|c| {
-                if c.conn_type == data::ConnType::Jump && c.distance > jump_distance {
-                    return None;
-                }
-                let target = star_map.get(&c.target).unwrap().clone();
-                let distance = c.distance.get::<light_year>() as i64;
-                match (optimize, c.conn_type) {
-                    // For shortest path, we only care about the distance
-                    // and don't care about the type of connection
-                    (PathOptimize::Distance, _) => Some((target, distance)),
-                    // For fuel efficient, we only care about the distance
-                    // if it's a jump
-                    (PathOptimize::Fuel, data::ConnType::Jump) => Some((target, distance)),
-                    // Gate connections are free (-ish. It still takes a tiny
-                    // amount of fuel to warp to a gate)
-                    (PathOptimize::Fuel, _) => Some((target, 0)),
-                }
-            })
-            .collect()
-    }
     astar(
         start,
         |star| successors(&star_map, star, jump_distance, optimize),
-        |star| (star.distance(end).get::<light_year>() / 3.0) as i64,
+        |star| heuristic(star, end, optimize),
         |star| star.id == end.id,
     )
     .map(|(path, _)| path)
