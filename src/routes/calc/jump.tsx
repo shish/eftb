@@ -1,24 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, FormEvent } from 'react'
-import { ships, fuels } from '../../consts'
-import { api } from '../../api'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, FormEvent } from "react";
+import { ships, fuels } from "../../consts";
+import { api } from "../../api";
 
-export const Route = createFileRoute('/calc/jump')({
+export const Route = createFileRoute("/calc/jump")({
   component: JumpCapacityCalculator,
-})
+});
 
 function JumpCapacityCalculator() {
-  const [ship, setShip] = useState('Val')
-  const [mass, setMass] = useState(28000000)
-  const [fuel, setFuel] = useState(539)
-  const [fuelType, setFuelType] = useState('SOF-40')
+  const [ship, setShip] = useState("Val");
+  const [mass, setMass] = useState(28000000);
+  const [fuel, setFuel] = useState(539);
+  const [fuelType, setFuelType] = useState("SOF-40");
 
-  const [dist, setDist] = useState<null | number>(null)
-  const [error, setError] = useState<null | Error>(null)
+  const [dist, setDist] = useState<null | number>(null);
+  const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    api(e.target as HTMLFormElement, setDist, setError)
+    e.preventDefault();
+    api(e.target as HTMLFormElement, setDist, setError);
   }
 
   return (
@@ -33,11 +33,11 @@ function JumpCapacityCalculator() {
                 <select
                   value={ship}
                   onChange={(e) => {
-                    const ship = ships[e.target.value]
-                    setShip(e.target.value)
-                    setMass(ship.mass)
-                    setFuel(ship.fuel)
-                    setFuelType(ship.fuel_type)
+                    const ship = ships[e.target.value];
+                    setShip(e.target.value);
+                    setMass(ship.mass);
+                    setFuel(ship.fuel);
+                    setFuelType(ship.fuel_type);
                   }}
                 >
                   {Object.keys(ships).map((ship) => (
@@ -61,6 +61,7 @@ function JumpCapacityCalculator() {
                   onChange={(e) => setMass(parseInt(e.target.value))}
                 />
               </td>
+              <td>(Right-click ship &rarr; Show Info)</td>
             </tr>
             <tr>
               <td>Fuel level</td>
@@ -74,6 +75,7 @@ function JumpCapacityCalculator() {
                   onChange={(e) => setFuel(parseInt(e.target.value))}
                 />
               </td>
+              <td>(The number in the orange rectangle)</td>
             </tr>
             <tr>
               <td>Fuel Type</td>
@@ -104,5 +106,5 @@ function JumpCapacityCalculator() {
         </table>
       </form>
     </section>
-  )
+  );
 }
