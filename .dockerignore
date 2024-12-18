@@ -1,1 +1,6 @@
 target
+dist
+node_modules
+old
+.git
+.sl

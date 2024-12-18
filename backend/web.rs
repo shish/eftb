@@ -2,7 +2,9 @@
 extern crate rocket;
 
 use std::collections::HashMap;
+use std::path::Path;
 
+use rocket::fs::NamedFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket::State;
@@ -33,6 +35,13 @@ impl Db {
         ))?;
         Ok(star)
     }
+}
+
+#[get("/<_..>", rank = 2)]
+async fn index() -> Option<NamedFile> {
+    NamedFile::open(Path::new("./dist").join("index.html"))
+        .await
+        .ok()
 }
 
 #[get("/jump?<mass>&<fuel>&<efficiency>")]
@@ -97,8 +106,8 @@ fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<f64> {
     ))
 }
 
-#[get("/exits?<start>&<jump>")]
-fn calc_exits(
+#[get("/exit?<start>&<jump>")]
+fn calc_exit(
     db: &State<Db>,
     start: String,
     jump: f64,
@@ -136,9 +145,10 @@ fn rocket() -> _ {
 
     rocket::build()
         .manage(db)
-        .mount("/", rocket::fs::FileServer::from("./assets"))
+        .mount("/", rocket::fs::FileServer::from("./dist").rank(1))
         .mount(
             "/api",
-            routes![calc_jump, calc_dist, calc_path, calc_fuel, calc_exits],
+            routes![calc_jump, calc_dist, calc_path, calc_fuel, calc_exit],
         )
+        .mount("/", routes![index])
 }
