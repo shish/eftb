@@ -88,6 +88,15 @@ fn calc_path(
     Ok(Json(result))
 }
 
+#[get("/fuel?<dist>&<mass>&<efficiency>")]
+fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<f64> {
+    Json(calcs::calc_fuel(
+        Length::new::<uom::si::length::light_year>(dist),
+        mass,
+        efficiency,
+    ))
+}
+
 #[get("/exits?<start>&<jump>")]
 fn calc_exits(
     db: &State<Db>,
@@ -128,5 +137,8 @@ fn rocket() -> _ {
     rocket::build()
         .manage(db)
         .mount("/", rocket::fs::FileServer::from("./assets"))
-        .mount("/api", routes![calc_jump, calc_dist, calc_path, calc_exits])
+        .mount(
+            "/api",
+            routes![calc_jump, calc_dist, calc_path, calc_fuel, calc_exits],
+        )
 }

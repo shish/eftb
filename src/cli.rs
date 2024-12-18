@@ -31,6 +31,13 @@ enum Commands {
         start_name: String,
         end_name: String,
     },
+    /// Find how much fuel is needed for a given jump
+    Fuel {
+        dist: f64,
+        mass: f64,
+        #[clap(default_value = "0.4")]
+        efficiency: f64,
+    },
     /// Find the shortest path between two stars
     Path {
         start_name: String,
@@ -226,6 +233,15 @@ fn main() -> anyhow::Result<()> {
                     from.distance(&to).get::<light_year>() as i32
                 );
             }
+        }
+        Some(Commands::Fuel {
+            dist,
+            mass,
+            efficiency,
+        }) => {
+            let dist: Length = Length::new::<light_year>(*dist);
+            let fuel = calcs::calc_fuel(dist, *mass, *efficiency);
+            println!("Fuel needed: {:.0}", fuel)
         }
         None => {
             warn!("No command specified");

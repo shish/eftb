@@ -10,6 +10,10 @@ pub fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Length {
     Length::new::<meter>((fuel / mass) * efficiency * 1e23)
 }
 
+pub fn calc_fuel(dist: Length, mass: f64, efficiency: f64) -> f64 {
+    return dist.get::<meter>() / (efficiency * 1e23) * mass;
+}
+
 pub fn calc_path(
     star_map: &HashMap<u64, data::Star>,
     start: &data::Star,
