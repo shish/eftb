@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent, useRef } from "react";
+import { useState, FormEvent } from "react";
 import { api } from "../../api";
 
 export const Route = createFileRoute("/calc/path")({
