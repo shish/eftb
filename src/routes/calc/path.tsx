@@ -12,7 +12,7 @@ type PathStep = {
     name: string;
     id: string;
   };
-  conn_type: string;
+  conn_type: ConnType;
   distance: number;
   to: {
     name: string;
