@@ -140,6 +140,12 @@ fn main() -> anyhow::Result<()> {
                 }
             }
 
+            info!("Sorting connections");
+            for star in star_map.values_mut() {
+                star.connections
+                    .sort_by(|a, b| a.distance.partial_cmp(&b.distance).unwrap());
+            }
+
             info!("Saving star map");
             // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
             std::fs::write("data/starmap.bin", bincode::serialize(&star_map)?)?;
