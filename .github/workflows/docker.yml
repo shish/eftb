@@ -1,0 +1,31 @@
+name: Docker Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@main
+      with:
+        name: shish2k/eftb
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    needs:
+      - publish
+    steps:
+      - uses: shish/watchtower-update@main
+        with:
+          url: https://watchtower.shish.io/v1/update
+          api_token: ${{ secrets.WATCHTOWER_TOKEN }}
+          images: shish2k/eftb
