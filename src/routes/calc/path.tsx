@@ -88,6 +88,8 @@ function PathFinder() {
                   type="number"
                   required={true}
                   value={jump}
+                  min={1}
+                  max={500}
                   onChange={(e) => setJump(parseInt(e.target.value))}
                 />
               </td>

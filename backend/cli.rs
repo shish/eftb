@@ -22,7 +22,7 @@ struct Cli {
 enum Commands {
     /// Build the starmap from star_data.json and star_names.json
     Build {
-        #[clap(default_value = "300.0")]
+        #[clap(default_value = "500.0")]
         max_jump_distance: f64,
     },
     /// Find the direct distance between two stars
