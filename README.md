@@ -1,4 +1,4 @@
-# EVE Frontiers Toolbox
+# EVE Frontier Toolbox
 
 ## How to prepare the data
 1. Create `data/extracted-starmap.json` using https://github.com/frontier-reapers/frontier-static-data (This data is under NDA, don't post it anywhere)

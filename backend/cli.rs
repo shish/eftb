@@ -176,6 +176,7 @@ fn main() -> anyhow::Result<()> {
             jump_distance,
             optimize,
         }) => {
+            info!("Pathing from {} to {}", start_name, end_name);
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
             let star_map: HashMap<u64, data::Star> =
