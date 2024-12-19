@@ -28,7 +28,7 @@ function JumpCapacityCalculator() {
         <table>
           <tbody>
             <tr>
-              <td>Ship</td>
+              <th>Ship</th>
               <td>
                 <select
                   value={ship}
@@ -50,7 +50,7 @@ function JumpCapacityCalculator() {
               <td>(Just a shortcut to set mass &amp; fuel)</td>
             </tr>
             <tr>
-              <td>Mass (kg)</td>
+              <th>Mass (kg)</th>
               <td>
                 <input
                   name="mass"
@@ -64,7 +64,7 @@ function JumpCapacityCalculator() {
               <td>(Right-click ship &rarr; Show Info)</td>
             </tr>
             <tr>
-              <td>Fuel level</td>
+              <th>Fuel level</th>
               <td>
                 <input
                   name="fuel"
@@ -78,7 +78,7 @@ function JumpCapacityCalculator() {
               <td>(The number in the orange rectangle)</td>
             </tr>
             <tr>
-              <td>Fuel Type</td>
+              <th>Fuel Type</th>
               <td>
                 <select name="efficiency">
                   {Object.entries(fuels).map(([name, value]) => (

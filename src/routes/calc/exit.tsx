@@ -28,7 +28,7 @@ function ExitFinder() {
         <table>
           <tbody>
             <tr>
-              <td>Solar System</td>
+              <th>Solar System</th>
               <td>
                 <input
                   name="start"
@@ -40,7 +40,7 @@ function ExitFinder() {
               </td>
             </tr>
             <tr>
-              <td>Jump distance (ly)</td>
+              <th>Jump distance (ly)</th>
               <td>
                 <input
                   name="jump"

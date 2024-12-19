@@ -4,7 +4,6 @@ import "../index.css";
 import { Suspense } from "react";
 import React from "react";
 const TanStackRouterDevtools =
-  // eslint-disable-next-line
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
     : React.lazy(() =>

@@ -29,7 +29,7 @@ function FuelCalculator() {
         <table>
           <tbody>
             <tr>
-              <td>Ship</td>
+              <th>Ship</th>
               <td>
                 <select
                   value={ship}
@@ -51,7 +51,7 @@ function FuelCalculator() {
               <td>(Just a shortcut to set mass &amp; fuel type)</td>
             </tr>
             <tr>
-              <td>Mass (kg)</td>
+              <th>Mass (kg)</th>
               <td>
                 <input
                   name="mass"
@@ -64,7 +64,7 @@ function FuelCalculator() {
               </td>
             </tr>
             <tr>
-              <td>Dist (ly)</td>
+              <th>Dist (ly)</th>
               <td>
                 <input
                   name="dist"
@@ -77,7 +77,7 @@ function FuelCalculator() {
               </td>
             </tr>
             <tr>
-              <td>Fuel Type</td>
+              <th>Fuel Type</th>
               <td>
                 <select name="efficiency">
                   {Object.entries(fuels).map(([name, value]) => (

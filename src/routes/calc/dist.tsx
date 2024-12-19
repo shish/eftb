@@ -25,7 +25,7 @@ function DistanceBetweenSystems() {
         <table>
           <tbody>
             <tr>
-              <td>System 1</td>
+              <th>System 1</th>
               <td>
                 <input
                   name="start"
@@ -37,7 +37,7 @@ function DistanceBetweenSystems() {
               </td>
             </tr>
             <tr>
-              <td>System 2</td>
+              <th>System 2</th>
               <td>
                 <input
                   name="end"

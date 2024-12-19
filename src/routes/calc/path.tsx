@@ -57,7 +57,7 @@ function PathFinder() {
         <table>
           <tbody>
             <tr>
-              <td>System 1</td>
+              <th>System 1</th>
               <td>
                 <input
                   name="start"
@@ -69,7 +69,7 @@ function PathFinder() {
               </td>
             </tr>
             <tr>
-              <td>System 2</td>
+              <th>System 2</th>
               <td>
                 <input
                   name="end"
@@ -81,7 +81,7 @@ function PathFinder() {
               </td>
             </tr>
             <tr>
-              <td>Jump distance (ly)</td>
+              <th>Jump distance (ly)</th>
               <td>
                 <input
                   name="jump"
@@ -93,7 +93,7 @@ function PathFinder() {
               </td>
             </tr>
             <tr>
-              <td>Optimize for</td>
+              <th>Optimize for</th>
               <td>
                 <select
                   name="optimize"
@@ -111,11 +111,15 @@ function PathFinder() {
               <td>
                 <input type="submit" value="Calculate" />
                 {path && (
-                  <input
-                    type="button"
-                    value="Copy with EVE-Links"
-                    onClick={copyFormatted}
-                  />
+                  <>
+                    <input
+                      type="button"
+                      value="Copy with EVE-Links"
+                      onClick={copyFormatted}
+                    />
+                    (If you paste with EVE-Links into an in-game notepad, you
+                    get clickable links)
+                  </>
                 )}
               </td>
               <td>

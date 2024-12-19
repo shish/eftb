@@ -10,6 +10,14 @@ INPUT {
 SELECT {
   width: 100%;
 }
+TH {
+  text-align: right;
+  width: 1%;
+  /* disable text wrapping */
+  white-space: nowrap;
+  padding-right: 0.25em;
+}
+
 TD:nth-child(2) {
   min-width: 20em;
 }
