@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef } from "react";
 import { api } from "../../api";
 
 export const Route = createFileRoute("/calc/path")({
@@ -32,6 +32,22 @@ function PathFinder() {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     api(2, e.target as HTMLFormElement, setPath, setError);
+  }
+  function copyFormatted() {
+    if (path) {
+      const text =
+        `${start} &rarr; ${end}\n\n` +
+        path
+          .map(
+            (p) =>
+              `<a href="showinfo:5//${p.to.id}">${p.to.name}</a> (${p.conn_type}, ${p.distance.toFixed()}ly)`,
+          )
+          .join("\n");
+
+      navigator.clipboard
+        .writeText(text)
+        .catch(() => alert("Failed to copy :("));
+    }
   }
 
   return (
@@ -94,17 +110,26 @@ function PathFinder() {
             <tr>
               <td>
                 <input type="submit" value="Calculate" />
+                {path && (
+                  <input
+                    type="button"
+                    value="Copy with EVE-Links"
+                    onClick={copyFormatted}
+                  />
+                )}
               </td>
               <td>
                 {path && (
                   <>
                     <ul>
                       {path.map((p) => (
-                        <li key={p.from.id}>
-                          {p.from.name} &rarr;{" "}
-                          <a href={`showinfo:5//${p.to.id}`}>{p.to.name}</a> (
-                          {p.conn_type}, {p.distance.toFixed(2)} ly)
-                        </li>
+                        <>
+                          <li key={p.from.id}>
+                            {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
+                            {p.distance.toFixed(2)} ly)
+                          </li>
+                          {"\n"}
+                        </>
                       ))}
                     </ul>
                     {path.length} jumps,{" "}
