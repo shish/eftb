@@ -18,7 +18,7 @@ function JumpCapacityCalculator() {
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(e.target as HTMLFormElement, setDist, setError);
+    api(1, e.target as HTMLFormElement, setDist, setError);
   }
 
   return (

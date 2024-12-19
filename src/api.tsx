@@ -1,4 +1,11 @@
+type ApiReturn = {
+  version: number;
+  // eslint-disable-next-line
+  data: any;
+};
+
 export function api(
+  expected_version: number,
   form: HTMLFormElement,
   // eslint-disable-next-line
   onData: (data: null | any) => void,
@@ -15,9 +22,14 @@ export function api(
         ? response.json()
         : response.text().then((text) => Promise.reject(Error(text))),
     )
-    .then((data) => {
-      onError(null);
-      onData(data);
+    .then((data: ApiReturn) => {
+      if (data.version == expected_version) {
+        onError(null);
+        onData(data.data);
+      } else {
+        onError(new Error("Version mismatch - refresh the page?"));
+        onData(null);
+      }
     })
     .catch((error) => {
       onError(error as Error);

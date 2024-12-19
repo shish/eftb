@@ -1,21 +1,21 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, FormEvent } from 'react'
-import { api } from '../../api'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, FormEvent } from "react";
+import { api } from "../../api";
 
-export const Route = createFileRoute('/calc/dist')({
+export const Route = createFileRoute("/calc/dist")({
   component: DistanceBetweenSystems,
-})
+});
 
 function DistanceBetweenSystems() {
-  const [start, setStart] = useState('E.G1G.6GD')
-  const [end, setEnd] = useState('Nod')
+  const [start, setStart] = useState("E.G1G.6GD");
+  const [end, setEnd] = useState("Nod");
 
-  const [dist, setDist] = useState<null | number>(null)
-  const [error, setError] = useState<null | Error>(null)
+  const [dist, setDist] = useState<null | number>(null);
+  const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    api(e.target as HTMLFormElement, setDist, setError)
+    e.preventDefault();
+    api(1, e.target as HTMLFormElement, setDist, setError);
   }
 
   return (
@@ -61,5 +61,5 @@ function DistanceBetweenSystems() {
         </table>
       </form>
     </section>
-  )
+  );
 }

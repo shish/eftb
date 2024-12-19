@@ -1,23 +1,23 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, FormEvent } from 'react'
-import { api } from '../../api'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, FormEvent } from "react";
+import { api } from "../../api";
 
-export const Route = createFileRoute('/calc/exit')({
+export const Route = createFileRoute("/calc/exit")({
   component: ExitFinder,
-})
+});
 
-type Exit = [string, string, number]
+type Exit = [string, string, number];
 
 function ExitFinder() {
-  const [start, setStart] = useState('E.G1G.6GD')
-  const [jump, setJump] = useState(80)
+  const [start, setStart] = useState("E.G1G.6GD");
+  const [jump, setJump] = useState(80);
 
-  const [exits, setExits] = useState<null | Exit[]>(null)
-  const [error, setError] = useState<null | Error>(null)
+  const [exits, setExits] = useState<null | Exit[]>(null);
+  const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    api(e.target as HTMLFormElement, setExits, setError)
+    e.preventDefault();
+    api(1, e.target as HTMLFormElement, setExits, setError);
   }
 
   return (
@@ -72,5 +72,5 @@ function ExitFinder() {
         </table>
       </form>
     </section>
-  )
+  );
 }

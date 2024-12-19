@@ -7,7 +7,18 @@ export const Route = createFileRoute("/calc/path")({
 });
 
 type ConnType = "npc_gate" | "smart_gate" | "jump";
-type PathStep = [string, string, ConnType, number];
+type PathStep = {
+  from: {
+    name: string;
+    id: string;
+  };
+  conn_type: string;
+  distance: number;
+  to: {
+    name: string;
+    id: string;
+  };
+};
 
 function PathFinder() {
   const [start, setStart] = useState("E.G1G.6GD");
@@ -20,7 +31,7 @@ function PathFinder() {
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(e.target as HTMLFormElement, setPath, setError);
+    api(2, e.target as HTMLFormElement, setPath, setError);
   }
 
   return (
@@ -89,16 +100,21 @@ function PathFinder() {
                   <>
                     <ul>
                       {path.map((p) => (
-                        <li key={p[0]}>
-                          {p[0]} &rarr; {p[1]} ({p[2]}, {p[3].toFixed(2)} ly)
+                        <li key={p.from.id}>
+                          {p.from.name} &rarr;{" "}
+                          <a href={`showinfo:5//${p.to.id}`}>{p.to.name}</a> (
+                          {p.conn_type}, {p.distance.toFixed(2)} ly)
                         </li>
                       ))}
                     </ul>
                     {path.length} jumps,{" "}
-                    {path.reduce((a, b) => a + b[3], 0).toFixed(2)} ly
+                    {path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly
                     travelled,{" "}
                     {path
-                      .reduce((a, b) => a + (b[2] == "jump" ? b[3] : 0), 0)
+                      .reduce(
+                        (a, b) => a + (b.conn_type == "jump" ? b.distance : 0),
+                        0,
+                      )
                       .toFixed(2)}{" "}
                     ly jumped
                   </>

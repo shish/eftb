@@ -12,9 +12,11 @@ use rocket::request::Request;
 use rocket::response::{self, Responder, Response};
 use rocket::serde::json::Json;
 use rocket::State;
+use serde::Serialize;
 use uom::si::f64::Length;
 
 use eftb::data;
+use eftb::data::{ConnType, SolarSystemId, Star};
 use uom::si::length::light_year;
 
 //#[derive(Error)]
@@ -32,12 +34,12 @@ impl<'r> Responder<'r, 'static> for CustomError {
 }
 
 struct Db {
-    star_map: HashMap<u64, data::Star>,
-    star_id_to_name: HashMap<u64, String>,
-    star_name_to_id: HashMap<String, u64>,
+    star_map: HashMap<SolarSystemId, Star>,
+    star_id_to_name: HashMap<SolarSystemId, String>,
+    star_name_to_id: HashMap<String, SolarSystemId>,
 }
 impl Db {
-    fn get_star(&self, name: String) -> Result<&data::Star, CustomError> {
+    fn get_star(&self, name: String) -> Result<&Star, CustomError> {
         let id = self.star_name_to_id.get(&name).ok_or(CustomError(
             Status::NotFound,
             format!("Solar system {} not found", name),
@@ -57,18 +59,55 @@ async fn index() -> Option<NamedFile> {
         .ok()
 }
 
+#[derive(Debug, Serialize)]
+struct JumpReturn {
+    version: u32,
+    data: f64,
+}
+
 #[get("/jump?<mass>&<fuel>&<efficiency>")]
-fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<f64> {
+fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<JumpReturn> {
     let dist: Length = eftb::calc_jump(mass, fuel, efficiency);
-    Json(dist.get::<uom::si::length::light_year>())
+    Json(JumpReturn {
+        version: 1,
+        data: dist.get::<uom::si::length::light_year>(),
+    })
+}
+
+#[derive(Debug, Serialize)]
+struct DistReturn {
+    version: u32,
+    data: f64,
 }
 
 #[get("/dist?<start>&<end>")]
-fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<f64>, CustomError> {
+fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<DistReturn>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let dist: Length = start.distance(end);
-    Ok(Json(dist.get::<uom::si::length::light_year>()))
+    Ok(Json(DistReturn {
+        version: 1,
+        data: dist.get::<uom::si::length::light_year>(),
+    }))
+}
+
+#[derive(Debug, Serialize)]
+struct WebStar {
+    id: SolarSystemId,
+    name: String,
+}
+#[derive(Debug, Serialize)]
+struct PathStep {
+    from: WebStar,
+    conn_type: String,
+    distance: f64,
+    to: WebStar,
+}
+
+#[derive(Debug, Serialize)]
+struct PathReturn {
+    version: u32,
+    data: Vec<PathStep>,
 }
 
 #[get("/path?<start>&<end>&<jump>&<optimize>")]
@@ -78,7 +117,7 @@ fn calc_path(
     end: String,
     jump: f64,
     optimize: String,
-) -> Result<Json<Vec<(String, String, String, f64)>>, CustomError> {
+) -> Result<Json<PathReturn>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let optimize = match optimize.as_str() {
@@ -101,39 +140,59 @@ fn calc_path(
     )
     .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 
-    let mut result: Vec<(String, String, String, f64)> = Vec::new();
+    let mut result = Vec::new();
     let mut last_id = start.id;
     for conn in path {
-        result.push((
-            db.star_id_to_name[&last_id].clone(),
-            db.star_id_to_name[&conn.target].clone(),
-            match conn.conn_type {
-                data::ConnType::Jump => "jump".to_string(),
-                data::ConnType::NpcGate => "npc_gate".to_string(),
-                data::ConnType::SmartGate => "smart_gate".to_string(),
+        result.push(PathStep {
+            from: WebStar {
+                id: last_id,
+                name: db.star_id_to_name[&last_id].clone(),
             },
-            conn.distance.get::<light_year>() as f64,
-        ));
+            conn_type: match conn.conn_type {
+                ConnType::Jump => "jump".to_string(),
+                ConnType::NpcGate => "npc_gate".to_string(),
+                ConnType::SmartGate => "smart_gate".to_string(),
+            },
+            distance: conn.distance.get::<light_year>() as f64,
+            to: WebStar {
+                id: conn.target,
+                name: db.star_id_to_name[&conn.target].clone(),
+            },
+        });
         last_id = conn.target;
     }
-    Ok(Json(result))
+    Ok(Json(PathReturn {
+        version: 2,
+        data: result,
+    }))
+}
+
+#[derive(Debug, Serialize)]
+struct FuelReturn {
+    version: u32,
+    data: f64,
 }
 
 #[get("/fuel?<dist>&<mass>&<efficiency>")]
-fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<f64> {
-    Json(eftb::calc_fuel(
-        Length::new::<uom::si::length::light_year>(dist),
-        mass,
-        efficiency,
-    ))
+fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<FuelReturn> {
+    Json(FuelReturn {
+        version: 1,
+        data: eftb::calc_fuel(
+            Length::new::<uom::si::length::light_year>(dist),
+            mass,
+            efficiency,
+        ),
+    })
+}
+
+#[derive(Debug, Serialize)]
+struct ExitReturn {
+    version: u32,
+    data: Vec<(String, String, f64)>,
 }
 
 #[get("/exit?<start>&<jump>")]
-fn calc_exit(
-    db: &State<Db>,
-    start: String,
-    jump: f64,
-) -> Result<Json<Vec<(String, String, f64)>>, CustomError> {
+fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn>, CustomError> {
     let start = db.get_star(start)?;
 
     let exits = eftb::calc_exits(
@@ -150,12 +209,15 @@ fn calc_exit(
             from.distance(&to).get::<uom::si::length::light_year>(),
         ));
     }
-    Ok(Json(result))
+    Ok(Json(ExitReturn {
+        version: 1,
+        data: result,
+    }))
 }
 
 #[launch]
 fn rocket() -> _ {
-    let star_map: HashMap<u64, data::Star> =
+    let star_map: HashMap<u64, Star> =
         bincode::deserialize(&std::fs::read("data/starmap.bin").unwrap()).unwrap();
     let (star_id_to_name, star_name_to_id) = data::get_name_maps().unwrap();
 

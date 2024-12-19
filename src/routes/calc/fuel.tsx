@@ -1,24 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, FormEvent } from 'react'
-import { api } from '../../api'
-import { ships, fuels } from '../../consts'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, FormEvent } from "react";
+import { api } from "../../api";
+import { ships, fuels } from "../../consts";
 
-export const Route = createFileRoute('/calc/fuel')({
+export const Route = createFileRoute("/calc/fuel")({
   component: FuelCalculator,
-})
+});
 
 function FuelCalculator() {
-  const [ship, setShip] = useState('Val')
-  const [mass, setMass] = useState(28000000)
-  const [dist, setDist] = useState(100)
-  const [fuelType, setFuelType] = useState('SOF-40')
+  const [ship, setShip] = useState("Val");
+  const [mass, setMass] = useState(28000000);
+  const [dist, setDist] = useState(100);
+  const [fuelType, setFuelType] = useState("SOF-40");
 
-  const [fuel, setFuel] = useState<null | number>(null)
-  const [error, setError] = useState<null | Error>(null)
+  const [fuel, setFuel] = useState<null | number>(null);
+  const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    api(e.target as HTMLFormElement, setFuel, setError)
+    e.preventDefault();
+    api(1, e.target as HTMLFormElement, setFuel, setError);
   }
 
   return (
@@ -34,11 +34,11 @@ function FuelCalculator() {
                 <select
                   value={ship}
                   onChange={(e) => {
-                    const ship = ships[e.target.value]
-                    setShip(e.target.value)
-                    setMass(ship.mass)
-                    setFuel(ship.fuel)
-                    setFuelType(ship.fuel_type)
+                    const ship = ships[e.target.value];
+                    setShip(e.target.value);
+                    setMass(ship.mass);
+                    setFuel(ship.fuel);
+                    setFuelType(ship.fuel_type);
                   }}
                 >
                   {Object.keys(ships).map((ship) => (
@@ -105,5 +105,5 @@ function FuelCalculator() {
         </table>
       </form>
     </section>
-  )
+  );
 }
