@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { ships, fuels } from "../../consts";
-import { api } from "../../api";
+import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/jump")({
@@ -21,11 +21,16 @@ function JumpCapacityCalculator() {
   const [jump, setJump] = useState<null | number>(null);
   const [error, setError] = useState<null | Error>(null);
 
+  useEffect(() => {
+    setJump(null);
+    setError(null);
+  }, [ship, mass, fuel, fuelType]);
+
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(
-      1,
+    form_api(
       e.target as HTMLFormElement,
+      1,
       (x: number) => {
         setJump(x);
         setSavedJump(parseFloat(x.toFixed(2)));

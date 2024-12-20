@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent } from "react";
-import { api } from "../../api";
+import { useState, FormEvent, useEffect } from "react";
+import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/exit")({
@@ -16,9 +16,14 @@ function ExitFinder() {
   const [exits, setExits] = useState<null | Exit[]>(null);
   const [error, setError] = useState<null | Error>(null);
 
+  useEffect(() => {
+    setExits(null);
+    setError(null);
+  }, [start, jump]);
+
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(1, e.target as HTMLFormElement, setExits, setError);
+    form_api(e.target as HTMLFormElement, 1, setExits, setError);
   }
 
   return (

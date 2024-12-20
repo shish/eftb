@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent } from "react";
-import { api } from "../../api";
+import { useState, FormEvent, useEffect } from "react";
+import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/dist")({
@@ -15,21 +15,22 @@ function DistanceBetweenSystems() {
   const [dist, setDist] = useState<null | number>(null);
   const [error, setError] = useState<null | Error>(null);
 
+  useEffect(() => {
+    setDist(null);
+    setError(null);
+  }, [start, end]);
+
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(
-      1,
+    form_api(
       e.target as HTMLFormElement,
+      1,
       (d: number) => {
         setDist(d);
         setSavedDist(parseFloat(d.toFixed(2)));
       },
       setError,
     );
-  }
-  function reset() {
-    setDist(null);
-    setError(null);
   }
 
   return (
@@ -46,10 +47,7 @@ function DistanceBetweenSystems() {
                   type="text"
                   required={true}
                   value={start}
-                  onChange={(e) => {
-                    reset();
-                    setStart(e.target.value);
-                  }}
+                  onChange={(e) => setStart(e.target.value)}
                 />
               </td>
             </tr>
@@ -61,10 +59,7 @@ function DistanceBetweenSystems() {
                   type="text"
                   required={true}
                   value={end}
-                  onChange={(e) => {
-                    reset();
-                    setEnd(e.target.value);
-                  }}
+                  onChange={(e) => setEnd(e.target.value)}
                 />
               </td>
             </tr>

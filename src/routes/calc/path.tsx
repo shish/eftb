@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, FormEvent } from "react";
-import { api } from "../../api";
+import { useState, FormEvent, useEffect } from "react";
+import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/path")({
@@ -33,9 +33,14 @@ function PathFinder() {
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);
 
+  useEffect(() => {
+    setPath(null);
+    setError(null);
+  }, [start, end, jump, optimize]);
+
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(2, e.target as HTMLFormElement, setPath, setError);
+    form_api(e.target as HTMLFormElement, 2, setPath, setError);
   }
   function copyFormatted() {
     if (path) {

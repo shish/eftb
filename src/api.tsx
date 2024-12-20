@@ -4,9 +4,9 @@ type ApiReturn = {
   data: any;
 };
 
-export function api(
-  expected_version: number,
+export function form_api(
   form: HTMLFormElement,
+  expected_version: number,
   // eslint-disable-next-line
   onData: (data: null | any) => void,
   onError: (error: null | Error) => void,
@@ -15,7 +15,16 @@ export function api(
   // eslint-disable-next-line
   const params = new URLSearchParams(form_data as any).toString();
   const url = form.action + "?" + params;
+  api(url, expected_version, onData, onError);
+}
 
+export function api(
+  url: string,
+  expected_version: number,
+  // eslint-disable-next-line
+  onData: (data: null | any) => void,
+  onError: (error: null | Error) => void,
+) {
   fetch(url)
     .then((response) =>
       response.ok
