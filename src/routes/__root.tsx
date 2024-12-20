@@ -67,10 +67,18 @@ export const Route = createRootRoute({
           - How do I get out of a trapped region?
         </li>
         <li>
-          <a href="https://ko-fi.com/shish2k">Buy me a coffee?</a>
+          <a href="https://ko-fi.com/shish2k" target="_blank" rel="noreferrer">
+            Buy me a coffee?
+          </a>
         </li>
         <li>
-          <a href="https://github.com/shish/eftb">GitHub</a>
+          <a
+            href="https://github.com/shish/eftb"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
         </li>
         {/*
         <li>
