@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
 import { api } from "../../api";
+import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/path")({
   component: PathFinder,
@@ -21,10 +22,13 @@ type PathStep = {
 };
 
 function PathFinder() {
-  const [start, setStart] = useState("E.G1G.6GD");
-  const [end, setEnd] = useState("Nod");
-  const [jump, setJump] = useState(120);
-  const [optimize, setOptimize] = useState<"fuel" | "distance">("fuel");
+  const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
+  const [end, setEnd] = useSessionStorage<string>("end", "Nod");
+  const [jump, setJump] = useSessionStorage<number>("jump", 80);
+  const [optimize, setOptimize] = useSessionStorage<"fuel" | "distance">(
+    "optimize",
+    "fuel",
+  );
 
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
 import { api } from "../../api";
+import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/exit")({
   component: ExitFinder,
@@ -9,8 +10,8 @@ export const Route = createFileRoute("/calc/exit")({
 type Exit = [string, string, number];
 
 function ExitFinder() {
-  const [start, setStart] = useState("E.G1G.6GD");
-  const [jump, setJump] = useState(80);
+  const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
+  const [jump, setJump] = useSessionStorage<number>("jump", 80);
 
   const [exits, setExits] = useState<null | Exit[]>(null);
   const [error, setError] = useState<null | Error>(null);

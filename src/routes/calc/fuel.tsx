@@ -2,16 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
 import { api } from "../../api";
 import { ships, fuels } from "../../consts";
+import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/fuel")({
   component: FuelCalculator,
 });
 
 function FuelCalculator() {
-  const [ship, setShip] = useState("Val");
-  const [mass, setMass] = useState(28000000);
-  const [dist, setDist] = useState(100);
-  const [fuelType, setFuelType] = useState("SOF-40");
+  const [ship, setShip] = useSessionStorage<string>("ship", "Val");
+  const [mass, setMass] = useSessionStorage<number>("mass", 28000000);
+  const [dist, setDist] = useSessionStorage<number>("dist", 100);
+  const [fuelType, setFuelType] = useState<string>("SOF-40");
 
   const [fuel, setFuel] = useState<null | number>(null);
   const [error, setError] = useState<null | Error>(null);

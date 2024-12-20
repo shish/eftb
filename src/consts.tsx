@@ -13,7 +13,8 @@ export const ships: Ships = {
   Microptero: { mass: 17000000, fuel: 245, fuel_type: "SOF-40" },
   Val: { mass: 28000000, fuel: 539, fuel_type: "SOF-40" },
   Flegel: { mass: 145000000, fuel: 2990, fuel_type: "SOF-40" },
-};
+  Anser: { mass: 285000000, fuel: 7090, fuel_type: "SOF-40" },
+} as const;
 
 export const fuels = {
   "uSOF-30": 0.3,

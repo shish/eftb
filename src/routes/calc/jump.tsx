@@ -2,23 +2,36 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
 import { ships, fuels } from "../../consts";
 import { api } from "../../api";
+import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/jump")({
   component: JumpCapacityCalculator,
 });
 
 function JumpCapacityCalculator() {
-  const [ship, setShip] = useState("Val");
-  const [mass, setMass] = useState(28000000);
-  const [fuel, setFuel] = useState(539);
-  const [fuelType, setFuelType] = useState("SOF-40");
+  const [ship, setShip] = useSessionStorage<string>("ship", "Val");
+  const [mass, setMass] = useSessionStorage<number>("mass", 28000000);
+  const [fuel, setFuel] = useSessionStorage<number>("fuel", 539);
+  const [fuelType, setFuelType] = useSessionStorage<string>(
+    "fuelType",
+    "SOF-40",
+  );
 
-  const [dist, setDist] = useState<null | number>(null);
+  const [_, setSavedJump] = useSessionStorage<number>("jump", 0);
+  const [jump, setJump] = useState<null | number>(null);
   const [error, setError] = useState<null | Error>(null);
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    api(1, e.target as HTMLFormElement, setDist, setError);
+    api(
+      1,
+      e.target as HTMLFormElement,
+      (x: number) => {
+        setJump(x);
+        setSavedJump(parseFloat(x.toFixed(2)));
+      },
+      setError,
+    );
   }
 
   return (
@@ -98,7 +111,7 @@ function JumpCapacityCalculator() {
                 <input type="submit" value="Calculate" />
               </td>
               <td>
-                {dist && `${dist.toFixed(2)} ly`}
+                {jump && `${jump.toFixed(2)} ly`}
                 {error && error.message}
               </td>
             </tr>
