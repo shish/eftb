@@ -36,7 +36,7 @@ function PathFinder() {
   function copyFormatted() {
     if (path) {
       const text =
-        `${start} &rarr; ${end}\n\n` +
+        `${start} → ${end}\n\n` +
         path
           .map(
             (p) =>
