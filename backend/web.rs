@@ -19,6 +19,9 @@ use eftb::data;
 use eftb::data::{ConnType, SolarSystemId, Star};
 use uom::si::length::light_year;
 
+// ====================================================================
+// common
+
 //#[derive(Error)]
 #[derive(Debug, Clone)]
 pub struct CustomError(pub Status, pub String);
@@ -59,6 +62,27 @@ async fn index() -> Option<NamedFile> {
         .ok()
 }
 
+// ====================================================================
+// get_stars
+
+#[derive(Debug, Serialize)]
+struct StarsReturn {
+    version: u32,
+    data: Vec<String>,
+}
+
+#[get("/stars")]
+fn get_stars(db: &State<Db>) -> Json<StarsReturn> {
+    let names = db.star_name_to_id.keys().cloned().collect();
+    Json(StarsReturn {
+        version: 1,
+        data: names,
+    })
+}
+
+// ====================================================================
+// calc_jump
+
 #[derive(Debug, Serialize)]
 struct JumpReturn {
     version: u32,
@@ -73,6 +97,9 @@ fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<JumpReturn> {
         data: dist.get::<uom::si::length::light_year>(),
     })
 }
+
+// ====================================================================
+// calc_dist
 
 #[derive(Debug, Serialize)]
 struct DistReturn {
@@ -91,6 +118,9 @@ fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<DistRetu
     }))
 }
 
+// ====================================================================
+// calc_path
+
 #[derive(Debug, Serialize)]
 struct WebStar {
     id: SolarSystemId,
@@ -103,7 +133,6 @@ struct PathStep {
     distance: f64,
     to: WebStar,
 }
-
 #[derive(Debug, Serialize)]
 struct PathReturn {
     version: u32,
@@ -167,6 +196,9 @@ fn calc_path(
     }))
 }
 
+// ====================================================================
+// calc_fuel
+
 #[derive(Debug, Serialize)]
 struct FuelReturn {
     version: u32,
@@ -184,6 +216,9 @@ fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<FuelReturn> {
         ),
     })
 }
+
+// ====================================================================
+// calc_exit
 
 #[derive(Debug, Serialize)]
 struct ExitReturn {
@@ -215,6 +250,9 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
     }))
 }
 
+// ====================================================================
+// launch
+
 #[launch]
 fn rocket() -> _ {
     let star_map = data::get_star_map().unwrap();
@@ -231,7 +269,7 @@ fn rocket() -> _ {
         .mount("/", rocket::fs::FileServer::from("./dist").rank(1))
         .mount(
             "/api",
-            routes![calc_jump, calc_dist, calc_path, calc_fuel, calc_exit],
+            routes![get_stars, calc_jump, calc_dist, calc_path, calc_fuel, calc_exit],
         )
         .mount("/", routes![index])
 }
