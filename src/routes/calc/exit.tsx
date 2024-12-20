@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent, useEffect } from "react";
 import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
+import { StarDataList } from "../../components/StarDataList";
 
 export const Route = createFileRoute("/calc/exit")({
   component: ExitFinder,
@@ -38,6 +39,7 @@ function ExitFinder() {
               <td>
                 <input
                   name="start"
+                  list="starDataList"
                   type="text"
                   required={true}
                   value={start}

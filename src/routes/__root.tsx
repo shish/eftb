@@ -3,6 +3,7 @@ import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import "../index.css";
 import { Suspense } from "react";
 import React from "react";
+import { StarDataList } from "../components/StarDataList";
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
@@ -28,6 +29,8 @@ export const Route = createRootRoute({
         running the latest code before reporting it &lt;3
       </p>
       <hr />
+      {/* load this once at the top rather than re-rendering on every page */}
+      <StarDataList id="starDataList" />
       <Outlet />
       <hr />
       <ul>
@@ -67,10 +70,18 @@ export const Route = createRootRoute({
           - How do I get out of a trapped region?
         </li>
         <li>
-          <a href="https://ko-fi.com/shish2k">Buy me a coffee?</a>
+          <a href="https://ko-fi.com/shish2k" target="_blank" rel="noreferrer">
+            Buy me a coffee?
+          </a>
         </li>
         <li>
-          <a href="https://github.com/shish/eftb">GitHub</a>
+          <a
+            href="https://github.com/shish/eftb"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
         </li>
         {/*
         <li>
