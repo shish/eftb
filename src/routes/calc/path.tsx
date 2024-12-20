@@ -21,6 +21,57 @@ type PathStep = {
   };
 };
 
+function CopyFormattedButton(props: { path: PathStep[] }) {
+  function copyFormatted() {
+    const text =
+      `${props.path[0].from.name} → ${props.path[props.path.length - 1].to.name}\n\n` +
+      props.path
+        .map(
+          (p) =>
+            `<a href="showinfo:5//${p.to.id}">${p.to.name}</a> (${p.conn_type}, ${p.distance.toFixed()}ly)`,
+        )
+        .join("\n");
+
+    navigator.clipboard.writeText(text).catch(() => alert("Failed to copy :("));
+  }
+
+  return (
+    <>
+      <input
+        type="button"
+        value="Copy with EVE-Links"
+        onClick={copyFormatted}
+      />
+      (If you paste with EVE-Links into an in-game notepad, you get clickable
+      links)
+    </>
+  );
+}
+
+function TextPath(props: { path: PathStep[] }) {
+  return (
+    <>
+      <ul>
+        {props.path.map((p) => (
+          <>
+            <li key={p.from.id}>
+              {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
+              {p.distance.toFixed(2)} ly)
+            </li>
+            {"\n"}
+          </>
+        ))}
+      </ul>
+      {props.path.length} jumps,{" "}
+      {props.path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly travelled,{" "}
+      {props.path
+        .reduce((a, b) => a + (b.conn_type == "jump" ? b.distance : 0), 0)
+        .toFixed(2)}{" "}
+      ly jumped
+    </>
+  );
+}
+
 function PathFinder() {
   const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
   const [end, setEnd] = useSessionStorage<string>("end", "Nod");
@@ -41,22 +92,6 @@ function PathFinder() {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     form_api(e.target as HTMLFormElement, 2, setPath, setError);
-  }
-  function copyFormatted() {
-    if (path) {
-      const text =
-        `${start} → ${end}\n\n` +
-        path
-          .map(
-            (p) =>
-              `<a href="showinfo:5//${p.to.id}">${p.to.name}</a> (${p.conn_type}, ${p.distance.toFixed()}ly)`,
-          )
-          .join("\n");
-
-      navigator.clipboard
-        .writeText(text)
-        .catch(() => alert("Failed to copy :("));
-    }
   }
 
   return (
@@ -125,44 +160,10 @@ function PathFinder() {
             <tr>
               <td>
                 <input type="submit" value="Calculate" />
-                {path && (
-                  <>
-                    <input
-                      type="button"
-                      value="Copy with EVE-Links"
-                      onClick={copyFormatted}
-                    />
-                    (If you paste with EVE-Links into an in-game notepad, you
-                    get clickable links)
-                  </>
-                )}
+                {path && <CopyFormattedButton path={path} />}
               </td>
               <td>
-                {path && (
-                  <>
-                    <ul>
-                      {path.map((p) => (
-                        <>
-                          <li key={p.from.id}>
-                            {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
-                            {p.distance.toFixed(2)} ly)
-                          </li>
-                          {"\n"}
-                        </>
-                      ))}
-                    </ul>
-                    {path.length} jumps,{" "}
-                    {path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly
-                    travelled,{" "}
-                    {path
-                      .reduce(
-                        (a, b) => a + (b.conn_type == "jump" ? b.distance : 0),
-                        0,
-                      )
-                      .toFixed(2)}{" "}
-                    ly jumped
-                  </>
-                )}
+                {path && <TextPath path={path} />}
                 {error && error.message}
               </td>
             </tr>
