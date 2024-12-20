@@ -32,24 +32,24 @@ fn successors(
     let star = star_map.get(&conn.target).unwrap();
     star.connections
         .iter()
-        .filter_map(|c| {
-            // If we can't jump that far, don't consider it at all
-            if c.conn_type == data::ConnType::Jump && c.distance > jump_distance {
-                return None;
-            }
+        // take gates and short jumps - stop searching after we
+        // find a long jump
+        .take_while(|c| c.conn_type != data::ConnType::Jump || c.distance <= jump_distance)
+        // Turn the connection into a (connection, cost) tuple
+        .map(|c| {
             let distance = c.distance.get::<light_year>() as i64;
             match (optimize, c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
-                (PathOptimize::Distance, _) => Some((c.clone(), distance)),
+                (PathOptimize::Distance, _) => (c.clone(), distance),
                 // For fuel efficient, we only care about the distance
                 // if it's a jump
-                (PathOptimize::Fuel, data::ConnType::Jump) => Some((c.clone(), distance)),
+                (PathOptimize::Fuel, data::ConnType::Jump) => (c.clone(), distance),
                 // Gate connections are free (-ish. It still takes a tiny
                 // amount of fuel to warp to a gate)
-                (PathOptimize::Fuel, data::ConnType::NpcGate) => Some((c.clone(), 1)),
+                (PathOptimize::Fuel, data::ConnType::NpcGate) => (c.clone(), 1),
                 // Smart gates are slightly more expensive than NPC gates
-                (PathOptimize::Fuel, data::ConnType::SmartGate) => Some((c.clone(), 2)),
+                (PathOptimize::Fuel, data::ConnType::SmartGate) => (c.clone(), 2),
             }
         })
         .collect()

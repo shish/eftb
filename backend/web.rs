@@ -217,8 +217,7 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
 
 #[launch]
 fn rocket() -> _ {
-    let star_map: HashMap<u64, Star> =
-        bincode::deserialize(&std::fs::read("data/starmap.bin").unwrap()).unwrap();
+    let star_map = data::get_star_map().unwrap();
     let (star_id_to_name, star_name_to_id) = data::get_name_maps().unwrap();
 
     let db = Db {

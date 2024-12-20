@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
 use bincode;
 use clap::{Parser, Subcommand};
@@ -141,14 +142,18 @@ fn main() -> anyhow::Result<()> {
             }
 
             info!("Sorting connections");
-            for star in star_map.values_mut() {
-                star.connections
-                    .sort_by(|a, b| a.distance.partial_cmp(&b.distance).unwrap());
+            // sort gates first, and then jumps by distance - then when we
+            // reach a jump that is too long we can stop searching
+            for star in star_map.values_mut().progress() {
+                star.connections.sort_by(|a, b| {
+                    a.conn_type
+                        .cmp(&b.conn_type)
+                        .then_with(|| a.distance.partial_cmp(&b.distance).unwrap())
+                });
             }
 
             info!("Saving star map");
-            // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
-            std::fs::write("data/starmap.bin", bincode::serialize(&star_map)?)?;
+            data::save_star_map(&star_map)?;
             info!("Complete");
         }
         Some(Commands::Dist {
@@ -157,8 +162,7 @@ fn main() -> anyhow::Result<()> {
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
-            let star_map: HashMap<u64, data::Star> =
-                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
+            let star_map = data::get_star_map()?;
             info!("Loaded star map");
 
             let start = star_map
@@ -182,12 +186,11 @@ fn main() -> anyhow::Result<()> {
             jump_distance,
             optimize,
         }) => {
-            info!("Pathing from {} to {}", start_name, end_name);
             info!("Loading star map");
+            let now = Instant::now();
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
-            let star_map: HashMap<u64, data::Star> =
-                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
-            info!("Loaded star map");
+            let star_map = data::get_star_map()?;
+            info!("Loaded star map in {:.3}", now.elapsed().as_secs_f64());
 
             let start = star_map
                 .get(star_name_to_id.get(start_name).unwrap())
@@ -198,7 +201,9 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
+            let now = Instant::now();
             let path = eftb::calc_path(&star_map, start, end, jump_distance, *optimize);
+            info!("Found path in {:.3}", now.elapsed().as_secs_f64());
             if let Some(path) = path {
                 let mut last_id = start.id;
                 for conn in path {
