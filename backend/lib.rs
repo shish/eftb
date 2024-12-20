@@ -19,6 +19,7 @@ pub fn calc_fuel(dist: Length, mass: f64, efficiency: f64) -> f64 {
 pub enum PathOptimize {
     Fuel,
     Distance,
+    Hops,
 }
 
 /// Given a connection, return a list of all possible next-connections,
@@ -50,6 +51,8 @@ fn successors(
                 (PathOptimize::Fuel, data::ConnType::NpcGate) => (c.clone(), 1),
                 // Smart gates are slightly more expensive than NPC gates
                 (PathOptimize::Fuel, data::ConnType::SmartGate) => (c.clone(), 2),
+                // Treat all hops the same, we want to minimise the total
+                (PathOptimize::Hops, _) => (c.clone(), 1),
             }
         })
         .collect()

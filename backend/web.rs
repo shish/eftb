@@ -152,6 +152,7 @@ fn calc_path(
     let optimize = match optimize.as_str() {
         "fuel" => eftb::PathOptimize::Fuel,
         "distance" => eftb::PathOptimize::Distance,
+        "hops" => eftb::PathOptimize::Hops,
         _ => {
             return Err(CustomError(
                 Status::BadRequest,

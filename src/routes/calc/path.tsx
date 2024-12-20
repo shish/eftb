@@ -59,12 +59,13 @@ function TextPath(props: { path: PathStep[] }) {
           </li>
         ))}
       </ul>
-      {props.path.length} jumps,{" "}
-      {props.path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly travelled,{" "}
+      {props.path.length} hops (
+      {props.path.filter((c) => c.conn_type == "jump").length} jumps),{" "}
+      {props.path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly travelled (
       {props.path
         .reduce((a, b) => a + (b.conn_type == "jump" ? b.distance : 0), 0)
         .toFixed(2)}{" "}
-      ly jumped
+      ly jumped)
     </>
   );
 }
@@ -73,10 +74,9 @@ function PathFinder() {
   const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
   const [end, setEnd] = useSessionStorage<string>("end", "Nod");
   const [jump, setJump] = useSessionStorage<number>("jump", 80);
-  const [optimize, setOptimize] = useSessionStorage<"fuel" | "distance">(
-    "optimize",
-    "fuel",
-  );
+  const [optimize, setOptimize] = useSessionStorage<
+    "fuel" | "distance" | "hops"
+  >("optimize", "fuel");
 
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);
@@ -149,6 +149,7 @@ function PathFinder() {
                 >
                   <option value="fuel">Fuel (Prefer gates)</option>
                   <option value="distance">Distance (Prefer jumps)</option>
+                  <option value="hops">Hops (Minimise clicks)</option>
                 </select>
               </td>
             </tr>
