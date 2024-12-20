@@ -38,8 +38,6 @@ function ExitFinder() {
               <td>
                 <input
                   name="start"
-                  list="starDataList"
-                  autoComplete="off"
                   type="text"
                   required={true}
                   value={start}

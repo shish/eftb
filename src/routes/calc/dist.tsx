@@ -44,8 +44,6 @@ function DistanceBetweenSystems() {
               <td>
                 <input
                   name="start"
-                  list="starDataList"
-                  autoComplete="off"
                   type="text"
                   required={true}
                   value={start}
@@ -58,8 +56,6 @@ function DistanceBetweenSystems() {
               <td>
                 <input
                   name="end"
-                  list="starDataList"
-                  autoComplete="off"
                   type="text"
                   required={true}
                   value={end}
