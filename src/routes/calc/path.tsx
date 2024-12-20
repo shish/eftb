@@ -53,13 +53,10 @@ function TextPath(props: { path: PathStep[] }) {
     <>
       <ul>
         {props.path.map((p) => (
-          <>
-            <li key={p.from.id}>
-              {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
-              {p.distance.toFixed(2)} ly)
-            </li>
-            {"\n"}
-          </>
+          <li key={p.from.id}>
+            {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
+            {p.distance.toFixed(2)} ly)
+          </li>
         ))}
       </ul>
       {props.path.length} jumps,{" "}
