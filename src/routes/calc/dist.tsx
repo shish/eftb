@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent, useEffect } from "react";
 import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
-import { StarDataList } from "../../components/StarDataList";
 
 export const Route = createFileRoute("/calc/dist")({
   component: DistanceBetweenSystems,
@@ -46,6 +45,7 @@ function DistanceBetweenSystems() {
                 <input
                   name="start"
                   list="starDataList"
+                  autoComplete="off"
                   type="text"
                   required={true}
                   value={start}
@@ -59,6 +59,7 @@ function DistanceBetweenSystems() {
                 <input
                   name="end"
                   list="starDataList"
+                  autoComplete="off"
                   type="text"
                   required={true}
                   value={end}
