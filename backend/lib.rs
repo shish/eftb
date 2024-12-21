@@ -59,30 +59,20 @@ fn successors(
 }
 
 /// Heuristic function for A* pathfinding
-/// How good is this path?
+/// - Return an approximation of the cost from this connection to the end
+/// - Must not return greater than the actual cost, or the path will be suboptimal
+///   - Remember that in "optimise for fuel" mode, actual cost might be 1
 pub fn heuristic(
     star_map: &HashMap<u64, data::Star>,
     conn: &data::Connection,
     end: &data::Star,
-    optimize: PathOptimize,
 ) -> i64 {
-    // If this connection is a gate, and we're optimising
-    // for fuel, it's nearly free
-    if optimize == PathOptimize::Fuel {
-        if conn.conn_type == data::ConnType::NpcGate {
-            return 1;
-        }
-        if conn.conn_type == data::ConnType::SmartGate {
-            return 2;
-        }
-    }
-    // If this connection is a jump, or we're optimising for
-    // distance, then cost = distance
-    return star_map
+    let d = star_map
         .get(&conn.target)
         .unwrap()
         .distance(end)
-        .get::<light_year>() as i64;
+        .get::<light_year>();
+    return d as i64;
 }
 
 pub fn calc_path(
@@ -101,7 +91,7 @@ pub fn calc_path(
     let path = astar(
         &init_conn,
         |conn| successors(&star_map, conn, jump_distance, optimize),
-        |conn| heuristic(&star_map, conn, end, optimize),
+        |conn| heuristic(&star_map, conn, end),
         |conn| conn.target == end.id,
     )
     .map(|(path, _)| path);
