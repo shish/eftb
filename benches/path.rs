@@ -8,7 +8,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     let start = star_map.get(&30020604).unwrap(); // I2S-G19
     let end = star_map.get(&30023494).unwrap(); // L.YZG.1RS
 
-    for opt in [
+    for optimize in [
         eftb::calc::path::PathOptimize::Distance,
         eftb::calc::path::PathOptimize::Fuel,
         eftb::calc::path::PathOptimize::Hops,
@@ -24,13 +24,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                 &jump_distance,
                 |b, jump_distance| {
                     b.iter(|| {
-                        eftb::calc_path(
-                            &star_map,
-                            start,
-                            end,
-                            black_box(*jump_distance),
-                            eftb::calc::path::PathOptimize::Fuel,
-                        )
+                        eftb::calc_path(&star_map, start, end, black_box(*jump_distance), optimize)
                     })
                 },
             );
