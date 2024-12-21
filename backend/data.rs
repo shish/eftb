@@ -38,7 +38,7 @@ impl std::hash::Hash for Connection {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Star {
     pub id: SolarSystemId,
     pub region_id: RegionId,

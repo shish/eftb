@@ -2,16 +2,16 @@ use std::collections::HashMap;
 
 use uom::si::f64::*;
 
-use crate::data;
+use crate::data::*;
 
 pub fn calc_exit(
-    star_map: &HashMap<u64, data::Star>,
-    start: &data::Star,
+    star_map: &HashMap<SolarSystemId, Star>,
+    start: &Star,
     jump_distance: Length,
-) -> Vec<(data::Star, data::Star)> {
-    let mut exits: Vec<(data::Star, data::Star)> = Vec::new();
-    let mut checked: Vec<data::SolarSystemId> = Vec::new();
-    let mut to_check: Vec<data::SolarSystemId> = Vec::new();
+) -> Vec<(Star, Star)> {
+    let mut exits: Vec<(Star, Star)> = Vec::new();
+    let mut checked: Vec<SolarSystemId> = Vec::new();
+    let mut to_check: Vec<SolarSystemId> = Vec::new();
 
     to_check.push(start.id);
 
@@ -21,13 +21,11 @@ pub fn calc_exit(
         let star = star_map.get(&current).unwrap();
         for conn in &star.connections {
             let target = star_map.get(&conn.target).unwrap();
-            if conn.conn_type == data::ConnType::NpcGate
-                || conn.conn_type == data::ConnType::SmartGate
-            {
+            if conn.conn_type == ConnType::NpcGate || conn.conn_type == ConnType::SmartGate {
                 if !checked.contains(&target.id) && !to_check.contains(&target.id) {
                     to_check.push(target.id);
                 }
-            } else if conn.conn_type == data::ConnType::Jump
+            } else if conn.conn_type == ConnType::Jump
                 && conn.distance <= jump_distance
                 && target.region_id != start.region_id
             {
@@ -38,4 +36,47 @@ pub fn calc_exit(
     }
 
     return exits;
+}
+
+#[cfg(test)]
+mod tests {
+    use uom::si::length::light_year;
+
+    use super::*;
+
+    #[test]
+    fn test_exit() {
+        let stars = [
+            Star {
+                id: 1,
+                region_id: 1,
+                connections: vec![Connection {
+                    id: 1,
+                    conn_type: ConnType::Jump,
+                    distance: Length::new::<light_year>(10.0),
+                    target: 2,
+                }],
+                ..Default::default()
+            },
+            Star {
+                id: 2,
+                region_id: 2,
+                connections: vec![Connection {
+                    id: 2,
+                    conn_type: ConnType::Jump,
+                    distance: Length::new::<light_year>(10.0),
+                    target: 1,
+                }],
+                ..Default::default()
+            },
+        ];
+
+        let star_map: HashMap<SolarSystemId, Star> =
+            stars.iter().map(|s| (s.id, s.clone())).collect();
+
+        assert_eq!(
+            calc_exit(&star_map, &stars[0], Length::new::<light_year>(20.0)),
+            vec![(stars[0].clone(), stars[1].clone())]
+        );
+    }
 }

@@ -75,7 +75,7 @@ fn main() -> anyhow::Result<()> {
             let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
 
             info!("Building star map");
-            let mut star_map: HashMap<u64, data::Star> = HashMap::new();
+            let mut star_map: HashMap<data::SolarSystemId, data::Star> = HashMap::new();
             for (id_str, raw_star) in raw_star_data.solar_systems.iter() {
                 let id = id_str.parse()?;
                 let star = data::Star {
@@ -234,7 +234,7 @@ fn main() -> anyhow::Result<()> {
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
-            let star_map: HashMap<u64, data::Star> =
+            let star_map: HashMap<data::SolarSystemId, data::Star> =
                 bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
             info!("Loaded star map");
 
