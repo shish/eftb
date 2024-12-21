@@ -9,9 +9,9 @@ fn criterion_benchmark(c: &mut Criterion) {
     let end = star_map.get(&30023494).unwrap(); // L.YZG.1RS
 
     for opt in [
-        eftb::PathOptimize::Distance,
-        eftb::PathOptimize::Fuel,
-        eftb::PathOptimize::Hops,
+        eftb::calc::path::PathOptimize::Distance,
+        eftb::calc::path::PathOptimize::Fuel,
+        eftb::calc::path::PathOptimize::Hops,
     ] {
         let mut group = c.benchmark_group(format!("path --optimize {:?}", opt).as_str());
         group.warm_up_time(std::time::Duration::from_secs(1));
@@ -29,7 +29,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                             start,
                             end,
                             black_box(*jump_distance),
-                            eftb::PathOptimize::Fuel,
+                            eftb::calc::path::PathOptimize::Fuel,
                         )
                     })
                 },

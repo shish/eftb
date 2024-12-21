@@ -10,6 +10,7 @@ use uom::si::length::light_year;
 
 use eftb::data;
 use eftb::raw;
+use uom::si::mass::kilogram;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -225,7 +226,7 @@ fn main() -> anyhow::Result<()> {
             fuel,
             efficiency,
         }) => {
-            let dist: Length = eftb::calc_jump(*mass, *fuel, *efficiency);
+            let dist: Length = eftb::calc_jump(Mass::new::<kilogram>(*mass), *fuel, *efficiency);
             println!("Jump distance: {:.0} ly", dist.get::<light_year>())
         }
         Some(Commands::Exits {
@@ -261,7 +262,8 @@ fn main() -> anyhow::Result<()> {
             efficiency,
         }) => {
             let dist: Length = Length::new::<light_year>(*dist);
-            let fuel = eftb::calc_fuel(dist, *mass, *efficiency);
+            let mass: Mass = Mass::new::<kilogram>(*mass);
+            let fuel = eftb::calc_fuel(dist, mass, *efficiency);
             println!("Fuel needed: {:.0}", fuel)
         }
         None => {

@@ -13,12 +13,13 @@ use rocket::response::{self, Responder, Response};
 use rocket::serde::json::Json;
 use rocket::State;
 use serde::Serialize;
-use uom::si::f64::Length;
+use uom::si::f64::*;
+use uom::si::length::light_year;
+use uom::si::mass::kilogram;
 
 use eftb::calc::path::PathOptimize;
 use eftb::data;
 use eftb::data::{ConnType, SolarSystemId, Star};
-use uom::si::length::light_year;
 
 // ====================================================================
 // common
@@ -92,7 +93,7 @@ struct JumpReturn {
 
 #[get("/jump?<mass>&<fuel>&<efficiency>")]
 fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<JumpReturn> {
-    let dist: Length = eftb::calc_jump(mass, fuel, efficiency);
+    let dist: Length = eftb::calc_jump(Mass::new::<kilogram>(mass), fuel, efficiency);
     Json(JumpReturn {
         version: 1,
         data: dist.get::<uom::si::length::light_year>(),
@@ -213,7 +214,7 @@ fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<FuelReturn> {
         version: 1,
         data: eftb::calc_fuel(
             Length::new::<uom::si::length::light_year>(dist),
-            mass,
+            Mass::new::<kilogram>(mass),
             efficiency,
         ),
     })
