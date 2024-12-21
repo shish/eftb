@@ -7,6 +7,7 @@ export const Route = createFileRoute("/calc/path")({
   component: PathFinder,
 });
 
+type PathOptimize = "fuel" | "distance" | "hops";
 type ConnType = "npc_gate" | "smart_gate" | "jump";
 type PathStep = {
   from: {
@@ -74,9 +75,10 @@ function PathFinder() {
   const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
   const [end, setEnd] = useSessionStorage<string>("end", "Nod");
   const [jump, setJump] = useSessionStorage<number>("jump", 80);
-  const [optimize, setOptimize] = useSessionStorage<
-    "fuel" | "distance" | "hops"
-  >("optimize", "fuel");
+  const [optimize, setOptimize] = useSessionStorage<PathOptimize>(
+    "optimize",
+    "fuel",
+  );
 
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);
@@ -143,9 +145,7 @@ function PathFinder() {
                 <select
                   name="optimize"
                   value={optimize}
-                  onChange={(e) =>
-                    setOptimize(e.target.value as "fuel" | "distance")
-                  }
+                  onChange={(e) => setOptimize(e.target.value as PathOptimize)}
                 >
                   <option value="fuel">Fuel (Prefer gates)</option>
                   <option value="distance">Distance (Prefer jumps)</option>
