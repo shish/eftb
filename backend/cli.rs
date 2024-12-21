@@ -45,7 +45,7 @@ enum Commands {
         #[clap(short, long, default_value = "100.0")]
         jump_distance: f64,
         #[clap(short, long, default_value = "fuel")]
-        optimize: eftb::PathOptimize,
+        optimize: eftb::calc::path::PathOptimize,
     },
     /// Figure out how far a given ship can jump
     Jump {
@@ -244,7 +244,7 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding exits");
-            let exits = eftb::calc_exits(&star_map, start, jump_distance);
+            let exits = eftb::calc_exit(&star_map, start, jump_distance);
             for (from, to) in exits {
                 println!(
                     "{} -> {} ({}) ({} ly)",

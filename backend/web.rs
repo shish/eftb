@@ -15,6 +15,7 @@ use rocket::State;
 use serde::Serialize;
 use uom::si::f64::Length;
 
+use eftb::calc::path::PathOptimize;
 use eftb::data;
 use eftb::data::{ConnType, SolarSystemId, Star};
 use uom::si::length::light_year;
@@ -150,9 +151,9 @@ fn calc_path(
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
     let optimize = match optimize.as_str() {
-        "fuel" => eftb::PathOptimize::Fuel,
-        "distance" => eftb::PathOptimize::Distance,
-        "hops" => eftb::PathOptimize::Hops,
+        "fuel" => PathOptimize::Fuel,
+        "distance" => PathOptimize::Distance,
+        "hops" => PathOptimize::Hops,
         _ => {
             return Err(CustomError(
                 Status::BadRequest,
@@ -231,7 +232,7 @@ struct ExitReturn {
 fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn>, CustomError> {
     let start = db.get_star(start)?;
 
-    let exits = eftb::calc_exits(
+    let exits = eftb::calc_exit(
         &db.star_map,
         start,
         Length::new::<uom::si::length::light_year>(jump),
