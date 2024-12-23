@@ -19,8 +19,9 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 
 FROM debian:stable-slim
 EXPOSE 8000
-#HEALTHCHECK --interval=1m --timeout=3s CMD curl --fail http://127.0.0.1:8074/ || exit 1
-#RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
+HEALTHCHECK --interval=1m --timeout=3s --start-interval=1s --start-period=30s \
+    CMD curl --fail http://127.0.0.1:8000/ || exit 1
+RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build-backend /app/web /app/
 COPY --from=build-frontend /app/dist /app/dist
 
