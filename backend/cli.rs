@@ -47,6 +47,8 @@ enum Commands {
         jump_distance: f64,
         #[clap(short, long, default_value = "fuel")]
         optimize: eftb::calc::path::PathOptimize,
+        #[clap(short, long)]
+        use_smart_gates: bool,
     },
     /// Figure out how far a given ship can jump
     Jump {
@@ -213,6 +215,7 @@ fn main() -> anyhow::Result<()> {
             end_name,
             jump_distance,
             optimize,
+            use_smart_gates,
         }) => {
             info!("Loading star map");
             let now = Instant::now();
@@ -230,7 +233,14 @@ fn main() -> anyhow::Result<()> {
 
             info!("Finding path");
             let now = Instant::now();
-            let path = eftb::calc_path(&star_map, start, end, jump_distance, *optimize);
+            let path = eftb::calc_path(
+                &star_map,
+                start,
+                end,
+                jump_distance,
+                *optimize,
+                *use_smart_gates,
+            );
             info!("Found path in {:.3}", now.elapsed().as_secs_f64());
             if let Some(path) = path {
                 let mut last_id = start.id;

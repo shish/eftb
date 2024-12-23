@@ -141,13 +141,14 @@ struct PathReturn {
     data: Vec<PathStep>,
 }
 
-#[get("/path?<start>&<end>&<jump>&<optimize>")]
+#[get("/path?<start>&<end>&<jump>&<optimize>&<use_smart_gates>")]
 fn calc_path(
     db: &State<Db>,
     start: String,
     end: String,
     jump: f64,
     optimize: String,
+    use_smart_gates: bool,
 ) -> Result<Json<PathReturn>, CustomError> {
     let start = db.get_star(start)?;
     let end = db.get_star(end)?;
@@ -169,6 +170,7 @@ fn calc_path(
         end,
         Length::new::<uom::si::length::light_year>(jump),
         optimize,
+        use_smart_gates,
     )
     .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 

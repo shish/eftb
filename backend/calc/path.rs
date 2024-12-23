@@ -20,6 +20,7 @@ fn successors(
     conn: &Connection,
     jump_distance: Length,
     optimize: PathOptimize,
+    use_smart_gates: bool,
 ) -> Vec<(Connection, i64)> {
     let star = star_map.get(&conn.target).unwrap();
     star.connections
@@ -27,6 +28,8 @@ fn successors(
         // take gates and short jumps - stop searching after we
         // find a long jump
         .take_while(|c| c.conn_type != ConnType::Jump || c.distance <= jump_distance)
+        // If we're not using smart gates, skip them
+        .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
             let distance = c.distance.get::<light_year>() as i64;
@@ -68,6 +71,7 @@ pub fn calc_path(
     end: &Star,
     jump_distance: Length,
     optimize: PathOptimize,
+    use_smart_gates: bool,
 ) -> Option<Vec<Connection>> {
     let init_conn = Connection {
         id: 0,
@@ -77,7 +81,7 @@ pub fn calc_path(
     };
     let path = astar(
         &init_conn,
-        |conn| successors(&star_map, conn, jump_distance, optimize),
+        |conn| successors(&star_map, conn, jump_distance, optimize, use_smart_gates),
         |conn| heuristic(&star_map, conn, end),
         |conn| conn.target == end.id,
     )

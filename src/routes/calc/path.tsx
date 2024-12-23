@@ -79,6 +79,10 @@ function PathFinder() {
     "optimize",
     "fuel",
   );
+  const [useSmartGates, setUseSmartGates] = useSessionStorage<boolean>(
+    "useSmartGates",
+    true,
+  );
 
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);
@@ -151,6 +155,17 @@ function PathFinder() {
                   <option value="distance">Distance (Prefer jumps)</option>
                   <option value="hops">Hops (Minimise clicks)</option>
                 </select>
+              </td>
+            </tr>
+            <tr>
+              <th>Use smart gates</th>
+              <td>
+                <input
+                  name="use_smart_gates"
+                  type="checkbox"
+                  checked={useSmartGates}
+                  onChange={(e) => setUseSmartGates(e.target.checked)}
+                />
               </td>
             </tr>
             <tr>

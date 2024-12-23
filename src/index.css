@@ -7,6 +7,9 @@
 INPUT {
   width: 100%;
 }
+INPUT[type="checkbox"] {
+  width: auto;
+}
 SELECT {
   width: 100%;
 }
