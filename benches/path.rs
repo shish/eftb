@@ -45,7 +45,14 @@ fn criterion_benchmark(c: &mut Criterion) {
                 &jump_distance,
                 |b, jump_distance| {
                     b.iter(|| {
-                        eftb::calc_path(&star_map, start, end, black_box(*jump_distance), optimize)
+                        eftb::calc_path(
+                            &star_map,
+                            start,
+                            end,
+                            black_box(*jump_distance),
+                            optimize,
+                            false,
+                        )
                     })
                 },
             );

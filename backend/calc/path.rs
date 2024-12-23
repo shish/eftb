@@ -139,7 +139,8 @@ mod tests {
                 &stars[0],
                 &stars[1],
                 Length::new::<light_year>(20.0),
-                PathOptimize::Fuel
+                PathOptimize::Fuel,
+                false
             ),
             Some(vec![(stars[0].connections[0].clone())])
         );
