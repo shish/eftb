@@ -75,7 +75,7 @@ pub struct RawSolarSystem {
 }
 
 // ====================================================================
-// Data structures for the star json fetched from the API
+// Data structures for solarsystems.json
 // ====================================================================
 
 #[derive(Debug, Deserialize)]
@@ -85,4 +85,15 @@ pub struct RawStar {
     #[serde(rename(deserialize = "solarSystemName"))]
     pub solar_system_name: String,
     //pub location: RawLocation,
+}
+
+// ====================================================================
+// Data structures for smartgates.json
+// ====================================================================
+
+#[derive(Debug, Deserialize)]
+pub struct RawSmartGate {
+    pub id: String,
+    pub from: u64,
+    pub to: u64,
 }
