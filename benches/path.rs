@@ -38,10 +38,10 @@ fn criterion_benchmark(c: &mut Criterion) {
         group.warm_up_time(std::time::Duration::from_secs(1));
         group.measurement_time(std::time::Duration::from_secs(1));
         group.sample_size(10);
-        for jd in 0..10 {
-            let jump_distance: Length = Length::new::<light_year>((jd * 50) as f64);
+        for jd in 0..6 {
+            let jump_distance: Length = Length::new::<light_year>((jd * 100) as f64);
             group.bench_with_input(
-                BenchmarkId::from_parameter(jd * 50),
+                BenchmarkId::from_parameter(jd * 100),
                 &jump_distance,
                 |b, jump_distance| {
                     b.iter(|| {
