@@ -61,6 +61,8 @@ enum Commands {
         #[clap(short, long, default_value = "100.0")]
         jump_distance: f64,
     },
+    /// Show info about a solar system
+    Star { name: String },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -265,6 +267,27 @@ fn main() -> anyhow::Result<()> {
             let mass: Mass = Mass::new::<kilogram>(*mass);
             let fuel = eftb::calc_fuel(dist, mass, *efficiency);
             println!("Fuel needed: {:.0}", fuel)
+        }
+        Some(Commands::Star { name }) => {
+            info!("Loading star map");
+            let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
+            let star_map = data::get_star_map()?;
+            info!("Loaded star map");
+
+            let star = star_map.get(star_name_to_id.get(name).unwrap()).unwrap();
+            println!("{} ({}):", star_id_to_name[&star.id], star.id);
+            println!("  Region: {}", star.region_id);
+            println!("  Connections:");
+            for conn in &star.connections {
+                if conn.conn_type != data::ConnType::Jump {
+                    println!(
+                        "    {} ({:?}, {} ly)",
+                        star_id_to_name[&conn.target],
+                        conn.conn_type,
+                        conn.distance.get::<light_year>() as i32
+                    );
+                }
+            }
         }
         None => {
             warn!("No command specified");
