@@ -72,7 +72,7 @@ pub fn get_name_maps() -> anyhow::Result<(
     HashMap<SolarSystemId, String>,
     HashMap<String, SolarSystemId>,
 )> {
-    let data = std::fs::read_to_string("data/star-data.json")?;
+    let data = std::fs::read_to_string("data/solarsystems.json")?;
     let json = serde_json::from_str::<HashMap<String, crate::raw::RawStar>>(&data)?;
     let star_id_to_name: HashMap<SolarSystemId, String> = json
         .values()
