@@ -71,7 +71,7 @@ pub fn calc_path(
     jump_distance: Length,
     optimize: PathOptimize,
     use_smart_gates: bool,
-) -> Option<Vec<Connection>> {
+) -> anyhow::Result<Option<Vec<Connection>>> {
     let init_conn = Connection {
         id: 0,
         conn_type: ConnType::Jump,
@@ -83,16 +83,16 @@ pub fn calc_path(
         |conn| successors(&star_map, conn, jump_distance, optimize, use_smart_gates),
         |conn| heuristic(&star_map, conn, end),
         |conn| conn.target == end.id,
-    )
+    )?
     .map(|(path, _)| path);
 
     match path {
         Some(path) => {
             // The first connection is the one we invented
             // to start the search, so we can skip it
-            return Some(path[1..].to_vec());
+            return Ok(Some(path[1..].to_vec()));
         }
-        None => return None,
+        None => return Ok(None),
     }
 }
 
@@ -140,7 +140,8 @@ mod tests {
                 Length::new::<light_year>(20.0),
                 PathOptimize::Fuel,
                 false
-            ),
+            )
+            .unwrap(),
             Some(vec![(stars[0].connections[0].clone())])
         );
     }
@@ -154,6 +155,7 @@ mod pathfinding {
     use std::cmp::Ordering;
     use std::collections::BinaryHeap;
     use std::hash::Hash;
+    use std::time::Instant;
 
     use indexmap::IndexMap;
     use rustc_hash::FxHasher;
@@ -166,7 +168,7 @@ mod pathfinding {
         mut successors: FN,
         mut heuristic: FH,
         mut success: FS,
-    ) -> Option<(Vec<N>, C)>
+    ) -> anyhow::Result<Option<(Vec<N>, C)>>
     where
         N: Eq + Hash + Clone,
         C: Zero + Ord + Copy,
@@ -175,6 +177,7 @@ mod pathfinding {
         FH: FnMut(&N) -> C,
         FS: FnMut(&N) -> bool,
     {
+        let start_time = Instant::now();
         let mut to_see = BinaryHeap::new();
         to_see.push(SmallestCostHolder {
             estimated_cost: Zero::zero(),
@@ -184,11 +187,14 @@ mod pathfinding {
         let mut parents: FxIndexMap<N, (usize, C)> = FxIndexMap::default();
         parents.insert(start.clone(), (usize::MAX, Zero::zero()));
         while let Some(SmallestCostHolder { cost, index, .. }) = to_see.pop() {
+            if start_time.elapsed().as_secs() > 5 {
+                return Err(anyhow::anyhow!("Timeout"));
+            }
             let successors = {
                 let (node, &(_, c)) = parents.get_index(index).unwrap(); // Cannot fail
                 if success(node) {
                     let path = reverse_path(&parents, |&(p, _)| p, index);
-                    return Some((path, cost));
+                    return Ok(Some((path, cost)));
                 }
                 // We may have inserted a node several time into the binary heap if we found
                 // a better way to access it. Ensure that we are currently dealing with the
@@ -226,7 +232,7 @@ mod pathfinding {
                 });
             }
         }
-        None
+        Ok(None)
     }
 
     #[allow(clippy::needless_collect)]

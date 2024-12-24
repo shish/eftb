@@ -38,6 +38,12 @@ impl<'r> Responder<'r, 'static> for CustomError {
     }
 }
 
+impl From<anyhow::Error> for CustomError {
+    fn from(err: anyhow::Error) -> Self {
+        CustomError(Status::InternalServerError, format!("{:?}", err))
+    }
+}
+
 struct Db {
     star_map: HashMap<SolarSystemId, Star>,
     star_id_to_name: HashMap<SolarSystemId, String>,
@@ -171,7 +177,7 @@ fn calc_path(
         Length::new::<uom::si::length::light_year>(jump),
         optimize,
         use_smart_gates,
-    )
+    )?
     .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 
     let mut result = Vec::new();
