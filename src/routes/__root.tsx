@@ -17,13 +17,7 @@ export const Route = createRootRoute({
     <>
       <h1>EVE Frontier Toolbox</h1>
       <p>
-        Very much a work in progress, let Shish know if something seems off.
-        Also let Shish know if things are good - right now a lot of this stuff
-        is theoretical and I&apos;d love to have some confirmation that it works
-        in practice :)
-      </p>
-      <p>
-        Also heads up this site is under active development - if you get an
+        Work in progress - let Shish know if something seems off - if you get an
         error, please refresh the page and try again to make sure you&apos;re
         running the latest code before reporting it &lt;3
       </p>
