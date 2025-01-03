@@ -175,11 +175,7 @@ fn main() -> anyhow::Result<()> {
             // sort gates first, and then jumps by distance - then when we
             // reach a jump that is too long we can stop searching
             for star in star_map.values_mut().progress() {
-                star.connections.sort_by(|a, b| {
-                    a.conn_type
-                        .cmp(&b.conn_type)
-                        .then_with(|| a.distance.partial_cmp(&b.distance).unwrap())
-                });
+                star.connections.sort_unstable();
             }
 
             info!("Saving star map");

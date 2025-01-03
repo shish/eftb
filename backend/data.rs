@@ -8,10 +8,6 @@ pub type ConnectionId = u64;
 pub type SolarSystemId = u64;
 pub type RegionId = u64;
 
-/// IMPORTANT: Jump must come last, so that when we sort connections
-/// by (type, distance) the long gates get sorted before the short jumps.
-/// This allows us to stop searching for a path when we reach a jump that
-/// is too long.
 #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
     NpcGate = 0,
@@ -35,6 +31,18 @@ impl Eq for Connection {}
 impl std::hash::Hash for Connection {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
+    }
+}
+impl PartialOrd for Connection {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Connection {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.conn_type
+            .cmp(&other.conn_type)
+            .then_with(|| self.distance.partial_cmp(&other.distance).unwrap())
     }
 }
 
@@ -95,4 +103,82 @@ pub fn get_star_map() -> anyhow::Result<HashMap<SolarSystemId, Star>> {
     let map: HashMap<SolarSystemId, Star> =
         bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
     Ok(map)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_distance() {
+        let a = Star {
+            id: 1,
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            ..Default::default()
+        };
+        let b = Star {
+            id: 2,
+            x: 1.0,
+            y: 0.0,
+            z: 0.0,
+            ..Default::default()
+        };
+        assert_eq!(a.distance(&b), Length::new::<meter>(1.0));
+    }
+
+    /// Check that connections are sorted by type (Jump last) then distance
+    /// (shortest first) - this means that when we're searching for a path we
+    /// can search all the gates, then search the jumps up until we reach a
+    /// jump that is too long, and we can stop there.
+    #[test]
+    fn test_conn_order() {
+        let a = Connection {
+            id: 1,
+            conn_type: ConnType::Jump,
+            distance: Length::new::<meter>(2.0),
+            target: 1,
+        };
+        let b = Connection {
+            id: 2,
+            conn_type: ConnType::NpcGate,
+            distance: Length::new::<meter>(2.0),
+            target: 1,
+        };
+        let c = Connection {
+            id: 3,
+            conn_type: ConnType::SmartGate,
+            distance: Length::new::<meter>(2.0),
+            target: 1,
+        };
+        let d = Connection {
+            id: 4,
+            conn_type: ConnType::Jump,
+            distance: Length::new::<meter>(1.0),
+            target: 1,
+        };
+        let e = Connection {
+            id: 5,
+            conn_type: ConnType::NpcGate,
+            distance: Length::new::<meter>(1.0),
+            target: 1,
+        };
+        let f = Connection {
+            id: 6,
+            conn_type: ConnType::SmartGate,
+            distance: Length::new::<meter>(1.0),
+            target: 1,
+        };
+        let mut conns = vec![
+            a.clone(),
+            b.clone(),
+            c.clone(),
+            d.clone(),
+            e.clone(),
+            f.clone(),
+        ];
+        conns.sort();
+        assert_eq!(conns, vec![e, b, f, c, d, a]);
+    }
 }
