@@ -94,6 +94,8 @@ pub struct RawStar {
 #[derive(Debug, Deserialize)]
 pub struct RawSmartGate {
     pub id: String,
+    #[serde(rename(deserialize = "itemId"))]
+    pub item_id: u64,
     pub name: String,
     pub from: u64,
     pub to: u64,

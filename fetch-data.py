@@ -32,6 +32,7 @@ for sass in tqdm(api_get('smartassemblies')):
             if gate['gateLink']['isLinked']:
                 gates_to_gates.append({
                     'id': gate['id'],
+                    'itemId': gate['itemId'],
                     'name': gate['name'],
                     # 'from': gate['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
                     'from': gate['solarSystemId'],  # refers to alpha SolarSystemId
@@ -46,13 +47,9 @@ for sass in tqdm(api_get('smartassemblies')):
 gate_id_to_solar_system_id = {gate['id']: gate['from'] for gate in gates_to_gates}
 gates_to_solar_systems = []
 for gate in gates_to_gates:
-    if gate['to'] in gate_id_to_solar_system_id:
-        gates_to_solar_systems.append({
-            'id': gate['id'],
-            'name': gate['name'],
-            'from': gate['from'],
-            'to': gate_id_to_solar_system_id[gate['to']]
-        })
+    ssid = gate_id_to_solar_system_id.get(gate['to'])
+    if ssid:
+        gates_to_solar_systems.append(gate | {'to': ssid})
     else:
         print(f'Gate {gate["id"][:10]} has invalid destination ({gate["to"][:10]})')
 # filter out some invalid test-gates
