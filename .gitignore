@@ -1,6 +1,7 @@
 target
 data
 old
+venv
 
 # Logs
 logs
