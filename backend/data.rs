@@ -8,11 +8,11 @@ pub type ConnectionId = u64;
 pub type SolarSystemId = u64;
 pub type RegionId = u64;
 
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
-    NpcGate = 0,
-    SmartGate = 1,
-    Jump = 2,
+    NpcGate,
+    SmartGate,
+    Jump,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

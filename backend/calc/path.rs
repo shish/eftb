@@ -32,7 +32,7 @@ fn successors(
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
             let distance = c.distance.get::<light_year>() as i64;
-            match (optimize, c.conn_type) {
+            match (optimize, &c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
                 (PathOptimize::Distance, _) => (c.clone(), distance),
