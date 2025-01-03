@@ -32,6 +32,7 @@ for sass in tqdm(api_get('smartassemblies')):
             if gate['gateLink']['isLinked']:
                 gates_to_gates.append({
                     'id': gate['id'],
+                    'name': gate['name'],
                     # 'from': gate['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
                     'from': gate['solarSystemId'],  # refers to alpha SolarSystemId
                     # 'to': dest['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
@@ -48,6 +49,7 @@ for gate in gates_to_gates:
     if gate['to'] in gate_id_to_solar_system_id:
         gates_to_solar_systems.append({
             'id': gate['id'],
+            'name': gate['name'],
             'from': gate['from'],
             'to': gate_id_to_solar_system_id[gate['to']]
         })
