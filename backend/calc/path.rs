@@ -187,7 +187,7 @@ mod pathfinding {
         let mut parents: FxIndexMap<N, (usize, C)> = FxIndexMap::default();
         parents.insert(start.clone(), (usize::MAX, Zero::zero()));
         while let Some(SmallestCostHolder { cost, index, .. }) = to_see.pop() {
-            if start_time.elapsed().as_secs() > 5 {
+            if start_time.elapsed().as_secs() >= 5 {
                 return Err(anyhow::anyhow!("Timeout"));
             }
             let successors = {
