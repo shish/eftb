@@ -64,6 +64,7 @@ pub fn heuristic(star_map: &HashMap<SolarSystemId, Star>, conn: &Connection, end
     return d as i64;
 }
 
+#[derive(Debug, PartialEq)]
 pub enum PathResult {
     Found(Vec<Connection>),
     NotFound,
@@ -149,9 +150,8 @@ mod tests {
                 PathOptimize::Fuel,
                 false,
                 None
-            )
-            .unwrap(),
-            Some(vec![(stars[0].connections[0].clone())])
+            ),
+            PathResult::Found(vec![(stars[0].connections[0].clone())])
         );
     }
 }
