@@ -64,6 +64,12 @@ pub fn heuristic(star_map: &HashMap<SolarSystemId, Star>, conn: &Connection, end
     return d as i64;
 }
 
+pub enum PathResult {
+    Found(Vec<Connection>),
+    NotFound,
+    Timeout,
+}
+
 pub fn calc_path(
     star_map: &HashMap<SolarSystemId, Star>,
     start: &Star,
@@ -72,7 +78,7 @@ pub fn calc_path(
     optimize: PathOptimize,
     use_smart_gates: bool,
     timeout: Option<u64>,
-) -> anyhow::Result<Option<Vec<Connection>>> {
+) -> PathResult {
     let init_conn = Connection {
         id: 0,
         conn_type: ConnType::Jump,
@@ -85,16 +91,16 @@ pub fn calc_path(
         |conn| heuristic(&star_map, conn, end),
         |conn| conn.target == end.id,
         timeout,
-    )?
-    .map(|(path, _)| path);
+    );
 
     match path {
-        Some(path) => {
+        pathfinding::PathFindResult::Found((path, _)) => {
             // The first connection is the one we invented
             // to start the search, so we can skip it
-            return Ok(Some(path[1..].to_vec()));
+            return PathResult::Found(path[1..].to_vec());
         }
-        None => return Ok(None),
+        pathfinding::PathFindResult::NotFound => return PathResult::NotFound,
+        pathfinding::PathFindResult::Timeout => return PathResult::Timeout,
     }
 }
 
@@ -166,13 +172,19 @@ mod pathfinding {
 
     type FxIndexMap<K, V> = IndexMap<K, V, BuildHasherDefault<FxHasher>>;
 
+    pub enum PathFindResult<N, C> {
+        Found((Vec<N>, C)),
+        NotFound,
+        Timeout,
+    }
+
     pub fn astar<N, C, FN, IN, FH, FS>(
         start: &N,
         mut successors: FN,
         mut heuristic: FH,
         mut success: FS,
         timeout: Option<u64>,
-    ) -> anyhow::Result<Option<(Vec<N>, C)>>
+    ) -> PathFindResult<N, C>
     where
         N: Eq + Hash + Clone,
         C: Zero + Ord + Copy,
@@ -192,13 +204,13 @@ mod pathfinding {
         parents.insert(start.clone(), (usize::MAX, Zero::zero()));
         while let Some(SmallestCostHolder { cost, index, .. }) = to_see.pop() {
             if timeout.is_some() && start_time.elapsed().as_secs() >= timeout.unwrap() {
-                return Err(anyhow::anyhow!("Timeout"));
+                return PathFindResult::Timeout;
             }
             let successors = {
                 let (node, &(_, c)) = parents.get_index(index).unwrap(); // Cannot fail
                 if success(node) {
                     let path = reverse_path(&parents, |&(p, _)| p, index);
-                    return Ok(Some((path, cost)));
+                    return PathFindResult::Found((path, cost));
                 }
                 // We may have inserted a node several time into the binary heap if we found
                 // a better way to access it. Ensure that we are currently dealing with the
@@ -236,7 +248,7 @@ mod pathfinding {
                 });
             }
         }
-        Ok(None)
+        PathFindResult::NotFound
     }
 
     #[allow(clippy::needless_collect)]

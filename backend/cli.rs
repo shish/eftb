@@ -237,22 +237,29 @@ fn main() -> anyhow::Result<()> {
                 *optimize,
                 *use_smart_gates,
                 Some(30),
-            )?;
+            );
             info!("Found path in {:.3}", now.elapsed().as_secs_f64());
-            if let Some(path) = path {
-                let mut last_id = start.id;
-                for conn in path {
-                    println!(
-                        "{} -> {} ({:?}, {} ly)",
-                        star_id_to_name[&last_id],
-                        star_id_to_name[&conn.target],
-                        conn.conn_type,
-                        conn.distance.get::<light_year>() as i32
-                    );
-                    last_id = conn.target;
+            match path {
+                eftb::calc::path::PathResult::Found(path) => {
+                    println!("Path from {} to {}:", start_name, end_name);
+                    let mut last_id = start.id;
+                    for conn in path {
+                        println!(
+                            "{} -> {} ({:?}, {} ly)",
+                            star_id_to_name[&last_id],
+                            star_id_to_name[&conn.target],
+                            conn.conn_type,
+                            conn.distance.get::<light_year>() as i32
+                        );
+                        last_id = conn.target;
+                    }
                 }
-            } else {
-                warn!("No path found");
+                eftb::calc::path::PathResult::NotFound => {
+                    warn!("No path found");
+                }
+                eftb::calc::path::PathResult::Timeout => {
+                    warn!("Path search timed out");
+                }
             }
         }
         Some(Commands::Jump {

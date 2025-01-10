@@ -170,7 +170,7 @@ fn calc_path(
         }
     };
 
-    let path = eftb::calc_path(
+    let result = eftb::calc_path(
         &db.star_map,
         start,
         end,
@@ -178,34 +178,43 @@ fn calc_path(
         optimize,
         use_smart_gates,
         Some(5),
-    )?
-    .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
-
-    let mut result = Vec::new();
-    let mut last_id = start.id;
-    for conn in path {
-        result.push(PathStep {
-            from: WebStar {
-                id: last_id,
-                name: db.star_id_to_name[&last_id].clone(),
-            },
-            conn_type: match conn.conn_type {
-                ConnType::Jump => "jump".to_string(),
-                ConnType::NpcGate => "npc_gate".to_string(),
-                ConnType::SmartGate => "smart_gate".to_string(),
-            },
-            distance: conn.distance.get::<light_year>() as f64,
-            to: WebStar {
-                id: conn.target,
-                name: db.star_id_to_name[&conn.target].clone(),
-            },
-        });
-        last_id = conn.target;
+    );
+    match result {
+        eftb::calc::path::PathResult::Found(path) => {
+            let mut result = Vec::new();
+            let mut last_id = start.id;
+            for conn in path {
+                result.push(PathStep {
+                    from: WebStar {
+                        id: last_id,
+                        name: db.star_id_to_name[&last_id].clone(),
+                    },
+                    conn_type: match conn.conn_type {
+                        ConnType::Jump => "jump".to_string(),
+                        ConnType::NpcGate => "npc_gate".to_string(),
+                        ConnType::SmartGate => "smart_gate".to_string(),
+                    },
+                    distance: conn.distance.get::<light_year>() as f64,
+                    to: WebStar {
+                        id: conn.target,
+                        name: db.star_id_to_name[&conn.target].clone(),
+                    },
+                });
+                last_id = conn.target;
+            }
+            Ok(Json(PathReturn {
+                version: 2,
+                data: result,
+            }))
+        }
+        eftb::calc::path::PathResult::NotFound => {
+            Err(CustomError(Status::NotFound, format!("No path found")))
+        }
+        eftb::calc::path::PathResult::Timeout => Err(CustomError(
+            Status::InternalServerError,
+            format!("Path calculation timed out"),
+        )),
     }
-    Ok(Json(PathReturn {
-        version: 2,
-        data: result,
-    }))
 }
 
 // ====================================================================
