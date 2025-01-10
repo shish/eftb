@@ -177,6 +177,7 @@ fn calc_path(
         Length::new::<uom::si::length::light_year>(jump),
         optimize,
         use_smart_gates,
+        Some(5),
     )?
     .ok_or(CustomError(Status::NotFound, format!("No path found")))?;
 

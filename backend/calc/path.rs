@@ -71,6 +71,7 @@ pub fn calc_path(
     jump_distance: Length,
     optimize: PathOptimize,
     use_smart_gates: bool,
+    timeout: Option<u64>,
 ) -> anyhow::Result<Option<Vec<Connection>>> {
     let init_conn = Connection {
         id: 0,
@@ -83,6 +84,7 @@ pub fn calc_path(
         |conn| successors(&star_map, conn, jump_distance, optimize, use_smart_gates),
         |conn| heuristic(&star_map, conn, end),
         |conn| conn.target == end.id,
+        timeout,
     )?
     .map(|(path, _)| path);
 
@@ -139,7 +141,8 @@ mod tests {
                 &stars[1],
                 Length::new::<light_year>(20.0),
                 PathOptimize::Fuel,
-                false
+                false,
+                None
             )
             .unwrap(),
             Some(vec![(stars[0].connections[0].clone())])
@@ -168,6 +171,7 @@ mod pathfinding {
         mut successors: FN,
         mut heuristic: FH,
         mut success: FS,
+        timeout: Option<u64>,
     ) -> anyhow::Result<Option<(Vec<N>, C)>>
     where
         N: Eq + Hash + Clone,
@@ -187,7 +191,7 @@ mod pathfinding {
         let mut parents: FxIndexMap<N, (usize, C)> = FxIndexMap::default();
         parents.insert(start.clone(), (usize::MAX, Zero::zero()));
         while let Some(SmallestCostHolder { cost, index, .. }) = to_see.pop() {
-            if start_time.elapsed().as_secs() >= 5 {
+            if timeout.is_some() && start_time.elapsed().as_secs() >= timeout.unwrap() {
                 return Err(anyhow::anyhow!("Timeout"));
             }
             let successors = {

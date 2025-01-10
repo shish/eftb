@@ -52,6 +52,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                             black_box(*jump_distance),
                             optimize,
                             false,
+                            Some(10),
                         )
                     })
                 },

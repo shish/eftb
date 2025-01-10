@@ -236,6 +236,7 @@ fn main() -> anyhow::Result<()> {
                 jump_distance,
                 *optimize,
                 *use_smart_gates,
+                Some(30),
             )?;
             info!("Found path in {:.3}", now.elapsed().as_secs_f64());
             if let Some(path) = path {
