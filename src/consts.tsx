@@ -15,7 +15,7 @@ export const ships: Ships = {
   Flegel: { mass: 145000000, fuel: 2990, fuel_type: "SOF-40" },
   Anser: { mass: 285000000, fuel: 7090, fuel_type: "SOF-40" },
   Dremar: { mass: 70250000, fuel: 1100, fuel_type: "SOF-40" },
-  Axte: { mass: 807000000, fuel: 220500, fuel_type: "SOF-40" },
+  Axte: { mass: 807000000, fuel: 22500, fuel_type: "SOF-40" },
   Caruda: { mass: 1400000000, fuel: 38900, fuel_type: "SOF-40" },
   Grus: { mass: 2425000000, fuel: 66200, fuel_type: "SOF-40" },
 } as const;
