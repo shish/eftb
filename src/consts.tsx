@@ -21,7 +21,7 @@ export const ships: Ships = {
 } as const;
 
 export const fuels = {
-  "uSOF-30": 0.3,
+  "uSOF-20": 0.2,
   "SOF-40": 0.4,
   "EU-40": 0.4,
   "SOF-80": 0.8,
