@@ -20,7 +20,7 @@ def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evef
 
 
 # stillness API returns phase-V data for solarsystems; nova API returns current data
-api_get('solarsystems', base="https://blockchain-gateway-nova.nursery.reitnorf.com")
+api_get('solarsystems')
 api_get('types')
 
 # smartassemblies API returns a mixture of phase-V and current data
