@@ -8,17 +8,17 @@ export type Ships = {
 };
 export const ships: Ships = {
   // Cycle 3 has mass and fuel in show-info \o/
-  Explorer: { mass: 4_500_000, fuel: 230, fuel_type: "uSOF-20" },
-  Forager: { mass: 8_000_000, fuel: 120, fuel_type: "uSOF-20" },
-  Juav: { mass: 14_000_000, fuel: 360, fuel_type: "uSOF-20" },
   Anser: { mass: 285_000_000, fuel: 7050, fuel_type: "SOF-40" },
   Axte: { mass: 800_000_000, fuel: 22030, fuel_type: "SOF-40" },
   Baile: { mass: 488_000_000, fuel: 12200, fuel_type: "SOF-40" },
   Caruda: { mass: 1_425_000_000, fuel: 49870, fuel_type: "SOF-40" },
   Drema: { mass: 69_000_000, fuel: 1110, fuel_type: "SOF-40" },
+  Explorer: { mass: 4_500_000, fuel: 230, fuel_type: "uSOF-20" },
   Flegel: { mass: 143_000_000, fuel: 2860, fuel_type: "SOF-40" },
+  Forager: { mass: 8_000_000, fuel: 120, fuel_type: "uSOF-20" },
   Grus: { mass: 2_383_000_000, fuel: 71340, fuel_type: "SOF-40" },
   Harpia: { mass: 63_000_000, fuel: 1020, fuel_type: "SOF-40" },
+  Juav: { mass: 14_000_000, fuel: 360, fuel_type: "uSOF-20" },
   Klinge: { mass: 800_000_000, fuel: 21970, fuel_type: "SOF-40" },
   Microptero: { mass: 20_500_000, fuel: 240, fuel_type: "SOF-40" },
   Pici: { mass: 26_000_000, fuel: 330, fuel_type: "SOF-40" },
