@@ -2,7 +2,7 @@
 
 ## How to prepare the data
 1. Create `data/extracted-starmap.json` using https://github.com/frontier-reapers/frontier-static-data (This data is under NDA, don't post it anywhere)
-2. Create `data/solarsystems.json` from https://blockchain-gateway-nova.nursery.reitnorf.com/solarsystems
+2. Fetch other data with `./fetch_data.py`
 3. Create `data/starmap.bin` using `cargo run -- build` (This compiles the starmap data into a form that's more optimized for route planning)
 
 ## Testing with the CLI
@@ -18,7 +18,7 @@
 * `docker build -t eftb .`
 
 ## Running in production
-* `docker run -p 8000 eftb`
+* `docker run -p 8000 -v ./data:/app/data eftb`
 * open `http://localhost:8000` in your browser
 
 ## Code layout
