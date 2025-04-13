@@ -37,3 +37,10 @@ export const ships: Ships = {
   Ungher: { mass: 75_000_000, fuel: 1400, fuel_type: "SOF-40" },
   Val: { mass: 28_000_000, fuel: 550, fuel_type: "SOF-40" },
 } as const;
+
+
+export function isCompatible(fuel1: keyof typeof fuels, fuel2: keyof typeof fuels) {
+  const fuel1_is_basic = fuel1 === "uSOF-20";
+  const fuel2_is_basic = fuel2 === "uSOF-20";
+  return fuel1_is_basic === fuel2_is_basic;
+}

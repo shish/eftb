@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent, useEffect } from "react";
 import { form_api } from "../../api";
-import { ships, fuels } from "../../consts";
+import { ships, fuels, isCompatible } from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/fuel")({
@@ -9,10 +9,12 @@ export const Route = createFileRoute("/calc/fuel")({
 });
 
 function FuelCalculator() {
-  const [ship, setShip] = useSessionStorage<string>("ship", "Val");
+  const [ship, setShip] = useSessionStorage<keyof typeof ships>("ship", "Val");
+  const [fuelType, setFuelType] = useState<keyof typeof fuels>("SOF-40");
+
   const [mass, setMass] = useSessionStorage<number>("mass", 28000000);
   const [dist, setDist] = useSessionStorage<number>("dist", 100);
-  const [fuelType, setFuelType] = useState<string>("SOF-40");
+  const [efficiency, setEfficiency] = useState<number>(fuels[fuelType]);
 
   const [fuel, setFuel] = useState<null | number>(null);
   const [error, setError] = useState<null | Error>(null);
@@ -20,7 +22,18 @@ function FuelCalculator() {
   useEffect(() => {
     setFuel(null);
     setError(null);
-  }, [ship, mass, dist, fuelType]);
+  }, [ship, mass, dist, efficiency]);
+
+  useEffect(() => {
+    const shipData = ships[ship];
+    setMass(shipData.mass);
+    setFuel(shipData.fuel);
+    setFuelType(shipData.fuel_type);
+  }, [ship]);
+
+  useEffect(() => {
+    setEfficiency(fuels[fuelType]);
+  }, [fuelType]);
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,16 +48,12 @@ function FuelCalculator() {
         <table className="form">
           <tbody>
             <tr>
-              <th>Ship</th>
-              <td>
+              <th>Ship / Fuel</th>
+              <td className="pair">
                 <select
                   value={ship}
                   onChange={(e) => {
-                    const ship = ships[e.target.value];
                     setShip(e.target.value);
-                    setMass(ship.mass);
-                    setFuel(ship.fuel);
-                    setFuelType(ship.fuel_type);
                   }}
                 >
                   {Object.keys(ships).map((ship) => (
@@ -53,8 +62,27 @@ function FuelCalculator() {
                     </option>
                   ))}
                 </select>
+                <select
+                  value={fuelType}
+                  onChange={(e) => {
+                    setFuelType(e.target.value as keyof typeof fuels);
+                  }}
+                >
+                  {Object.keys(fuels)
+                    .filter((name) =>
+                      isCompatible(
+                        ships[ship].fuel_type,
+                        name as keyof typeof fuels,
+                      ),
+                    )
+                    .map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                </select>
               </td>
-              <td>(Just a shortcut to set mass &amp; fuel type)</td>
+              <td>(Just a shortcut to set mass &amp; fuel)</td>
             </tr>
             <tr>
               <th>Mass (kg)</th>
@@ -83,20 +111,17 @@ function FuelCalculator() {
               </td>
             </tr>
             <tr>
-              <th>Fuel Type</th>
+              <th>Fuel multiplier</th>
               <td>
-                <select name="efficiency">
-                  {Object.entries(fuels).map(([name, value]) => (
-                    <option
-                      key={name}
-                      value={value}
-                      selected={name == fuelType}
-                    >
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  name="efficiency"
+                  type="number"
+                  required={true}
+                  value={efficiency}
+                  onChange={(e) => setEfficiency(parseFloat(e.target.value))}
+                />
               </td>
+              <td>(The number in the fuel type)</td>
             </tr>
             <tr>
               <td>

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ships, fuels } from "../../consts";
+import { ships, fuels, isCompatible } from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 
 export const Route = createFileRoute("/calc/jump")({
@@ -22,12 +22,6 @@ function JumpCapacityCalculator() {
         <SummaryTable />
       </section>
   );
-}
-
-function isCompatible(fuel1: keyof typeof fuels, fuel2: keyof typeof fuels) {
-  const fuel1_is_basic = fuel1 === "uSOF-20";
-  const fuel2_is_basic = fuel2 === "uSOF-20";
-  return fuel1_is_basic === fuel2_is_basic;
 }
 
 function jumpRange(mass: number, fuel: number, efficiency: number): number {
