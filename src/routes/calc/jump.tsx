@@ -106,7 +106,7 @@ function Calculator() {
   }, [fuelType]);
 
   useEffect(() => {
-    setSavedJump(jumpRange(mass, fuel, efficiency));
+    setSavedJump(jumpRange(mass, fuel, efficiency).toFixed(0));
   }, [mass, fuel, efficiency]);
 
   return (
