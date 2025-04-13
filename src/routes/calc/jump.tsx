@@ -31,7 +31,7 @@ function isCompatible(fuel1: keyof typeof fuels, fuel2: keyof typeof fuels) {
 }
 
 function jumpRange(mass: number, fuel: number, efficiency: number): number {
-  return (fuel / mass) * efficiency * 1e7;
+  return parseInt(((fuel / mass) * efficiency * 1e7).toFixed(0));
 }
 
 const sorted_ships = Object.entries(ships);
@@ -63,11 +63,7 @@ function SummaryTable() {
                       fuelName as keyof typeof fuels,
                       ship.fuel_type,
                     )
-                      ? jumpRange(
-                          ships[shipName].mass,
-                          ships[shipName].fuel,
-                          efficiency,
-                        ).toFixed(2)
+                      ? jumpRange(ships[shipName].mass, ships[shipName].fuel, efficiency)
                       : "-"}
                   </td>
                 ))}
@@ -106,7 +102,7 @@ function Calculator() {
   }, [fuelType]);
 
   useEffect(() => {
-    setSavedJump(jumpRange(mass, fuel, efficiency).toFixed(0));
+    setSavedJump(jumpRange(mass, fuel, efficiency));
   }, [mass, fuel, efficiency]);
 
   return (
@@ -192,7 +188,7 @@ function Calculator() {
         </tr>
         <tr>
           <td></td>
-          <td>{jumpRange(mass, fuel, efficiency).toFixed(2)} ly</td>
+          <td>{jumpRange(mass, fuel, efficiency)} ly</td>
         </tr>
       </tbody>
     </table>
