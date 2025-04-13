@@ -47,7 +47,7 @@ function SummaryTable() {
                             .filter(([fuelName, _]) => fuelName !== "EU-40")
                             .map(([fuelName, efficiency]) => (
                             <td key={fuelName}>{
-                                isCompatible(fuelName, ship.fuel_type)
+                                isCompatible(fuelName as keyof typeof fuels, ship.fuel_type)
                                     ? jumpRange(shipName, efficiency)
                                     : "-"
                             }</td>
@@ -124,12 +124,12 @@ function JumpCapacityCalculator() {
                 <select
                   value={fuelType}
                   onChange={(e) => {
-                      setFuelType(e.target.value);
+                      setFuelType(e.target.value as keyof typeof fuels);
                   }}
                 >
                   {Object
                       .entries(fuels)
-                      .filter(([name, _]) => isCompatible(ships[ship].fuel_type, name))
+                      .filter(([name, _]) => isCompatible(ships[ship].fuel_type, name as keyof typeof fuels))
                       .map(([name, value]) => (
                     <option key={name} value={value}>
                       {name}
