@@ -31,7 +31,7 @@ function ExitFinder() {
       <h2>How do I get out of here?</h2>
       <p>Show the places you can jump to from a given constellation</p>
       <form action="/api/exit" method="get" onSubmit={submit}>
-        <table>
+        <table className="form">
           <tbody>
             <tr>
               <th>Solar System</th>

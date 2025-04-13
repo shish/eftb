@@ -4,26 +4,28 @@
 * {
   box-sizing: border-box;
 }
-INPUT {
-  width: 100%;
-}
-INPUT[type="checkbox"] {
-  width: auto;
-}
-SELECT {
-  width: 100%;
-}
-TH {
+
+TABLE.form INPUT:not([type="checkbox"]):not([type="radio"]),
+TABLE.form SELECT,
+TABLE.form TEXTAREA,
+TABLE.form BUTTON {width: 100%;}
+TABLE.form TH:first-child {
   text-align: right;
   width: 1%;
   /* disable text wrapping */
   white-space: nowrap;
   padding-right: 0.25em;
 }
-
-TD:nth-child(2) {
+TABLE.form TD:nth-child(2) {
   min-width: 20em;
 }
-TD {
+TABLE.form TD {
   vertical-align: top;
+}
+
+TABLE.jumpSummary TH,
+TABLE.jumpSummary TD {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 0.5em;
 }

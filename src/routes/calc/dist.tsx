@@ -37,7 +37,7 @@ function DistanceBetweenSystems() {
     <section>
       <h2>How far is it?</h2>
       <form action="/api/dist" method="get" onSubmit={submit}>
-        <table>
+        <table className="form">
           <tbody>
             <tr>
               <th>System 1</th>

@@ -101,7 +101,7 @@ function PathFinder() {
     <section>
       <h2>How do I get there?</h2>
       <form action="/api/path" method="get" onSubmit={submit}>
-        <table>
+        <table className="form">
           <tbody>
             <tr>
               <th>System 1</th>

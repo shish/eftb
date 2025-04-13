@@ -32,7 +32,7 @@ function FuelCalculator() {
       <h2>How much fuel will I need?</h2>
       <p>How much fuel will it take to jump a given distance</p>
       <form action="/api/fuel" method="get" onSubmit={submit}>
-        <table>
+        <table className="form">
           <tbody>
             <tr>
               <th>Ship</th>

@@ -8,6 +8,57 @@ export const Route = createFileRoute("/calc/jump")({
   component: JumpCapacityCalculator,
 });
 
+function isCompatible(fuel1: keyof typeof fuels, fuel2: keyof typeof fuels) {
+    const fuel1_is_basic = fuel1 === "uSOF-20";
+    const fuel2_is_basic = fuel2 === "uSOF-20";
+    return fuel1_is_basic === fuel2_is_basic;
+}
+
+function jumpRange(ship: keyof typeof ships, efficiency: number) {
+    const mass = ships[ship].mass;
+    const fuel = ships[ship].fuel;
+    const jumpRange = (fuel / mass) * efficiency * 1e7;
+    return jumpRange.toFixed(2);
+}
+
+function SummaryTable() {
+    return (
+        <table className="jumpSummary">
+            <thead>
+                <tr>
+                    <th>Ship</th>
+                    {Object
+                        .entries(fuels)
+                        .filter(([fuelName, _]) => fuelName !== "EU-40")
+                        .map(([fuelType]) => (
+                        <th key={fuelType}>{fuelType}</th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {Object
+                    .entries(ships)
+                    .toSorted((a, b) => a[1].mass - b[1].mass)
+                    .map(([shipName, ship]) => (
+                    <tr key={shipName}>
+                        <th>{shipName}</th>
+                        {Object
+                            .entries(fuels)
+                            .filter(([fuelName, _]) => fuelName !== "EU-40")
+                            .map(([fuelName, efficiency]) => (
+                            <td key={fuelName}>{
+                                isCompatible(fuelName, ship.fuel_type)
+                                    ? jumpRange(shipName, efficiency)
+                                    : "-"
+                            }</td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
 function JumpCapacityCalculator() {
   const [ship, setShip] = useSessionStorage<string>("ship", "Val");
   const [mass, setMass] = useSessionStorage<number>("mass", 28000000);
@@ -43,7 +94,7 @@ function JumpCapacityCalculator() {
     <section>
       <h2>How far can I jump?</h2>
       <form action="/api/jump" method="get" onSubmit={submit}>
-        <table>
+        <table className="form">
           <tbody>
             <tr>
               <th>Ship</th>
@@ -123,6 +174,12 @@ function JumpCapacityCalculator() {
           </tbody>
         </table>
       </form>
+      <hr/>
+      <h3>Summary</h3>
+      <p>These numbers are for empty ships with no fittings and no cargo.
+          To get an accurate jump distance, you need to know the total mass,
+          which can be found with right-click &rarr; Show Info.</p>
+      <SummaryTable />
     </section>
   );
 }
