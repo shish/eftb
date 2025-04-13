@@ -1,7 +1,15 @@
+export const fuels = {
+  "uSOF-20": 0.2,
+  "SOF-40": 0.4,
+  "EU-40": 0.4,
+  "SOF-80": 0.8,
+  "EU-90": 0.9,
+};
+
 export type Ship = {
   mass: number;
   fuel: number;
-  fuel_type: string;
+  fuel_type: keyof typeof fuels;
 };
 export type Ships = {
   [key: string]: Ship;
@@ -29,11 +37,3 @@ export const ships: Ships = {
   Ungher: { mass: 75_000_000, fuel: 1400, fuel_type: "SOF-40" },
   Val: { mass: 28_000_000, fuel: 550, fuel_type: "SOF-40" },
 } as const;
-
-export const fuels = {
-  "uSOF-20": 0.2,
-  "SOF-40": 0.4,
-  "EU-40": 0.4,
-  "SOF-80": 0.8,
-  "EU-90": 0.9,
-};

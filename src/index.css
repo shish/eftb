@@ -9,6 +9,9 @@ TABLE.form INPUT:not([type="checkbox"]):not([type="radio"]),
 TABLE.form SELECT,
 TABLE.form TEXTAREA,
 TABLE.form BUTTON {width: 100%;}
+TABLE.form TD.pair SELECT {
+  width: 50%;
+}
 TABLE.form TH:first-child {
   text-align: right;
   width: 1%;

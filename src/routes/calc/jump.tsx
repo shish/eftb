@@ -60,13 +60,12 @@ function SummaryTable() {
 }
 
 function JumpCapacityCalculator() {
-  const [ship, setShip] = useSessionStorage<string>("ship", "Val");
+  const [ship, setShip] = useSessionStorage<keyof typeof ships>("ship", "Val");
+  const [fuelType, setFuelType] = useSessionStorage<keyof typeof fuels>("fuelType", "SOF-40");
+
   const [mass, setMass] = useSessionStorage<number>("mass", 28000000);
   const [fuel, setFuel] = useSessionStorage<number>("fuel", 539);
-  const [fuelType, setFuelType] = useSessionStorage<string>(
-    "fuelType",
-    "SOF-40",
-  );
+  const [efficiency, setEfficiency] = useSessionStorage<number>("efficiency", 40);
 
   const [_, setSavedJump] = useSessionStorage<number>("jump", 0);
   const [jump, setJump] = useState<null | number>(null);
@@ -76,6 +75,17 @@ function JumpCapacityCalculator() {
     setJump(null);
     setError(null);
   }, [ship, mass, fuel, fuelType]);
+
+  useEffect(() => {
+      const shipData = ships[ship];
+      setMass(shipData.mass);
+      setFuel(shipData.fuel);
+      setFuelType(shipData.fuel_type);
+  }, [ship]);
+
+  useEffect(() => {
+      setEfficiency(fuels[fuelType]);
+  }, [fuelType]);
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,21 +107,32 @@ function JumpCapacityCalculator() {
         <table className="form">
           <tbody>
             <tr>
-              <th>Ship</th>
-              <td>
+              <th>Ship / Fuel</th>
+              <td className="pair">
                 <select
                   value={ship}
                   onChange={(e) => {
-                    const ship = ships[e.target.value];
                     setShip(e.target.value);
-                    setMass(ship.mass);
-                    setFuel(ship.fuel);
-                    setFuelType(ship.fuel_type);
                   }}
                 >
                   {Object.keys(ships).map((ship) => (
                     <option key={ship} value={ship}>
                       {ship}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={fuelType}
+                  onChange={(e) => {
+                      setFuelType(e.target.value);
+                  }}
+                >
+                  {Object
+                      .entries(fuels)
+                      .filter(([name, _]) => isCompatible(ships[ship].fuel_type, name))
+                      .map(([name, value]) => (
+                    <option key={name} value={value}>
+                      {name}
                     </option>
                   ))}
                 </select>
@@ -147,20 +168,18 @@ function JumpCapacityCalculator() {
               <td>(The number in the orange rectangle)</td>
             </tr>
             <tr>
-              <th>Fuel Type</th>
+              <th>Fuel multiplier</th>
               <td>
-                <select name="efficiency">
-                  {Object.entries(fuels).map(([name, value]) => (
-                    <option
-                      key={name}
-                      value={value}
-                      selected={name == fuelType}
-                    >
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  name="efficiency"
+                  type="number"
+                  min="1"
+                  required={true}
+                  value={efficiency}
+                  onChange={(e) => setEfficiency(parseInt(e.target.value))}
+                />
               </td>
+              <td>(The number in the fuel type)</td>
             </tr>
             <tr>
               <td>
