@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ships, fuels, isCompatible } from "../../consts";
+import { ships, fuels, isCompatible, getEngine } from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/shipfuel";
 
@@ -128,7 +128,7 @@ function SummaryTable() {
               .filter(([fuelName, _]) => fuelName !== "EU-40")
               .map(([fuelName, efficiency]) => (
                 <td key={fuelName}>
-                  {isCompatible(fuelName as keyof typeof fuels, ship.fuel)
+                  {isCompatible(fuelName as keyof typeof fuels, getEngine(ship.type).fuel)
                     ? jumpRange(
                         ships[shipName].mass,
                         ships[shipName].tank,
