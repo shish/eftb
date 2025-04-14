@@ -34,11 +34,11 @@ function Calculator() {
   const [tank, setTank] = useSessionStorage<number>("tank", 539);
   const [effi, setEffi] = useSessionStorage<number>("efficiency", 0.4);
 
-  const [_, setSavedJump] = useSessionStorage<number>("jump", 0);
+  const [jump, setJump] = useSessionStorage<number>("jump", 0);
 
   useEffect(() => {
-    setSavedJump(jumpRange(mass, tank, effi));
-  }, [setSavedJump, mass, tank, effi]);
+    setJump(jumpRange(mass, tank, effi));
+  }, [setJump, mass, tank, effi]);
 
   return (
     <table className="form">
@@ -97,7 +97,7 @@ function Calculator() {
         </tr>
         <tr>
           <th>Jump range</th>
-          <td>{jumpRange(mass, tank, effi)} ly</td>
+          <td>{jump} ly</td>
         </tr>
       </tbody>
     </table>
