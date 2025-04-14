@@ -9,8 +9,11 @@ TABLE.form INPUT:not([type="checkbox"]):not([type="radio"]),
 TABLE.form SELECT,
 TABLE.form TEXTAREA,
 TABLE.form BUTTON {width: 100%;}
-TABLE.form .pair SELECT {
-  width: 50%;
+TABLE.form .pair SELECT:nth-child(1) {
+  width: 60%;
+}
+TABLE.form .pair SELECT:nth-child(2) {
+  width: 40%;
 }
 TABLE.form TH:first-child {
   text-align: right;
@@ -20,7 +23,7 @@ TABLE.form TH:first-child {
   padding-right: 0.25em;
 }
 TABLE.form TD:nth-child(2) {
-  min-width: 20em;
+  width: 12em;
 }
 TABLE.form TD {
   vertical-align: top;
