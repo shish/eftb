@@ -10,32 +10,33 @@ export type Ship = {
   mass: number;
   tank: number;
   fuel: keyof typeof fuels;
+  cargo: number;
 };
 export type Ships = {
   [key: string]: Ship;
 };
 export const ships: Ships = {
   // Cycle 3 has mass and fuel in show-info \o/
-  Anser: { mass: 285_000_000, tank: 7050, fuel: "SOF-40" },
-  Axte: { mass: 800_000_000, tank: 22030, fuel: "SOF-40" },
-  Baile: { mass: 488_000_000, tank: 12200, fuel: "SOF-40" },
-  Caruda: { mass: 1_425_000_000, tank: 49870, fuel: "SOF-40" },
-  Drema: { mass: 69_000_000, tank: 1110, fuel: "SOF-40" },
-  Explorer: { mass: 4_500_000, tank: 230, fuel: "uSOF-20" },
-  Flegel: { mass: 143_000_000, tank: 2860, fuel: "SOF-40" },
-  Forager: { mass: 8_000_000, tank: 120, fuel: "uSOF-20" },
-  Grus: { mass: 2_383_000_000, tank: 71340, fuel: "SOF-40" },
-  Harpia: { mass: 63_000_000, tank: 1020, fuel: "SOF-40" },
-  Juav: { mass: 14_000_000, tank: 360, fuel: "uSOF-20" },
-  Klinge: { mass: 800_000_000, tank: 21970, fuel: "SOF-40" },
-  Microptero: { mass: 20_500_000, tank: 240, fuel: "SOF-40" },
-  Pici: { mass: 26_000_000, tank: 330, fuel: "SOF-40" },
-  Raubtier: { mass: 46_000_000, tank: 690, fuel: "SOF-40" },
-  Rebus_K: { mass: 1_474_000_000, tank: 41_620, fuel: "SOF-40" },
-  Samoskyd_1: { mass: 25_000_000, tank: 300, fuel: "SOF-40" },
-  Strix: { mass: 96_000_000, tank: 1550, fuel: "SOF-40" },
-  Ungher: { mass: 75_000_000, tank: 1400, fuel: "SOF-40" },
-  Val: { mass: 28_000_000, tank: 550, fuel: "SOF-40" },
+  Anser: { mass: 281_681_000, tank: 7_050, fuel: "SOF-40", cargo: 36_400 },
+  Axte: { mass: 800_711_000, tank: 22_030, fuel: "SOF-40", cargo: 33_800 },
+  Baile: { mass: 487_820_000, tank: 12_200, fuel: "SOF-40", cargo: 20_800 },
+  Caruda: { mass: 1_424_833_000, tank: 49_870, fuel: "SOF-40", cargo: 54_600 },
+  Dremar: { mass: 68_221_000, tank: 1_110, fuel: "SOF-40", cargo: 3_120 },
+  Explorer: { mass: 4_517_000, tank: 230, fuel: "uSOF-20", cargo: 520 },
+  Flegel: { mass: 142_121_000, tank: 2_860, fuel: "SOF-40", cargo: 31_200 },
+  Forager: { mass: 7_642_000, tank: 120, fuel: "uSOF-20", cargo: 1_040 },
+  Grus: { mass: 2_383_202_000, tank: 71_340, fuel: "SOF-40", cargo: 286_000 },
+  Harpia: { mass: 62_359_000, tank: 1_020, fuel: "SOF-40", cargo: 3_120 },
+  Juav: { mass: 12_928_000, tank: 360, fuel: "uSOF-20", cargo: 520 },
+  Klinge: { mass: 798_858_000, tank: 21_970, fuel: "SOF-40", cargo: 31_200 },
+  Microptero: { mass: 20_464_000, tank: 240, fuel: "SOF-40", cargo: 1_040 },
+  Pici: { mass: 25_921_000, tank: 330, fuel: "SOF-40", cargo: 3_120 },
+  Raubtier: { mass: 45_402_000, tank: 690, fuel: "SOF-40", cargo: 2_080 },
+  Rebus_K: { mass: 1_474_255_000, tank: 41_620, fuel: "SOF-40", cargo: 312_000 },
+  Samoskyd_1: { mass: 24_552_000, tank: 300, fuel: "SOF-40", cargo: 5_720 },
+  Strix: { mass: 95_376_000, tank: 1_550, fuel: "SOF-40", cargo: 4_160 },
+  Ungher: { mass: 74_389_000, tank: 1_400, fuel: "SOF-40", cargo: 3_120 },
+  Val: { mass: 27_210_000, tank: 550, fuel: "SOF-40", cargo: 6_240 },
 } as const;
 
 export function isCompatible(fuel1: keyof typeof fuels, fuel2: keyof typeof fuels) {
