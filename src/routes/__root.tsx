@@ -55,6 +55,12 @@ export const Route = createRootRoute({
           - How much fuel do I need to jump that far?
         </li>
         <li>
+          <Link to="/calc/fuelcost" className="[&.active]:font-bold">
+            Fuel Cost
+          </Link>{" "}
+          - How much does it cost to make this journey?
+        </li>
+        <li>
           <Link to="/calc/exit" className="[&.active]:font-bold">
             Region Exit Finder
           </Link>{" "}

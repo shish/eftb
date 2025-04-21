@@ -114,7 +114,7 @@ function Calculator() {
   );
 }
 
-type SummaryMode = "dist" | "effi" | "cost" | "ceff";
+type SummaryMode = "dist" | "effi" | "ceff";
 
 function SummaryTable() {
   const sorted_ships = Object.entries(ships) as [ShipName, Ship][];
@@ -123,7 +123,10 @@ function SummaryTable() {
     ([fuelName, _]) => fuelName !== "EU-40",
   );
 
-  const [mode, setMode] = useSessionStorage<SummaryMode>("jumpSummaryMode", "dist");
+  const [mode, setMode] = useSessionStorage<SummaryMode>(
+    "jumpSummaryMode",
+    "dist",
+  );
 
   return (
     <>
@@ -138,8 +141,7 @@ function SummaryTable() {
               >
                 <option value="dist">Distance (ly)</option>
                 <option value="effi">Fuel Efficiency (ly per fuel unit)</option>
-                <option value="cost">Cost (lux per max-distance jump)</option>
-                <option value="ceff">Cost Efficiency (ly per 1m lux)</option>
+                <option value="ceff">Travel Cost (lux per ly)</option>
               </select>
             </td>
           </tr>
@@ -203,15 +205,13 @@ function SummaryCell({
           {(jumpRange(totalMass, ship.tank, efficiency) / ship.tank).toFixed(3)}
         </td>
       );
-    case "cost":
-      return <td>{(ship.tank * fuelCosts[fuelName]).toLocaleString()}</td>;
     case "ceff":
       return (
         <td>
           {parseInt(
             (
-              jumpRange(totalMass, ship.tank, efficiency) /
-              ((ship.tank * fuelCosts[fuelName]) / 1_000_000)
+              (ship.tank * fuelCosts[fuelName]) /
+              jumpRange(totalMass, ship.tank, efficiency)
             ).toFixed(0),
           ).toLocaleString()}
         </td>

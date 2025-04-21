@@ -17,6 +17,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as CalcSettingsImport } from './routes/calc/settings'
 import { Route as CalcPathImport } from './routes/calc/path'
 import { Route as CalcJumpImport } from './routes/calc/jump'
+import { Route as CalcFuelcostImport } from './routes/calc/fuelcost'
 import { Route as CalcFuelImport } from './routes/calc/fuel'
 import { Route as CalcExitImport } from './routes/calc/exit'
 import { Route as CalcDistImport } from './routes/calc/dist'
@@ -54,6 +55,12 @@ const CalcPathRoute = CalcPathImport.update({
 const CalcJumpRoute = CalcJumpImport.update({
   id: '/calc/jump',
   path: '/calc/jump',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CalcFuelcostRoute = CalcFuelcostImport.update({
+  id: '/calc/fuelcost',
+  path: '/calc/fuelcost',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -114,6 +121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalcFuelImport
       parentRoute: typeof rootRoute
     }
+    '/calc/fuelcost': {
+      id: '/calc/fuelcost'
+      path: '/calc/fuelcost'
+      fullPath: '/calc/fuelcost'
+      preLoaderRoute: typeof CalcFuelcostImport
+      parentRoute: typeof rootRoute
+    }
     '/calc/jump': {
       id: '/calc/jump'
       path: '/calc/jump'
@@ -146,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
+  '/calc/fuelcost': typeof CalcFuelcostRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
@@ -157,6 +172,7 @@ export interface FileRoutesByTo {
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
+  '/calc/fuelcost': typeof CalcFuelcostRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
@@ -169,6 +185,7 @@ export interface FileRoutesById {
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
+  '/calc/fuelcost': typeof CalcFuelcostRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
@@ -182,6 +199,7 @@ export interface FileRouteTypes {
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
+    | '/calc/fuelcost'
     | '/calc/jump'
     | '/calc/path'
     | '/calc/settings'
@@ -192,6 +210,7 @@ export interface FileRouteTypes {
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
+    | '/calc/fuelcost'
     | '/calc/jump'
     | '/calc/path'
     | '/calc/settings'
@@ -202,6 +221,7 @@ export interface FileRouteTypes {
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
+    | '/calc/fuelcost'
     | '/calc/jump'
     | '/calc/path'
     | '/calc/settings'
@@ -214,6 +234,7 @@ export interface RootRouteChildren {
   CalcDistRoute: typeof CalcDistRoute
   CalcExitRoute: typeof CalcExitRoute
   CalcFuelRoute: typeof CalcFuelRoute
+  CalcFuelcostRoute: typeof CalcFuelcostRoute
   CalcJumpRoute: typeof CalcJumpRoute
   CalcPathRoute: typeof CalcPathRoute
   CalcSettingsRoute: typeof CalcSettingsRoute
@@ -225,6 +246,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalcDistRoute: CalcDistRoute,
   CalcExitRoute: CalcExitRoute,
   CalcFuelRoute: CalcFuelRoute,
+  CalcFuelcostRoute: CalcFuelcostRoute,
   CalcJumpRoute: CalcJumpRoute,
   CalcPathRoute: CalcPathRoute,
   CalcSettingsRoute: CalcSettingsRoute,
@@ -245,6 +267,7 @@ export const routeTree = rootRoute
         "/calc/dist",
         "/calc/exit",
         "/calc/fuel",
+        "/calc/fuelcost",
         "/calc/jump",
         "/calc/path",
         "/calc/settings"
@@ -264,6 +287,9 @@ export const routeTree = rootRoute
     },
     "/calc/fuel": {
       "filePath": "calc/fuel.tsx"
+    },
+    "/calc/fuelcost": {
+      "filePath": "calc/fuelcost.tsx"
     },
     "/calc/jump": {
       "filePath": "calc/jump.tsx"
