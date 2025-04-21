@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use uom::si::f64::*;
-use uom::si::length::meter;
 
 pub type ConnectionId = u64;
 pub type SolarSystemId = u64;
 pub type RegionId = u64;
+const M_PER_LY: f64 = 9.461e15;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
@@ -19,7 +18,7 @@ pub enum ConnType {
 pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
-    pub distance: Length,
+    pub distance: f64,
     pub target: SolarSystemId,
 }
 impl PartialEq for Connection {
@@ -57,11 +56,10 @@ pub struct Star {
 }
 
 impl Star {
-    pub fn distance(&self, other: &Star) -> Length {
-        Length::new::<meter>(
-            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
-                .sqrt(),
-        )
+    pub fn distance(&self, other: &Star) -> f64 {
+        ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
+            .sqrt()
+            / M_PER_LY
     }
 }
 impl PartialEq for Star {
@@ -120,12 +118,12 @@ mod tests {
         };
         let b = Star {
             id: 2,
-            x: 1.0,
+            x: 9.461e+15,
             y: 0.0,
             z: 0.0,
             ..Default::default()
         };
-        assert_eq!(a.distance(&b), Length::new::<meter>(1.0));
+        assert_eq!(a.distance(&b), 1.0);
     }
 
     /// Check that connections are sorted by type (Jump last) then distance
@@ -137,37 +135,37 @@ mod tests {
         let a = Connection {
             id: 1,
             conn_type: ConnType::Jump,
-            distance: Length::new::<meter>(2.0),
+            distance: 2.0,
             target: 1,
         };
         let b = Connection {
             id: 2,
             conn_type: ConnType::NpcGate,
-            distance: Length::new::<meter>(2.0),
+            distance: 2.0,
             target: 1,
         };
         let c = Connection {
             id: 3,
             conn_type: ConnType::SmartGate,
-            distance: Length::new::<meter>(2.0),
+            distance: 2.0,
             target: 1,
         };
         let d = Connection {
             id: 4,
             conn_type: ConnType::Jump,
-            distance: Length::new::<meter>(1.0),
+            distance: 1.0,
             target: 1,
         };
         let e = Connection {
             id: 5,
             conn_type: ConnType::NpcGate,
-            distance: Length::new::<meter>(1.0),
+            distance: 1.0,
             target: 1,
         };
         let f = Connection {
             id: 6,
             conn_type: ConnType::SmartGate,
-            distance: Length::new::<meter>(1.0),
+            distance: 1.0,
             target: 1,
         };
         let mut conns = vec![

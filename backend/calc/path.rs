@@ -1,8 +1,5 @@
 use std::collections::HashMap;
 
-use uom::si::f64::*;
-use uom::si::length::light_year;
-
 use crate::data::*;
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
@@ -17,7 +14,7 @@ pub enum PathOptimize {
 fn successors(
     star_map: &HashMap<SolarSystemId, Star>,
     conn: &Connection,
-    jump_distance: Length,
+    jump_distance: f64,
     optimize: PathOptimize,
     use_smart_gates: bool,
 ) -> Vec<(Connection, i64)> {
@@ -31,7 +28,7 @@ fn successors(
         .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
-            let distance = c.distance.get::<light_year>() as i64;
+            let distance = c.distance as i64;
             match (optimize, &c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
@@ -56,11 +53,7 @@ fn successors(
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
 pub fn heuristic(star_map: &HashMap<SolarSystemId, Star>, conn: &Connection, end: &Star) -> i64 {
-    let d = star_map
-        .get(&conn.target)
-        .unwrap()
-        .distance(end)
-        .get::<light_year>();
+    let d = star_map.get(&conn.target).unwrap().distance(end);
     return d as i64;
 }
 
@@ -75,7 +68,7 @@ pub fn calc_path(
     star_map: &HashMap<SolarSystemId, Star>,
     start: &Star,
     end: &Star,
-    jump_distance: Length,
+    jump_distance: f64,
     optimize: PathOptimize,
     use_smart_gates: bool,
     timeout: Option<u64>,
@@ -83,7 +76,7 @@ pub fn calc_path(
     let init_conn = Connection {
         id: 0,
         conn_type: ConnType::Jump,
-        distance: Length::new::<light_year>(0.0),
+        distance: 0.0,
         target: start.id,
     };
     let path = pathfinding::astar(
@@ -107,8 +100,6 @@ pub fn calc_path(
 
 #[cfg(test)]
 mod tests {
-    use uom::si::length::light_year;
-
     use super::*;
 
     #[test]
@@ -120,7 +111,7 @@ mod tests {
                 connections: vec![Connection {
                     id: 1,
                     conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
+                    distance: 10.0,
                     target: 2,
                 }],
                 ..Default::default()
@@ -131,7 +122,7 @@ mod tests {
                 connections: vec![Connection {
                     id: 2,
                     conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
+                    distance: 10.0,
                     target: 1,
                 }],
                 ..Default::default()
@@ -146,7 +137,7 @@ mod tests {
                 &star_map,
                 &stars[0],
                 &stars[1],
-                Length::new::<light_year>(20.0),
+                20.0,
                 PathOptimize::Fuel,
                 false,
                 None
