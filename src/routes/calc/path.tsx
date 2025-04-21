@@ -36,12 +36,38 @@ function CopyFormattedButton(props: { path: PathStep[] }) {
     navigator.clipboard.writeText(text).catch(() => alert("Failed to copy :("));
   }
 
+  function copyFormattedCompact() {
+    function connTypeToSymbol(connType: ConnType) {
+      switch (connType) {
+        case "npc_gate":
+          return "G";
+        case "smart_gate":
+          return "S";
+        case "jump":
+          return "J";
+      }
+    }
+    const text = props.path
+      .map(
+        (p) =>
+          `${connTypeToSymbol(p.conn_type)}→ <a href="showinfo:5//${p.to.id}">${p.to.name.substring(0, 4)}</a>`,
+      )
+      .join(" -");
+
+    navigator.clipboard.writeText(text).catch(() => alert("Failed to copy :("));
+  }
+
   return (
     <>
       <input
         type="button"
         value="Copy with EVE-Links"
         onClick={copyFormatted}
+      />
+      <input
+        type="button"
+        value="Compact Copy"
+        onClick={copyFormattedCompact}
       />
       (If you paste with EVE-Links into an in-game notepad, you get clickable
       links)
