@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext } from "react";
 import {
   ships,
@@ -20,6 +20,7 @@ function FuelCostCalculator() {
   return (
     <section>
       <h2>Cost for One Full Tank</h2>
+      <p>Based on prices from the <Link to="/calc/settings">Settings</Link> page</p>
       <SummaryTable />
     </section>
   );
