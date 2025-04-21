@@ -61,6 +61,12 @@ export const Route = createRootRoute({
           - How do I get out of a trapped region?
         </li>
         <li>
+          <Link to="/calc/settings" className="[&.active]:font-bold">
+            Settings
+          </Link>{" "}
+          - Constants that change
+        </li>
+        <li>
           <a href="https://ko-fi.com/shish2k" target="_blank" rel="noreferrer">
             Buy me a coffee?
           </a>

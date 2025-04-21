@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as CalcSettingsImport } from './routes/calc/settings'
 import { Route as CalcPathImport } from './routes/calc/path'
 import { Route as CalcJumpImport } from './routes/calc/jump'
 import { Route as CalcFuelImport } from './routes/calc/fuel'
@@ -35,6 +36,12 @@ const AboutLazyRoute = AboutLazyImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CalcSettingsRoute = CalcSettingsImport.update({
+  id: '/calc/settings',
+  path: '/calc/settings',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -121,6 +128,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalcPathImport
       parentRoute: typeof rootRoute
     }
+    '/calc/settings': {
+      id: '/calc/settings'
+      path: '/calc/settings'
+      fullPath: '/calc/settings'
+      preLoaderRoute: typeof CalcSettingsImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -134,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/calc/fuel': typeof CalcFuelRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
+  '/calc/settings': typeof CalcSettingsRoute
 }
 
 export interface FileRoutesByTo {
@@ -144,6 +159,7 @@ export interface FileRoutesByTo {
   '/calc/fuel': typeof CalcFuelRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
+  '/calc/settings': typeof CalcSettingsRoute
 }
 
 export interface FileRoutesById {
@@ -155,6 +171,7 @@ export interface FileRoutesById {
   '/calc/fuel': typeof CalcFuelRoute
   '/calc/jump': typeof CalcJumpRoute
   '/calc/path': typeof CalcPathRoute
+  '/calc/settings': typeof CalcSettingsRoute
 }
 
 export interface FileRouteTypes {
@@ -167,6 +184,7 @@ export interface FileRouteTypes {
     | '/calc/fuel'
     | '/calc/jump'
     | '/calc/path'
+    | '/calc/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -176,6 +194,7 @@ export interface FileRouteTypes {
     | '/calc/fuel'
     | '/calc/jump'
     | '/calc/path'
+    | '/calc/settings'
   id:
     | '__root__'
     | '/'
@@ -185,6 +204,7 @@ export interface FileRouteTypes {
     | '/calc/fuel'
     | '/calc/jump'
     | '/calc/path'
+    | '/calc/settings'
   fileRoutesById: FileRoutesById
 }
 
@@ -196,6 +216,7 @@ export interface RootRouteChildren {
   CalcFuelRoute: typeof CalcFuelRoute
   CalcJumpRoute: typeof CalcJumpRoute
   CalcPathRoute: typeof CalcPathRoute
+  CalcSettingsRoute: typeof CalcSettingsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -206,6 +227,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalcFuelRoute: CalcFuelRoute,
   CalcJumpRoute: CalcJumpRoute,
   CalcPathRoute: CalcPathRoute,
+  CalcSettingsRoute: CalcSettingsRoute,
 }
 
 export const routeTree = rootRoute
@@ -224,7 +246,8 @@ export const routeTree = rootRoute
         "/calc/exit",
         "/calc/fuel",
         "/calc/jump",
-        "/calc/path"
+        "/calc/path",
+        "/calc/settings"
       ]
     },
     "/": {
@@ -247,6 +270,9 @@ export const routeTree = rootRoute
     },
     "/calc/path": {
       "filePath": "calc/path.tsx"
+    },
+    "/calc/settings": {
+      "filePath": "calc/settings.tsx"
     }
   }
 }
