@@ -1,7 +1,7 @@
 # EVE Frontier Toolbox
 
 ## How to prepare the data
-1. Create `data/extracted-starmap.json` using https://github.com/frontier-reapers/frontier-static-data (This data is under NDA, don't post it anywhere)
+1. Extract starmap with `./restool.py extract -u res:/staticdata/starmapcache.pickle -o ./data/extracted-starmap.json` (This data is under NDA, don't post it anywhere)
 2. Fetch other data with `./fetch_data.py`
 3. Create `data/starmap.bin` using `cargo run -- build` (This compiles the starmap data into a form that's more optimized for route planning)
 
