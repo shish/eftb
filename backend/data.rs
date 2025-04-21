@@ -11,7 +11,7 @@ pub type RegionId = u64;
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
     NpcGate,
-    SmartGate,
+    SmartGate { id: String, name: String },
     Jump,
 }
 
@@ -148,7 +148,10 @@ mod tests {
         };
         let c = Connection {
             id: 3,
-            conn_type: ConnType::SmartGate,
+            conn_type: ConnType::SmartGate {
+                id: "id".to_string(),
+                name: "name".to_string(),
+            },
             distance: Length::new::<meter>(2.0),
             target: 1,
         };
@@ -166,7 +169,10 @@ mod tests {
         };
         let f = Connection {
             id: 6,
-            conn_type: ConnType::SmartGate,
+            conn_type: ConnType::SmartGate {
+                id: "id".to_string(),
+                name: "name".to_string(),
+            },
             distance: Length::new::<meter>(1.0),
             target: 1,
         };

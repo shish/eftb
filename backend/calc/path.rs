@@ -28,7 +28,7 @@ fn successors(
         // find a long jump
         .take_while(|c| c.conn_type != ConnType::Jump || c.distance <= jump_distance)
         // If we're not using smart gates, skip them
-        .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
+        .filter(|c| use_smart_gates || !matches!(c.conn_type, ConnType::SmartGate { .. }))
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
             let distance = c.distance.get::<light_year>() as i64;
@@ -43,7 +43,7 @@ fn successors(
                 // amount of fuel to warp to a gate)
                 (PathOptimize::Fuel, ConnType::NpcGate) => (c.clone(), 1),
                 // Smart gates are slightly more expensive than NPC gates
-                (PathOptimize::Fuel, ConnType::SmartGate) => (c.clone(), 2),
+                (PathOptimize::Fuel, ConnType::SmartGate { .. }) => (c.clone(), 2),
                 // Treat all hops the same, we want to minimise the total
                 (PathOptimize::Hops, _) => (c.clone(), 1),
             }

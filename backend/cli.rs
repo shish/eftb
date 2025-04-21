@@ -151,7 +151,10 @@ fn main() -> anyhow::Result<()> {
                 let distance: Length = from_star.distance(&to_star);
                 from_star.connections.push(data::Connection {
                     id: conn_count,
-                    conn_type: data::ConnType::SmartGate,
+                    conn_type: data::ConnType::SmartGate {
+                        id: gate.id.clone(),
+                        name: gate.name.clone(),
+                    },
                     distance,
                     target: gate.to,
                 });
