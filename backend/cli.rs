@@ -64,7 +64,11 @@ enum Commands {
         jump_distance: f64,
     },
     /// Show info about a solar system
-    Star { name: String },
+    Star {
+        name: String,
+        #[clap(short, long)]
+        jump_distance: Option<f64>,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -295,6 +299,15 @@ fn main() -> anyhow::Result<()> {
                     &to.region_id,
                     from.distance(&to).get::<light_year>() as i32
                 );
+                for conn in &star_map[&to.id].connections {
+                    let d = conn.distance.get::<light_year>();
+                    if conn.conn_type == data::ConnType::Jump
+                        && conn.distance < jump_distance
+                        && star_map[&conn.target].region_id != start.region_id
+                    {
+                        println!("  -> {} ({} ly)", star_id_to_name[&conn.target], d as i32);
+                    }
+                }
             }
         }
         Some(Commands::Fuel {
@@ -307,7 +320,10 @@ fn main() -> anyhow::Result<()> {
             let fuel = eftb::calc_fuel(dist, mass, *efficiency);
             println!("Fuel needed: {:.0}", fuel)
         }
-        Some(Commands::Star { name }) => {
+        Some(Commands::Star {
+            name,
+            jump_distance,
+        }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
             let star_map = data::get_star_map()?;
@@ -325,6 +341,15 @@ fn main() -> anyhow::Result<()> {
                         conn.conn_type,
                         conn.distance.get::<light_year>() as i32
                     );
+                }
+            }
+            if let Some(jump_distance) = jump_distance {
+                println!("  Nearby stars:");
+                for conn in &star.connections {
+                    let d = conn.distance.get::<light_year>();
+                    if conn.conn_type == data::ConnType::Jump && d < *jump_distance {
+                        println!("    {} ({} ly)", star_id_to_name[&conn.target], d as i32);
+                    }
                 }
             }
         }
