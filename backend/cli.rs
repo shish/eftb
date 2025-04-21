@@ -5,7 +5,8 @@ use bincode;
 use clap::{Parser, Subcommand};
 use eftb::data::SolarSystemId;
 use indicatif::ProgressIterator;
-use log::{info, warn};
+use tracing::{info, warn};
+use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
 use uom::si::f64::*;
 use uom::si::length::light_year;
 
@@ -75,18 +76,24 @@ enum Commands {
 }
 
 fn main() -> anyhow::Result<()> {
-    use env_logger::Env;
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::new(
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "debug".into()),
+        ))
+        .with(tracing_subscriber::fmt::layer().with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE))
+        .init();
 
     let cli = Cli::parse();
 
     match &cli.command {
         Some(Commands::Build { max_jump_distance }) => {
-            info!("Loading raw data");
-            let raw_star_data = raw::RawStarMap::from_file("data/extracted-starmap.json");
             let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
 
-            info!("Building star map");
+            let span = tracing::info_span!("Loading raw data").entered();
+            let raw_star_data = raw::RawStarMap::from_file("data/extracted-starmap.json");
+            span.exit();
+
+            let span = tracing::info_span!("Building star map").entered();
             let mut star_map: HashMap<data::SolarSystemId, data::Star> = HashMap::new();
             for (id_str, raw_star) in raw_star_data.solar_systems.iter() {
                 let id = id_str.parse()?;
@@ -100,8 +107,9 @@ fn main() -> anyhow::Result<()> {
                 };
                 star_map.insert(id, star);
             }
+            span.exit();
 
-            info!("Building connections from npc gates");
+            let span = tracing::info_span!("Building connections from npc gates").entered();
             let mut conn_count = 0;
             for raw_jump in raw_star_data.jumps.iter() {
                 // rust only lets us borrow one mutable star at a time, so we can't add
@@ -133,8 +141,9 @@ fn main() -> anyhow::Result<()> {
                     conn_count += 1;
                 }
             }
+            span.exit();
 
-            info!("Building connections from smart gates");
+            let span = tracing::info_span!("Building connections from smart gates").entered();
             let smart_gates: Vec<raw::RawSmartGate> =
                 serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
             for gate in smart_gates.iter() {
@@ -157,8 +166,9 @@ fn main() -> anyhow::Result<()> {
                 });
                 conn_count += 1;
             }
+            span.exit();
 
-            info!("Building connections from jumps");
+            let span = tracing::info_span!("Building connections from jumps").entered();
             let cloned_star_map = star_map.clone();
             for star in star_map.values_mut().progress() {
                 for other_star in cloned_star_map.values() {
@@ -177,17 +187,19 @@ fn main() -> anyhow::Result<()> {
                     }
                 }
             }
+            span.exit();
 
-            info!("Sorting connections");
+            let span = tracing::info_span!("Sorting connections").entered();
             // sort gates first, and then jumps by distance - then when we
             // reach a jump that is too long we can stop searching
             for star in star_map.values_mut().progress() {
                 star.connections.sort_unstable();
             }
+            span.exit();
 
-            info!("Saving star map");
+            let span = tracing::info_span!("Saving star map").entered();
             data::save_star_map(&star_map)?;
-            info!("Complete");
+            span.exit();
         }
         Some(Commands::Dist {
             start_name,
