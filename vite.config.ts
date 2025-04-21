@@ -14,5 +14,8 @@ export default defineConfig({
         ws: true,
       },
     },
+    watch: {
+      ignored: ["**/frontier/**"],
+    },
   },
 });

@@ -2,6 +2,7 @@ target
 data
 old
 venv
+frontier
 
 # Logs
 logs
