@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { ships, fuels, isCompatible, getEngine, Ship, ShipName, FuelName, Fuel } from "../../consts";
+import { useEffect, useState } from "react";
+import {
+  ships,
+  fuels,
+  isCompatible,
+  getEngine,
+  Ship,
+  ShipName,
+  FuelName,
+  Fuel,
+} from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/shipfuel";
 
@@ -20,9 +29,9 @@ function JumpCapacityCalculator() {
       <hr />
       <h2>Summary</h2>
       <p>
-        These numbers are for empty ships with no fittings and no cargo. To get
-        an accurate jump distance, you need to know the total mass, which can be
-        found with right-click &rarr; Show Info.
+        These numbers are for empty ships with only an engine and no cargo. To
+        get an accurate jump distance, you need to know the total mass, which
+        can be found with right-click &rarr; Show Info.
       </p>
       <SummaryTable />
     </section>
@@ -104,39 +113,91 @@ function Calculator() {
   );
 }
 
+type SummaryMode = "dist" | "effi";
+
 function SummaryTable() {
   const sorted_ships = Object.entries(ships) as [ShipName, Ship][];
   sorted_ships.sort((a, b) => a[1].mass - b[1].mass);
-  const dfuels = (Object.entries(fuels) as [FuelName, Fuel][]).filter(([fuelName, _]) => fuelName !== "EU-40");
+  const dfuels = (Object.entries(fuels) as [FuelName, Fuel][]).filter(
+    ([fuelName, _]) => fuelName !== "EU-40",
+  );
+
+  const [mode, setMode] = useState<SummaryMode>("dist");
 
   return (
-    <table className="jumpSummary">
-      <thead>
-        <tr>
-          <th>Ship</th>
-          {dfuels.map(([fuelType]) => (
+    <>
+      <table className="form">
+        <tbody>
+          <tr>
+            <th>Mode</th>
+            <td>
+              <select
+                value={mode}
+                onChange={(e) => setMode(e.target.value as SummaryMode)}
+              >
+                <option value="dist">Distance (ly)</option>
+                <option value="effi">Fuel Efficiency (ly per fuel unit)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p></p>
+
+      <table className="jumpSummary">
+        <thead>
+          <tr>
+            <th>Ship</th>
+            {dfuels.map(([fuelType]) => (
               <th key={fuelType}>{fuelType}</th>
             ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sorted_ships.map(([shipName, ship]) => (
-          <tr key={shipName}>
-            <th>{shipName}</th>
-            {dfuels.map(([fuelName, efficiency]) => (
-                <td key={fuelName}>
-                  {isCompatible(fuelName, getEngine(ship.type).fuel)
-                    ? jumpRange(
-                        ships[shipName].mass,
-                        ships[shipName].tank,
-                        efficiency,
-                      )
-                    : "-"}
-                </td>
-              ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {sorted_ships.map(([shipName, ship]) => (
+            <tr key={shipName}>
+              <th>{shipName}</th>
+              {dfuels.map(([fuelName, efficiency]) => (
+                <SummaryCell
+                  key={fuelName}
+                  fuelName={fuelName}
+                  efficiency={efficiency}
+                  ship={ship}
+                  mode={mode}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
+}
+
+function SummaryCell({
+  ship,
+  fuelName,
+  efficiency,
+  mode,
+}: {
+  ship: Ship;
+  fuelName: FuelName;
+  efficiency: number;
+  mode: SummaryMode;
+}) {
+  const totalMass = ship.mass + getEngine(ship.type).mass;
+  if (!isCompatible(fuelName, getEngine(ship.type).fuel)) {
+    return <td>-</td>;
+  }
+  switch (mode) {
+    case "dist":
+      return <td>{jumpRange(totalMass, ship.tank, efficiency)}</td>;
+    case "effi":
+      return (
+        <td>
+          {(jumpRange(totalMass, ship.tank, efficiency) / ship.tank).toFixed(3)}
+        </td>
+      );
+  }
 }
