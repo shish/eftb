@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ships,
   fuels,
@@ -12,6 +12,7 @@ import {
 } from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/shipfuel";
+import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/jump")({
   component: JumpCapacityCalculator,
@@ -113,7 +114,7 @@ function Calculator() {
   );
 }
 
-type SummaryMode = "dist" | "effi";
+type SummaryMode = "dist" | "effi" | "cost" | "ceff";
 
 function SummaryTable() {
   const sorted_ships = Object.entries(ships) as [ShipName, Ship][];
@@ -122,7 +123,7 @@ function SummaryTable() {
     ([fuelName, _]) => fuelName !== "EU-40",
   );
 
-  const [mode, setMode] = useState<SummaryMode>("dist");
+  const [mode, setMode] = useSessionStorage<SummaryMode>("jumpSummaryMode", "dist");
 
   return (
     <>
@@ -137,6 +138,8 @@ function SummaryTable() {
               >
                 <option value="dist">Distance (ly)</option>
                 <option value="effi">Fuel Efficiency (ly per fuel unit)</option>
+                <option value="cost">Cost (lux per max-distance jump)</option>
+                <option value="ceff">Cost Efficiency (ly per 1m lux)</option>
               </select>
             </td>
           </tr>
@@ -186,6 +189,7 @@ function SummaryCell({
   efficiency: number;
   mode: SummaryMode;
 }) {
+  const { fuelCosts } = useContext(SettingsContext);
   const totalMass = ship.mass + getEngine(ship.type).mass;
   if (!isCompatible(fuelName, getEngine(ship.type).fuel)) {
     return <td>-</td>;
@@ -197,6 +201,19 @@ function SummaryCell({
       return (
         <td>
           {(jumpRange(totalMass, ship.tank, efficiency) / ship.tank).toFixed(3)}
+        </td>
+      );
+    case "cost":
+      return <td>{(ship.tank * fuelCosts[fuelName]).toLocaleString()}</td>;
+    case "ceff":
+      return (
+        <td>
+          {parseInt(
+            (
+              jumpRange(totalMass, ship.tank, efficiency) /
+              ((ship.tank * fuelCosts[fuelName]) / 1_000_000)
+            ).toFixed(0),
+          ).toLocaleString()}
         </td>
       );
   }
