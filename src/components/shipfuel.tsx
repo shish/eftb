@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ships, fuels, isCompatible, getEngine } from "../consts";
+import { ships, fuels, isCompatible, getEngine, ShipName, FuelName } from "../consts";
 import { useSessionStorage } from "usehooks-ts";
 
 export function ShipFuelSelect({
@@ -11,8 +11,8 @@ export function ShipFuelSelect({
     onTankChange: (tank: number) => void;
     onEfficiencyChange: (efficiency: number) => void;
 }) {
-  const [ship, setShip] = useSessionStorage<keyof typeof ships>("ship", "Val");
-  const [fuelType, setFuelType] = useState<keyof typeof fuels>("SOF-40");
+  const [ship, setShip] = useSessionStorage<ShipName>("ship", "Val");
+  const [fuelType, setFuelType] = useState<FuelName>("SOF-40");
 
   useEffect(() => {
     const shipData = ships[ship];
@@ -31,7 +31,7 @@ export function ShipFuelSelect({
       <select
         value={ship}
         onChange={(e) => {
-          setShip(e.target.value);
+          setShip(e.target.value as ShipName);
         }}
       >
         {Object.keys(ships).map((ship) => (
@@ -43,12 +43,12 @@ export function ShipFuelSelect({
       <select
         value={fuelType}
         onChange={(e) => {
-          setFuelType(e.target.value as keyof typeof fuels);
+          setFuelType(e.target.value as FuelName);
         }}
       >
         {Object.keys(fuels)
           .filter((name) =>
-            isCompatible(getEngine(ships[ship].type).fuel, name as keyof typeof fuels),
+            isCompatible(getEngine(ships[ship].type).fuel, name as FuelName),
           )
           .map((name) => (
             <option key={name} value={name}>

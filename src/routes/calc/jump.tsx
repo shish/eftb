@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ships, fuels, isCompatible, getEngine } from "../../consts";
+import { ships, fuels, isCompatible, getEngine, Ship, ShipName, FuelName, Fuel } from "../../consts";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/shipfuel";
 
@@ -105,17 +105,16 @@ function Calculator() {
 }
 
 function SummaryTable() {
-  const sorted_ships = Object.entries(ships);
+  const sorted_ships = Object.entries(ships) as [ShipName, Ship][];
   sorted_ships.sort((a, b) => a[1].mass - b[1].mass);
+  const dfuels = (Object.entries(fuels) as [FuelName, Fuel][]).filter(([fuelName, _]) => fuelName !== "EU-40");
 
   return (
     <table className="jumpSummary">
       <thead>
         <tr>
           <th>Ship</th>
-          {Object.entries(fuels)
-            .filter(([fuelName, _]) => fuelName !== "EU-40")
-            .map(([fuelType]) => (
+          {dfuels.map(([fuelType]) => (
               <th key={fuelType}>{fuelType}</th>
             ))}
         </tr>
@@ -124,11 +123,9 @@ function SummaryTable() {
         {sorted_ships.map(([shipName, ship]) => (
           <tr key={shipName}>
             <th>{shipName}</th>
-            {Object.entries(fuels)
-              .filter(([fuelName, _]) => fuelName !== "EU-40")
-              .map(([fuelName, efficiency]) => (
+            {dfuels.map(([fuelName, efficiency]) => (
                 <td key={fuelName}>
-                  {isCompatible(fuelName as keyof typeof fuels, getEngine(ship.type).fuel)
+                  {isCompatible(fuelName, getEngine(ship.type).fuel)
                     ? jumpRange(
                         ships[shipName].mass,
                         ships[shipName].tank,
