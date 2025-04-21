@@ -21,6 +21,7 @@ import { Route as CalcFuelcostImport } from './routes/calc/fuelcost'
 import { Route as CalcFuelImport } from './routes/calc/fuel'
 import { Route as CalcExitImport } from './routes/calc/exit'
 import { Route as CalcDistImport } from './routes/calc/dist'
+import { Route as CalcBasematsImport } from './routes/calc/basemats'
 
 // Create Virtual Routes
 
@@ -82,6 +83,12 @@ const CalcDistRoute = CalcDistImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const CalcBasematsRoute = CalcBasematsImport.update({
+  id: '/calc/basemats',
+  path: '/calc/basemats',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -98,6 +105,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/calc/basemats': {
+      id: '/calc/basemats'
+      path: '/calc/basemats'
+      fullPath: '/calc/basemats'
+      preLoaderRoute: typeof CalcBasematsImport
       parentRoute: typeof rootRoute
     }
     '/calc/dist': {
@@ -157,6 +171,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutLazyRoute
+  '/calc/basemats': typeof CalcBasematsRoute
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
@@ -169,6 +184,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutLazyRoute
+  '/calc/basemats': typeof CalcBasematsRoute
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
@@ -182,6 +198,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutLazyRoute
+  '/calc/basemats': typeof CalcBasematsRoute
   '/calc/dist': typeof CalcDistRoute
   '/calc/exit': typeof CalcExitRoute
   '/calc/fuel': typeof CalcFuelRoute
@@ -196,6 +213,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/calc/basemats'
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
@@ -207,6 +225,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/calc/basemats'
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
@@ -218,6 +237,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/calc/basemats'
     | '/calc/dist'
     | '/calc/exit'
     | '/calc/fuel'
@@ -231,6 +251,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutLazyRoute: typeof AboutLazyRoute
+  CalcBasematsRoute: typeof CalcBasematsRoute
   CalcDistRoute: typeof CalcDistRoute
   CalcExitRoute: typeof CalcExitRoute
   CalcFuelRoute: typeof CalcFuelRoute
@@ -243,6 +264,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutLazyRoute: AboutLazyRoute,
+  CalcBasematsRoute: CalcBasematsRoute,
   CalcDistRoute: CalcDistRoute,
   CalcExitRoute: CalcExitRoute,
   CalcFuelRoute: CalcFuelRoute,
@@ -264,6 +286,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
+        "/calc/basemats",
         "/calc/dist",
         "/calc/exit",
         "/calc/fuel",
@@ -278,6 +301,9 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/calc/basemats": {
+      "filePath": "calc/basemats.tsx"
     },
     "/calc/dist": {
       "filePath": "calc/dist.tsx"

@@ -23,7 +23,7 @@ export type Engine = {
   fuel: FuelName;
   types: ShipType[];
 };
-export const engines: {[key in EngineName]: Engine} = {
+export const engines: { [key in EngineName]: Engine } = {
   "uSOF XS": { mass: 53_694, fuel: "uSOF-20", types: ["Shuttle"] },
   "GSC XS": { mass: 99_758, fuel: "uSOF-20", types: ["Corvette"] },
   "GSC S": { mass: 208_650, fuel: "SOF-40", types: ["Frigate", "Destroyer"] },
@@ -132,46 +132,24 @@ export type Item = {
   mass: number;
 };
 export const items: { [key: ItemName]: Item } = {
-  "uSOF-20 Fuel": {
-    volume: 0.28,
-    mass: 42,
-  },
-  "SOF-40 Fuel": {
-    volume: 0.28,
-    mass: 42,
-  },
-  "EU-40 Fuel": {
-    volume: 0.28,
-    mass: 42,
-  },
-  "SOF-80 Fuel": {
-    volume: 0.28,
-    mass: 42,
-  },
-  "EU-90 Fuel": {
-    volume: 0.28,
-    mass: 42,
-  },
-  "Carbonaceous Ore": {
-    volume: 1,
-    mass: 1671.31,
-  },
-  Thorium: {
-    volume: 0.01,
-    mass: 117,
-  },
-  "Steel Beams": {
-    volume: 10,
-    mass: 76_200,
-  },
-  "Light Metal Framing": {
-    volume: 10,
-    mass: 40_200,
-  },
-  "Fuel Tank": {
-    volume: 25,
-    mass: 13_442,
-  },
+  "uSOF-20 Fuel": { volume: 0.28, mass: 42 },
+  "SOF-40 Fuel": { volume: 0.28, mass: 42 },
+  "EU-40 Fuel": { volume: 0.28, mass: 42 },
+  "SOF-80 Fuel": { volume: 0.28, mass: 42 },
+  "EU-90 Fuel": { volume: 0.28, mass: 42 },
+  "Carbonaceous Ore": { volume: 1, mass: 1671.31 },
+  "Carbonaceous Materials": { volume: 0.01, mass: 20 },
+  Silicates: { volume: 0.01, mass: 30 },
+  "Bulky Cargo Panels": { volume: 100, mass: 294_074 },
+  "Mounting Platform": { volume: 5, mass: 17_044 },
+  Radar: { volume: 1, mass: 904 },
+  "Carbonaceous Fuel": { volume: 1, mass: 1671.31 },
+  Thorium: { volume: 0.01, mass: 117 },
+  "Steel Beams": { volume: 10, mass: 76_200 },
+  "Steel Plates": { volume: 1, mass: 7_620 },
+  "Light Metal Alloy": { volume: 0.1, mass: 400 },
+  "Light Metal Framing": { volume: 10, mass: 40_200 },
+  "Fuel Tank": { volume: 25, mass: 13_442 },
 };
 
 export type StructureName = string;
