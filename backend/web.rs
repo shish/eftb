@@ -133,6 +133,9 @@ fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<DistRetu
 struct WebStar {
     id: SolarSystemId,
     name: String,
+    x: f64,
+    y: f64,
+    z: f64,
 }
 #[derive(Debug, Serialize)]
 struct PathStep {
@@ -188,6 +191,9 @@ fn calc_path(
                     from: WebStar {
                         id: last_id,
                         name: db.star_id_to_name[&last_id].clone(),
+                x: from_star.x,
+                y: from_star.y,
+                z: from_star.z,
                     },
                     conn_type: match conn.conn_type {
                         ConnType::Jump => "jump".to_string(),
@@ -198,6 +204,9 @@ fn calc_path(
                     to: WebStar {
                         id: conn.target,
                         name: db.star_id_to_name[&conn.target].clone(),
+                x: from_star.x,
+                y: from_star.y,
+                z: from_star.z,
                     },
                 });
                 last_id = conn.target;
