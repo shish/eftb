@@ -3,6 +3,7 @@ use std::time::Instant;
 
 use bincode;
 use clap::{Parser, Subcommand};
+use eftb::data::SolarSystemId;
 use indicatif::ProgressIterator;
 use log::{info, warn};
 use uom::si::f64::*;
@@ -69,6 +70,8 @@ enum Commands {
         #[clap(short, long)]
         jump_distance: Option<f64>,
     },
+    /// Constellation
+    Constellation { name: String },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -349,6 +352,29 @@ fn main() -> anyhow::Result<()> {
                     let d = conn.distance.get::<light_year>();
                     if conn.conn_type == data::ConnType::Jump && d < *jump_distance {
                         println!("    {} ({} ly)", star_id_to_name[&conn.target], d as i32);
+                    }
+                }
+            }
+        }
+        Some(Commands::Constellation { name }) => {
+            info!("Loading star map");
+            let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
+            let star_map = data::get_star_map()?;
+            info!("Loaded star map");
+
+            let star = star_map.get(star_name_to_id.get(name).unwrap()).unwrap();
+            let mut visited: Vec<SolarSystemId> = Vec::new();
+            let mut to_visit: Vec<SolarSystemId> = vec![star.id];
+
+            while let Some(id) = to_visit.pop() {
+                if visited.contains(&id) {
+                    continue;
+                }
+                println!("{}", star_id_to_name[&id]);
+                visited.push(id);
+                for conn in &star_map[&id].connections {
+                    if conn.conn_type != data::ConnType::Jump {
+                        to_visit.push(conn.target);
                     }
                 }
             }
