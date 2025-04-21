@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import {
   ships,
   fuels,
@@ -9,10 +9,7 @@ import {
   ShipName,
   FuelName,
   Fuel,
-  items,
 } from "../../consts";
-import { useSessionStorage } from "usehooks-ts";
-import { ShipFuelSelect } from "../../components/shipfuel";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/fuelcost")({

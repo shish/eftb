@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import {
   ships,
   fuels,
