@@ -110,3 +110,104 @@ export function getEngine(type: ShipType): Engine {
     }
     throw new Error(`No engine found for type ${type}`);
 }
+
+export type ItemName = string;
+export type Item = {
+    volume: number;
+    mass: number;
+};
+export const items: {[key: ItemName]: Item} = {
+    "uSOF-20 Fuel": {
+        volume: 0.28,
+        mass: 42,
+    },
+    "SOF-40 Fuel": {
+        volume: 0.28,
+        mass: 42,
+    },
+    "EU-40 Fuel": {
+        volume: 0.28,
+        mass: 42,
+    },
+    "SOF-80 Fuel": {
+        volume: 0.28,
+        mass: 42,
+    },
+    "EU-90 Fuel": {
+        volume: 0.28,
+        mass: 42,
+    },
+    "Carbonaceous Ore": {
+        volume: 1,
+        mass: 1671.31,
+    },
+    "Thorium": {
+        volume: 0.01,
+        mass: 117,
+    },
+    "Steel Beams": {
+        volume: 10,
+        mass: 76_200,
+    },
+    "Light Metal Framing": {
+        volume: 10,
+        mass: 40_200,
+    },
+    "Fuel Tank": {
+        volume: 25,
+        mass: 13_442,
+    },
+};
+
+export type StructureName = string;
+export type StructureBom = {[key: ItemName]: number};
+export const posboms: {[key: StructureName]: StructureBom} = {
+    "Portable Refinery": {
+        "Carbonaceous Ore": 400,
+    },
+    "Portable Printer": {
+        "Carbonaceous Materials": 420,
+        "Silicates": 60,
+    },
+    "Sepulchre": {
+        "Steel Plates": 400,
+        "Light Metal Alloy": 6,
+    },
+    "Refuge": {
+        "Silicates": 430,
+        "Steel Plates": 8,
+        "Light Metal Alloy": 300,
+    },
+    "Storage Unit": {
+        "Carbonaceous Ore": 400,
+    },
+    "Printer L": {
+        "Thorium": 100,
+        "Steel Plates": 200,
+        "Light Metal Alloy": 500,
+        "Bulky Cargo Panels": 50,
+    },
+    "Smart Storage Unit": {
+        "Steel Plates": 60,
+        "Light Metal Framing": 6,
+        "Bulky Cargo Panels": 5,
+    },
+    "Smart Turret": {
+        "Steel Plates": 500,
+        "Light Metal Framing": 50,
+        "Mounting Platform": 1,
+        "Radar": 1,
+    },
+    "Smart Gate": {
+        "Thorium": 100,
+        "Steel Beams": 100,
+        "Light Metal Framing": 100,
+        "Fuel Tank": 160,
+    },
+    "Hedgehog": {
+        "Steel Plates": 500,
+        "Steel Beams": 50,
+    },
+};
+
+export type BaseBom = {[key: StructureName]: number};
