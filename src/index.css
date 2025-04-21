@@ -15,6 +15,9 @@ TABLE.form .pair SELECT:nth-child(1) {
 TABLE.form .pair SELECT:nth-child(2) {
   width: 40%;
 }
+TABLE.form .pair INPUT:nth-child(2) {
+  width: 40%;
+}
 TABLE.form TH:first-child {
   text-align: right;
   width: 1%;
