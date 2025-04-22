@@ -18,6 +18,7 @@ TABLE.form .pair INPUT:nth-child(2) {
 }
 TABLE.form TH:first-child {
   text-align: right;
+  width: 1em;
   /* disable text wrapping */
   white-space: nowrap;
   padding-right: 0.25em;
