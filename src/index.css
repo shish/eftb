@@ -24,7 +24,7 @@ TABLE.form TH:first-child {
   padding-right: 0.25em;
 }
 TABLE.form TD:nth-child(2) {
-  width: 14em;
+  width: 30em; /* wide enough for the "System -> System (type, dist)" */
 }
 TABLE.form TD {
   vertical-align: top;
