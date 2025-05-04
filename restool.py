@@ -80,20 +80,6 @@ if __name__ == "__main__":
         for file in list_resfiles(args.root):
             print(file)
 
-    if args.cmd == "unpickle":
-        result = find_resfile(args.root, args.resource)
-
-        jsonpickle.set_encoder_options('json', sort_keys=True, indent=4)
-
-        with open(result.filepath, 'rb') as file:
-            data = pickle.load(file)
-
-        json_data = jsonpickle.encode(data)
-
-        with open(args.output, 'w') as json_file:
-            json_file.write(json_data)
-            json_file.write('\n')
-
     if args.cmd == "extract":
         output = find_resfile(args.root, args.resource)
         data = open(output.filepath, 'rb').read()
