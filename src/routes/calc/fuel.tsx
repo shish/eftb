@@ -44,7 +44,7 @@ function FuelCalculator() {
                 min="1"
                 required={true}
                 value={mass}
-                onChange={(e) => setMass(parseInt(e.target.value))}
+                onChange={(e) => setMass(e.target.valueAsNumber)}
               />
             </td>
           </tr>
@@ -57,7 +57,7 @@ function FuelCalculator() {
                 min="1"
                 required={true}
                 value={dist}
-                onChange={(e) => setDist(parseInt(e.target.value))}
+                onChange={(e) => setDist(e.target.valueAsNumber)}
               />
             </td>
           </tr>
@@ -69,7 +69,7 @@ function FuelCalculator() {
                 type="number"
                 required={true}
                 value={effi}
-                onChange={(e) => setEffi(parseFloat(e.target.value))}
+                onChange={(e) => setEffi(e.target.valueAsNumber)}
               />
             </td>
             <td>(The number in the fuel type)</td>

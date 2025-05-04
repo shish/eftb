@@ -53,7 +53,7 @@ function ExitFinder() {
                   type="number"
                   required={true}
                   value={jump}
-                  onChange={(e) => setJump(parseInt(e.target.value))}
+                  onChange={(e) => setJump(e.target.valueAsNumber)}
                 />
               </td>
             </tr>

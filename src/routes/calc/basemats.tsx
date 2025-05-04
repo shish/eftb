@@ -64,7 +64,7 @@ function CargoCalculator() {
                   value={count}
                   onChange={(e) => {
                     const newBaseBom = { ...baseBom };
-                    newBaseBom[posName] = Number(e.target.value);
+                    newBaseBom[posName] = e.target.valueAsNumber;
                     setBaseBom(newBaseBom);
                   }}
                 />

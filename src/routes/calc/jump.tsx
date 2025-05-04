@@ -69,7 +69,7 @@ function Calculator() {
               min="1"
               required={true}
               value={mass}
-              onChange={(e) => setMass(parseInt(e.target.value))}
+              onChange={(e) => setMass(e.target.valueAsNumber)}
             />
           </td>
           <td>(Right-click ship &rarr; Show Info)</td>
@@ -83,7 +83,7 @@ function Calculator() {
               min="1"
               required={true}
               value={tank}
-              onChange={(e) => setTank(parseInt(e.target.value))}
+              onChange={(e) => setTank(e.target.valueAsNumber)}
             />
           </td>
           <td>(The number in the orange rectangle)</td>
@@ -96,7 +96,7 @@ function Calculator() {
               type="number"
               required={true}
               value={effi}
-              onChange={(e) => setEffi(parseFloat(e.target.value))}
+              onChange={(e) => setEffi(e.target.valueAsNumber)}
             />
           </td>
           <td>(The number in the fuel type)</td>
@@ -178,7 +178,7 @@ function SummaryTable() {
               <input
                 type={fittingsMode == "custom" ? "number" : "hidden"}
                 value={fittingsMass}
-                onChange={(e) => setFittingsMass(Number(e.target.value))}
+                onChange={(e) => setFittingsMass(e.target.valueAsNumber)}
               />
             </td>
           </tr>
@@ -197,7 +197,7 @@ function SummaryTable() {
               <input
                 type={cargoMode == "custom" ? "number" : "hidden"}
                 value={cargoMass}
-                onChange={(e) => setCargoMass(Number(e.target.value))}
+                onChange={(e) => setCargoMass(e.target.valueAsNumber)}
               />
             </td>
           </tr>

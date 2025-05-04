@@ -139,7 +139,7 @@ function PathFinder() {
                   value={jump}
                   min={1}
                   max={500}
-                  onChange={(e) => setJump(parseInt(e.target.value))}
+                  onChange={(e) => setJump(e.target.valueAsNumber)}
                 />
               </td>
             </tr>

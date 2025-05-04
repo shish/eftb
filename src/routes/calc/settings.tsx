@@ -31,7 +31,7 @@ function Settings() {
                     value={cost}
                     onChange={(e) => {
                       const newCosts = { ...fuelCosts };
-                      newCosts[name] = Number(e.target.value);
+                      newCosts[name] = e.target.valueAsNumber;
                       setFuelCosts(newCosts);
                     }}
                   />
