@@ -8,7 +8,9 @@
 TABLE.form INPUT:not([type="checkbox"]):not([type="radio"]),
 TABLE.form SELECT,
 TABLE.form TEXTAREA,
-TABLE.form BUTTON {width: 100%;}
+TABLE.form BUTTON {
+  width: 100%;
+}
 TABLE.form .pair SELECT:nth-child(1) {
   width: 60%;
 }

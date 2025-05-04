@@ -22,8 +22,11 @@ export const SettingsContext = React.createContext<SettingsContextType>({
   setFuelCosts: () => {},
 });
 
-export function SettingsProvider(props: {children: React.ReactNode}) {
-  const [fuelCosts, setFuelCosts] = useLocalStorage<FuelCosts>("fuel_costs", defaultFuelCosts);
+export function SettingsProvider(props: { children: React.ReactNode }) {
+  const [fuelCosts, setFuelCosts] = useLocalStorage<FuelCosts>(
+    "fuel_costs",
+    defaultFuelCosts,
+  );
 
   return (
     <SettingsContext.Provider

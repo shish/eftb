@@ -1,54 +1,54 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useSessionStorage } from 'usehooks-ts'
-import { items, posboms, BaseBom } from '../../consts'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useSessionStorage } from "usehooks-ts";
+import { items, posboms, BaseBom } from "../../consts";
 
-export const Route = createFileRoute('/calc/basemats')({
+export const Route = createFileRoute("/calc/basemats")({
   component: CargoCalculator,
-})
+});
 
 function CargoCalculator() {
-  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>('baseBom', {
-    'Portable Refinery': 0,
-    'Portable Printer': 0,
+  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>("baseBom", {
+    "Portable Refinery": 0,
+    "Portable Printer": 0,
     Sepulchre: 0,
     Refuge: 0,
-    'Storage Unit': 0,
-    'Printer L': 0,
-    'Smart Storage Unit': 0,
-    'Smart Turret': 0,
-    'Smart Gate': 0,
+    "Storage Unit": 0,
+    "Printer L": 0,
+    "Smart Storage Unit": 0,
+    "Smart Turret": 0,
+    "Smart Gate": 0,
     Hedgehog: 0,
-  })
-  const [itemsBom, setItemsBom] = useState<Record<string, number>>({})
-  const [cargoMass, setCargoMass] = useSessionStorage<number>('cargoMass', 0)
+  });
+  const [itemsBom, setItemsBom] = useState<Record<string, number>>({});
+  const [cargoMass, setCargoMass] = useSessionStorage<number>("cargoMass", 0);
   const [cargoVolume, setCargoVolume] = useSessionStorage<number>(
-    'cargoVolume',
+    "cargoVolume",
     0,
-  )
+  );
 
   useEffect(() => {
-    const myItemsBom: { [key: string]: number } = {}
+    const myItemsBom: { [key: string]: number } = {};
     for (const [pos, posCount] of Object.entries(baseBom)) {
       for (const [item, itemCount] of Object.entries(posboms[pos])) {
-        if (!myItemsBom[item]) myItemsBom[item] = 0
-        myItemsBom[item] += itemCount * posCount
+        if (!myItemsBom[item]) myItemsBom[item] = 0;
+        myItemsBom[item] += itemCount * posCount;
       }
     }
-    setItemsBom(myItemsBom)
-  }, [baseBom])
+    setItemsBom(myItemsBom);
+  }, [baseBom]);
 
   useEffect(() => {
-    let mass = 0
-    let volume = 0
+    let mass = 0;
+    let volume = 0;
     for (const [item, itemCount] of Object.entries(itemsBom)) {
-      if (!items[item]) continue
-      mass += items[item].mass * itemCount
-      volume += items[item].volume * itemCount
+      if (!items[item]) continue;
+      mass += items[item].mass * itemCount;
+      volume += items[item].volume * itemCount;
     }
-    setCargoMass(mass)
-    setCargoVolume(volume)
-  }, [itemsBom])
+    setCargoMass(mass);
+    setCargoVolume(volume);
+  }, [itemsBom]);
 
   return (
     <section>
@@ -63,9 +63,9 @@ function CargoCalculator() {
                   type="number"
                   value={count}
                   onChange={(e) => {
-                    const newBaseBom = { ...baseBom }
-                    newBaseBom[posName] = Number(e.target.value)
-                    setBaseBom(newBaseBom)
+                    const newBaseBom = { ...baseBom };
+                    newBaseBom[posName] = Number(e.target.value);
+                    setBaseBom(newBaseBom);
                   }}
                 />
               </td>
@@ -92,5 +92,5 @@ function CargoCalculator() {
         <tbody></tbody>
       </table>
     </section>
-  )
+  );
 }

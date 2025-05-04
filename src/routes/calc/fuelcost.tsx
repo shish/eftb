@@ -20,7 +20,9 @@ function FuelCostCalculator() {
   return (
     <section>
       <h2>Cost for One Full Tank</h2>
-      <p>Based on prices from the <Link to="/calc/settings">Settings</Link> page</p>
+      <p>
+        Based on prices from the <Link to="/calc/settings">Settings</Link> page
+      </p>
       <SummaryTable />
     </section>
   );

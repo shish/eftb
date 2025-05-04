@@ -14,7 +14,10 @@ function Settings() {
     <section>
       <h2>Settings</h2>
       <h3>Fuel Costs</h3>
-      <p>Defaults assume that lenses cost 100k lux, catalytic dust costs 5000, and fuel is sold for zero profit.</p>
+      <p>
+        Defaults assume that lenses cost 100k lux, catalytic dust costs 5000,
+        and fuel is sold for zero profit.
+      </p>
       <table className="form">
         <tbody>
           {(Object.entries(fuelCosts) as [FuelName, number][]).map(
@@ -34,7 +37,7 @@ function Settings() {
                   />
                 </td>
               </tr>
-            )
+            ),
           )}
         </tbody>
       </table>

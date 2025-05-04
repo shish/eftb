@@ -1,15 +1,22 @@
 import { useState, useEffect } from "react";
-import { ships, fuels, isCompatible, getEngine, ShipName, FuelName } from "../consts";
+import {
+  ships,
+  fuels,
+  isCompatible,
+  getEngine,
+  ShipName,
+  FuelName,
+} from "../consts";
 import { useSessionStorage } from "usehooks-ts";
 
 export function ShipFuelSelect({
-    onMassChange,
-    onTankChange,
-    onEfficiencyChange,
+  onMassChange,
+  onTankChange,
+  onEfficiencyChange,
 }: {
-    onMassChange: (mass: number) => void;
-    onTankChange: (tank: number) => void;
-    onEfficiencyChange: (efficiency: number) => void;
+  onMassChange: (mass: number) => void;
+  onTankChange: (tank: number) => void;
+  onEfficiencyChange: (efficiency: number) => void;
 }) {
   const [ship, setShip] = useSessionStorage<ShipName>("ship", "Val");
   const [fuelType, setFuelType] = useState<FuelName>("SOF-40");

@@ -226,8 +226,16 @@ function SummaryTable() {
                   efficiency={efficiency}
                   ship={ship}
                   mode={mode}
-                  fittingsMass={fittingsMode === "engine" ? getEngine(ship.type).mass : fittingsMass}
-                  cargoMass={cargoMode === "fuel" ? ship.tank * items["uSOF-20 Fuel"].mass : cargoMass}
+                  fittingsMass={
+                    fittingsMode === "engine"
+                      ? getEngine(ship.type).mass
+                      : fittingsMass
+                  }
+                  cargoMass={
+                    cargoMode === "fuel"
+                      ? ship.tank * items["uSOF-20 Fuel"].mass
+                      : cargoMass
+                  }
                 />
               ))}
             </tr>
