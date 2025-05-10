@@ -73,6 +73,7 @@ function TextPath(props: { path: PathStep[] }) {
 
 function PathFinder() {
   const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
+  const [endType, setEndType] = useSessionStorage<string>("endType", "star")
   const [end, setEnd] = useSessionStorage<string>("end", "Nod");
   const [jump, setJump] = useSessionStorage<number>("jump", 80);
   const [optimize, setOptimize] = useSessionStorage<PathOptimize>(
@@ -104,7 +105,7 @@ function PathFinder() {
         <table className="form">
           <tbody>
             <tr>
-              <th>System 1</th>
+              <th>From system</th>
               <td>
                 <input
                   name="start"
@@ -116,17 +117,31 @@ function PathFinder() {
               </td>
             </tr>
             <tr>
-              <th>System 2</th>
+              <th>
+                  <select
+                      value={endType}
+                      onChange={(e) => setEndType(e.target.value as PathOptimize)}
+>
+                      <option value="star">To system</option>
+                      <option value="nearest">To nearest</option>
+                  </select>
+              </th>
               <td>
-                <input
-                  name="end"
-                  list="starDataList"
-                  autoComplete="off"
-                  type="text"
-                  required={true}
-                  value={end}
-                  onChange={(e) => setEnd(e.target.value)}
-                />
+                {endType == "star" ?
+                    <input
+                        name="end"
+                        list="starDataList"
+                        autoComplete="off"
+                        type="text"
+                        required={true}
+                        value={end}
+                        onChange={(e) => setEnd(e.target.value)}
+                    />
+                    : <select name="end">
+                        <option value="nearest-station">NPC Station</option>
+                        <option value="nearest-fabricator">Fabricator</option>
+                    </select>
+                }
               </td>
             </tr>
             <tr>
