@@ -21,7 +21,9 @@ pub fn calc_exit(
         let star = star_map.get(&current).unwrap();
         for conn in &star.connections {
             let target = star_map.get(&conn.target).unwrap();
-            if conn.conn_type == ConnType::NpcGate || conn.conn_type == ConnType::SmartGate {
+            if conn.conn_type == ConnType::NpcGate
+                || matches!(conn.conn_type, ConnType::SmartGate { .. })
+            {
                 if !checked.contains(&target.id) && !to_check.contains(&target.id) {
                     to_check.push(target.id);
                 }
