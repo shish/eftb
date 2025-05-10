@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
-use uom::si::f64::*;
-
 use crate::data::*;
 
 pub fn calc_exit(
     star_map: &HashMap<SolarSystemId, Star>,
     start: &Star,
-    jump_distance: Length,
+    jump_distance: f64,
 ) -> Vec<(Star, Star)> {
     let mut exits: Vec<(Star, Star)> = Vec::new();
     let mut checked: Vec<SolarSystemId> = Vec::new();
@@ -40,8 +38,6 @@ pub fn calc_exit(
 
 #[cfg(test)]
 mod tests {
-    use uom::si::length::light_year;
-
     use super::*;
 
     #[test]
@@ -53,7 +49,7 @@ mod tests {
                 connections: vec![Connection {
                     id: 1,
                     conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
+                    distance: 10.0,
                     target: 2,
                 }],
                 ..Default::default()
@@ -64,7 +60,7 @@ mod tests {
                 connections: vec![Connection {
                     id: 2,
                     conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
+                    distance: 10.0,
                     target: 1,
                 }],
                 ..Default::default()
@@ -75,7 +71,7 @@ mod tests {
             stars.iter().map(|s| (s.id, s.clone())).collect();
 
         assert_eq!(
-            calc_exit(&star_map, &stars[0], Length::new::<light_year>(20.0)),
+            calc_exit(&star_map, &stars[0], 20.0),
             vec![(stars[0].clone(), stars[1].clone())]
         );
     }

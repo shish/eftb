@@ -240,7 +240,7 @@ fn main() -> anyhow::Result<()> {
                 &star_map,
                 start,
                 end,
-                jump_distance,
+                *jump_distance,
                 *optimize,
                 *use_smart_gates,
                 Some(30),
@@ -293,14 +293,14 @@ fn main() -> anyhow::Result<()> {
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding exits");
-            let exits = eftb::calc_exit(&star_map, start, jump_distance);
+            let exits = eftb::calc_exit(&star_map, start, *jump_distance);
             for (from, to) in exits {
                 println!(
                     "{} -> {} ({}) ({} ly)",
                     star_id_to_name[&from.id],
                     star_id_to_name[&to.id],
                     &to.region_id,
-                    from.distance(&to).get::<light_year>() as i32
+                    from.distance(&to) as i32
                 );
                 for conn in &star_map[&to.id].connections {
                     let d = conn.distance.get::<light_year>();
@@ -340,9 +340,7 @@ fn main() -> anyhow::Result<()> {
                 if conn.conn_type != data::ConnType::Jump {
                     println!(
                         "    {} ({:?}, {} ly)",
-                        star_id_to_name[&conn.target],
-                        conn.conn_type,
-                        conn.distance.get::<light_year>() as i32
+                        star_id_to_name[&conn.target], conn.conn_type, conn.distance as i32
                     );
                 }
             }
