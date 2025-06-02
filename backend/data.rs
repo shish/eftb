@@ -95,13 +95,18 @@ pub fn get_name_maps() -> anyhow::Result<(
 
 pub fn save_star_map(star_map: &HashMap<SolarSystemId, Star>) -> anyhow::Result<()> {
     // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
-    std::fs::write("data/starmap.bin", bincode::serialize(&star_map)?)?;
+    std::fs::write(
+        "data/starmap.bin",
+        bincode::serde::encode_to_vec(&star_map, bincode::config::legacy())?,
+    )?;
     Ok(())
 }
 
 pub fn get_star_map() -> anyhow::Result<HashMap<SolarSystemId, Star>> {
-    let map: HashMap<SolarSystemId, Star> =
-        bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
+    let map: HashMap<SolarSystemId, Star> = bincode::serde::decode_from_slice(
+        &std::fs::read("data/starmap.bin")?,
+        bincode::config::legacy(),
+    )?.0;
     Ok(map)
 }
 

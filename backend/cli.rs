@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
-use bincode;
 use clap::{Parser, Subcommand};
 use eftb::data::SolarSystemId;
 use indicatif::ProgressIterator;
@@ -283,8 +282,7 @@ fn main() -> anyhow::Result<()> {
         }) => {
             info!("Loading star map");
             let (star_id_to_name, star_name_to_id) = data::get_name_maps()?;
-            let star_map: HashMap<data::SolarSystemId, data::Star> =
-                bincode::deserialize(&std::fs::read("data/starmap.bin")?)?;
+            let star_map = data::get_star_map()?;
             info!("Loaded star map");
 
             let start = star_map
