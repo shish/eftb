@@ -5,37 +5,70 @@
 
 import pickle
 import argparse
-import os.path
 import sys
 import csv
 import typing as t
+import logging
+import os.path
+from pathlib import Path
 
 import jsonpickle
 
+log = logging.getLogger(__name__)
 
-def list_resources(root) -> t.Dict[str, str]:
-    indexFiles = [
-        # '1d/1d34143a37d4b739_553cd67a2f32c66f69a51f6eae071b9a',
-        '1d/1d34143a37d4b739_2010dea88d4c9c47074c073c7d01deea',
-        '1d/1d34143a37d4b739_388b20b64620b92a6befcbbe89571575',
-        # '56/5610a6eb8b5a4975_1a78826bc07a6e1c4814141ad484df52',
-        '56/5610a6eb8b5a4975_59756139412b3a5e548f78e15b27686e',
-        '56/5610a6eb8b5a4975_f44159b8bdd132e8e4d6d5bc89dbe5ad',
-    ]
-    resources = {}
+
+def read_index_file(root: Path, index_path: Path) -> t.Dict[str, Path]:
+    """
+    Reads a CSV index file and returns a dictionary mapping resource names to their paths.
+    """
+    log.info(f"Reading index file: {index_path}")
+    resources: t.Dict[str, Path] = {}
+    if index_path.is_file():
+        with index_path.open('r', newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+            for row in reader:
+                if len(row) >= 2:
+                    resources[row[0]] = Path(root / "ResFiles" / row[1])
+                    log.debug(f"Added resource {row[0]} with path {row[1]}")
+                else:
+                    log.warning(f"Skipping malformed row: {row}")
+    else:
+        log.error(f"Index file {index_path.absolute()} not found.")
+    return resources
+
+
+def list_resources(root: Path) -> t.Dict[str, Path]:
+    indexFiles: t.List[Path] = []
+
+    metaIndex = read_index_file(root, root / 'index_stillness.txt')
+    for fn, path in metaIndex.items():
+        if fn.startswith('app:/resfileindex'):
+            indexFiles.append(path)
+            log.debug(f"Found index file: {path}")
+
+    resources: t.Dict[str, Path] = {}
     for index in indexFiles:
-        indexPath = os.path.join(root, index)
-        if (os.path.isfile(indexPath)):
-            with open(indexPath, 'r', newline='') as csvfile:
-                reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-                for row in reader:
-                    resources[row[0]] = os.path.join(root, row[1])
+        resources.update(read_index_file(root, index))
     return resources
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+
+    defpath = None
+    for path in [
+        "./frontier",
+        "C:/CCP/EVE Frontier"
+    ]:
+        if Path(path).is_dir():
+            defpath = Path(path)
+            break
+    if defpath is None:
+        log.error("No valid root directory found. Please specify the --root argument.")
+        sys.exit(1)
+
     parser = argparse.ArgumentParser(sys.argv[0])
-    parser.add_argument('--root', help='the root directory containing ResFiles.', default="./frontier/ResFiles")
+    parser.add_argument('--root', type=Path, help='the root directory containing ResFiles.', default=defpath)
     subparsers = parser.add_subparsers(dest='cmd')
 
     list_parser = subparsers.add_parser('list')
@@ -53,7 +86,7 @@ if __name__ == "__main__":
 
     if args.cmd == "extract":
         files = list_resources(args.root)
-        data = open(files[args.resource], 'rb').read()
+        data = files[args.resource].read_bytes()
 
         if args.unpickle:
             jsonpickle.set_encoder_options('json', sort_keys=True, indent=4)
