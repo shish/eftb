@@ -1,4 +1,4 @@
-#!./venv/bin/python3
+#!/usr/bin/env python3
 
 import json
 import urllib.request
@@ -19,7 +19,6 @@ def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evef
     return data
 
 
-# stillness API returns phase-V data for solarsystems; nova API returns current data
 api_get('solarsystems')
 api_get('types')
 
