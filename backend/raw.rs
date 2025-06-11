@@ -80,10 +80,8 @@ pub struct RawSolarSystem {
 
 #[derive(Debug, Deserialize)]
 pub struct RawStar {
-    #[serde(rename(deserialize = "solarSystemId"))]
-    pub solar_system_id: u64,
-    #[serde(rename(deserialize = "solarSystemName"))]
-    pub solar_system_name: String,
+    pub id: u64,
+    pub name: String,
     //pub location: RawLocation,
 }
 

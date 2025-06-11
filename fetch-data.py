@@ -6,14 +6,30 @@ import pathlib
 import typing as t
 from tqdm import tqdm
 
-def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evefrontier.com') -> t.Any:
+def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evefrontier.com/v2') -> t.Any:
     cache = pathlib.Path(f'data/{path}.json')
     if cache.exists():
         data = json.loads(cache.read_text())
     else:
         url = f'{base}/{path}'
-        response = urllib.request.urlopen(url).read()
-        data = json.loads(response.decode('utf-8'))
+
+        first = json.loads(urllib.request.urlopen(url).read())
+        total = first["metadata"]["total"]
+        limit = first["metadata"]["limit"]
+
+        data = []
+        for offset in tqdm(range(0, total, limit), desc=f'Fetching {path}'):
+            paged_url = f'{url}?limit={limit}&offset={offset}'
+            response = urllib.request.urlopen(paged_url).read()
+            page_data = json.loads(response.decode('utf-8'))
+            if not page_data["data"]:
+                break
+            if offset == 0:
+                data = page_data["data"]
+            else:
+                data.extend(page_data["data"])
+            offset += limit
+
         cache.parent.mkdir(parents=True, exist_ok=True)
         cache.write_text(json.dumps(data, indent=4))
     return data
@@ -22,24 +38,27 @@ def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evef
 api_get('solarsystems')
 api_get('types')
 
-# smartassemblies API returns a mixture of phase-V and current data
 gates_to_gates = []
 for sass in tqdm(api_get('smartassemblies')):
-    if sass['assemblyType'] == 'SmartGate' and sass['isOnline']:
-        try:
-            gate = api_get(f'smartassemblies/{sass["id"]}')
-            if gate['gateLink']['isLinked']:
-                gates_to_gates.append({
-                    'id': gate['id'],
-                    'itemId': gate['itemId'],
-                    'name': gate['name'],
-                    # 'from': gate['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
-                    'from': gate['solarSystemId'],  # refers to alpha SolarSystemId
-                    # 'to': dest['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
-                    'to': gate['gateLink']['destinationGate']  # refers to alpha SmartAssemblyId
-                })
-        except Exception as e:
-            print(f'Error fetching gate {sass["id"][:10]}: {e}')
+    if sass['type'] == 'SmartGate' and sass['state'] == "online":
+        # currently there are no smartgates online, so I don't know
+        # what the data for an online gate looks like...
+        print(sass)
+        import sys; sys.exit(1)
+        #try:
+        #    gate = api_get(f'smartassemblies/{sass["id"]}')
+        #    if gate['gateLink']['isLinked']:
+        #        gates_to_gates.append({
+        #            'id': gate['id'],
+        #            'itemId': gate['itemId'],
+        #            'name': gate['name'],
+        #            # 'from': gate['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
+        #            'from': gate['solarSystemId'],  # refers to alpha SolarSystemId
+        #            # 'to': dest['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
+        #            'to': gate['gateLink']['destinationGate']  # refers to alpha SmartAssemblyId
+        #        })
+        #except Exception as e:
+        #    print(f'Error fetching gate {sass["id"][:10]}: {e}')
 
 # Now that we've loaded all the gates, update `gate.to` to be a
 # SolarSystemId instead of a GateId
