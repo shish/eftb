@@ -52,7 +52,7 @@ function CargoCalculator() {
       <h2>How much does this stuff weigh?</h2>
       <table className="form">
         <tbody>
-          {Object.entries(baseBom).map(([posName, count]) => (
+          {(Object.entries(baseBom) as [StructureName, number][]).map(([posName, count]) => (
             <tr key={posName}>
               <th>{posName}</th>
               <td>
