@@ -1,12 +1,12 @@
-import React from "react";
+import React, { createContext } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { FuelName } from "../consts";
 
 const dustCost = 50000;
 type FuelCosts = { [key in FuelName]: number };
 const defaultFuelCosts: FuelCosts = {
-    "D1": 5,
-    "D2": 5,
+  D1: 1,
+  D2: 5,
   "SOF-40": 100_000 / 2500,
   "EU-40": 100_000 / 2500,
   "SOF-80": 100_000 / 2500 + (44 * dustCost) / 500,
@@ -18,21 +18,23 @@ export interface SettingsContextType {
   setFuelCosts: (newFuelCosts: FuelCosts) => void;
 }
 
-export const SettingsContext = React.createContext<SettingsContextType>({
-  fuelCosts: defaultFuelCosts,
-  setFuelCosts: () => {},
-});
+export const SettingsContext = createContext<SettingsContextType>(
+  {} as SettingsContextType,
+);
 
 export function SettingsProvider(props: { children: React.ReactNode }) {
-  const [fuelCosts, setFuelCosts] = useLocalStorage<FuelCosts>(
+  const [fuelCosts, setFuelCosts] = useLocalStorage<{ [ key in FuelName]?: number }>(
     "fuel_costs",
-    defaultFuelCosts,
+    {},
   );
 
   return (
     <SettingsContext.Provider
       value={{
-        fuelCosts,
+        fuelCosts: {
+          ...defaultFuelCosts,
+          ...fuelCosts,
+        },
         setFuelCosts,
       }}
     >

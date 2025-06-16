@@ -1,25 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { items, posboms, BaseBom, ItemName } from "../../consts";
+import { items, posboms, BaseBom, ItemName, StructureName } from "../../consts";
 
 export const Route = createFileRoute("/calc/basemats")({
   component: CargoCalculator,
 });
 
 function CargoCalculator() {
-  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>("baseBom", {
-    "Portable Refinery": 0,
-    "Portable Printer": 0,
-    Sepulchre: 0,
-    Refuge: 0,
-    "Storage Unit": 0,
-    "Printer L": 0,
-    "Smart Storage Unit": 0,
-    "Smart Turret": 0,
-    "Smart Gate": 0,
-    Hedgehog: 0,
-  });
+  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>(
+    "baseBom",
+    Object.fromEntries(
+      Object.entries(posboms).map(([name, _]) => [name, 0]),
+    ) as BaseBom,
+  );
   const [itemsBom, setItemsBom] = useState<Record<string, number>>({});
   const [cargoMass, setCargoMass] = useSessionStorage<number>("cargoMass", 0);
   const [cargoVolume, setCargoVolume] = useSessionStorage<number>(
@@ -29,7 +23,7 @@ function CargoCalculator() {
 
   useEffect(() => {
     const myItemsBom: { [key: string]: number } = {};
-    for (const [pos, posCount] of Object.entries(baseBom)) {
+    for (const [pos, posCount] of Object.entries(baseBom) as [StructureName, number][]) {
       for (const [item, itemCount] of Object.entries(posboms[pos])) {
         if (!myItemsBom[item]) myItemsBom[item] = 0;
         myItemsBom[item] += itemCount * posCount;
@@ -41,7 +35,10 @@ function CargoCalculator() {
   useEffect(() => {
     let mass = 0;
     let volume = 0;
-    for (const [item, itemCount] of Object.entries(itemsBom) as [ItemName, number][]) {
+    for (const [item, itemCount] of Object.entries(itemsBom) as [
+      ItemName,
+      number,
+    ][]) {
       if (!items[item]) continue;
       mass += items[item].mass * itemCount;
       volume += items[item].volume * itemCount;

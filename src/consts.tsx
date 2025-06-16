@@ -237,8 +237,8 @@ const _posboms = {
     "Building Foam": 2,
   },
 };
-export type StructureName = string;
+export type StructureName = keyof typeof _posboms;
 export type StructureBom = { [key in ItemName]?: number };
 export const posboms: { [key in StructureName]: StructureBom } = _posboms;
 
-export type BaseBom = { [key: StructureName]: number };
+export type BaseBom = { [key in StructureName]: number };
