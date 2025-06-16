@@ -18,7 +18,7 @@ export function ShipFuelSelect({
   onTankChange: (tank: number) => void;
   onEfficiencyChange: (efficiency: number) => void;
 }) {
-  const [ship, setShip] = useSessionStorage<ShipName>("ship", "Val");
+  const [ship, setShip] = useSessionStorage<ShipName>("ship", "Wend");
   const [fuelType, setFuelType] = useState<FuelName>("SOF-40");
 
   useEffect(() => {

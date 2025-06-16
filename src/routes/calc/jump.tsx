@@ -233,7 +233,7 @@ function SummaryTable() {
                   }
                   cargoMass={
                     cargoMode === "fuel"
-                      ? ship.tank * items["uSOF-20 Fuel"].mass
+                      ? ship.tank * items["D1 Fuel"].mass
                       : cargoMass
                   }
                 />

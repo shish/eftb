@@ -5,7 +5,8 @@ import { FuelName } from "../consts";
 const dustCost = 50000;
 type FuelCosts = { [key in FuelName]: number };
 const defaultFuelCosts: FuelCosts = {
-  "uSOF-20": 5,
+    "D1": 5,
+    "D2": 5,
   "SOF-40": 100_000 / 2500,
   "EU-40": 100_000 / 2500,
   "SOF-80": 100_000 / 2500 + (44 * dustCost) / 500,

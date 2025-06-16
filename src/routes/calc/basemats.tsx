@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { items, posboms, BaseBom } from "../../consts";
+import { items, posboms, BaseBom, ItemName } from "../../consts";
 
 export const Route = createFileRoute("/calc/basemats")({
   component: CargoCalculator,
@@ -41,7 +41,7 @@ function CargoCalculator() {
   useEffect(() => {
     let mass = 0;
     let volume = 0;
-    for (const [item, itemCount] of Object.entries(itemsBom)) {
+    for (const [item, itemCount] of Object.entries(itemsBom) as [ItemName, number][]) {
       if (!items[item]) continue;
       mass += items[item].mass * itemCount;
       volume += items[item].volume * itemCount;

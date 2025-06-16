@@ -1,7 +1,14 @@
-export type FuelName = "uSOF-20" | "SOF-40" | "EU-40" | "SOF-80" | "EU-90";
+export type FuelName =
+  | "D1"
+  | "D2"
+  | "SOF-40"
+  | "EU-40"
+  | "SOF-80"
+  | "EU-90";
 export type Fuel = number;
 export const fuels: { [key in FuelName]: Fuel } = {
-  "uSOF-20": 0.2,
+  D1: 0.1,
+  D2: 0.15,
   "SOF-40": 0.4,
   "EU-40": 0.4,
   "SOF-80": 0.8,
@@ -17,49 +24,54 @@ export type ShipType =
   | "Combat Battlecruiser"
   | "Battleship";
 
-export type EngineName = "uSOF XS" | "GSC XS" | "GSC S" | "GSC M" | "GSC L";
+export type EngineName =
+  | "Celerity CD03"
+  | "Celerity CD01"
+  | "Embark"
+  | "Sojourn"
+  | "Tempo CD41"
+  | "Velocity CD81";
 export type Engine = {
   mass: number;
   fuel: FuelName;
   types: ShipType[];
 };
 export const engines: { [key in EngineName]: Engine } = {
-  "uSOF XS": { mass: 53_694, fuel: "uSOF-20", types: ["Shuttle"] },
-  "GSC XS": { mass: 99_758, fuel: "uSOF-20", types: ["Corvette"] },
-  "GSC S": { mass: 208_650, fuel: "SOF-40", types: ["Frigate", "Destroyer"] },
-  "GSC M": {
-    mass: 417_280,
-    fuel: "SOF-40",
-    types: ["Destroyer", "Cruiser", "Combat Battlecruiser"],
-  },
-  "GSC L": {
+  "Celerity CD03": {
     mass: 834_540,
     fuel: "SOF-40",
     types: ["Combat Battlecruiser", "Battleship"],
   },
+  "Celerity CD01": {
+    mass: 300_000,
+    fuel: "SOF-40",
+    types: ["Frigate", "Destroyer"],
+  },
+  Embark: { mass: 150_000, fuel: "D1", types: ["Shuttle"] },
+  Sojourn: { mass: 150_000, fuel: "D1", types: ["Corvette"] },
+  "Tempo CD41": {
+    mass: 300_000,
+    fuel: "SOF-80",
+    types: ["Frigate", "Destroyer"],
+  },
+  "Velocity CD81": {
+    mass: 300_000,
+    fuel: "SOF-80",
+    types: ["Frigate", "Destroyer"],
+  },
 };
 
 export type ShipName =
-  | "Anser"
-  | "Axte"
-  | "Baile"
-  | "Caruda"
-  | "Dremar"
-  | "Explorer"
-  | "Flegel"
-  | "Forager"
-  | "Grus"
-  | "Harpia"
-  | "Juav"
-  | "Klinge"
-  | "Microptero"
-  | "Pici"
-  | "Raubtier"
-  | "Rebus-K"
-  | "Samoskyd-1"
-  | "Strix"
-  | "Ungher"
-  | "Val";
+  | "HAF"
+  | "LORHA"
+  | "MCF"
+  | "TADES"
+  | "USV"
+  | "Recurve"
+  | "Reflex"
+  | "Reiver"
+  | "Wend"
+  | "Chumaq";
 export type Ship = {
   mass: number;
   tank: number;
@@ -67,52 +79,29 @@ export type Ship = {
   cargo: number;
 };
 export const ships: { [key in ShipName]: Ship } = {
-  // Cycle 3 has mass and fuel in show-info \o/
-  Anser: { mass: 281_681_000, tank: 7_050, type: "Cruiser", cargo: 36_400 },
-  Axte: {
-    mass: 800_711_000,
-    tank: 22_030,
-    type: "Combat Battlecruiser",
-    cargo: 33_800,
-  },
-  Baile: { mass: 487_820_000, tank: 12_200, type: "Cruiser", cargo: 20_800 },
-  Caruda: {
-    mass: 1_424_833_000,
-    tank: 49_870,
-    type: "Battleship",
-    cargo: 54_600,
-  },
-  Dremar: { mass: 68_221_000, tank: 1_110, type: "Destroyer", cargo: 3_120 },
-  Explorer: { mass: 4_517_000, tank: 230, type: "Shuttle", cargo: 520 },
-  Flegel: { mass: 142_121_000, tank: 2_860, type: "Cruiser", cargo: 31_200 },
-  Forager: { mass: 7_642_000, tank: 120, type: "Shuttle", cargo: 1_040 },
-  Grus: {
-    mass: 2_383_202_000,
-    tank: 71_340,
-    type: "Battleship",
-    cargo: 286_000,
-  },
-  Harpia: { mass: 62_359_000, tank: 1_020, type: "Destroyer", cargo: 3_120 },
-  Juav: { mass: 12_928_000, tank: 360, type: "Corvette", cargo: 520 },
-  Klinge: { mass: 798_858_000, tank: 21_970, type: "Cruiser", cargo: 31_200 },
-  Microptero: { mass: 20_464_000, tank: 240, type: "Frigate", cargo: 1_040 },
-  Pici: { mass: 25_921_000, tank: 330, type: "Frigate", cargo: 3_120 },
-  Raubtier: { mass: 45_402_000, tank: 690, type: "Frigate", cargo: 2_080 },
-  "Rebus-K": {
-    mass: 1_474_255_000,
-    tank: 41_620,
+  // Exclave Ventures
+  HAF: { mass: 81_883_000, tank: 4_184, type: "Frigate", cargo: 3_120 },
+  LORHA: { mass: 31_369_320, tank: 2_508, type: "Frigate", cargo: 6_240 },
+  MCF: { mass: 52_313_760, tank: 6_548, type: "Frigate", cargo: 2_080 },
+  TADES: { mass: 74_655_480, tank: 5_972, type: "Destroyer", cargo: 3_120 },
+  USV: { mass: 30_266_600, tank: 2_420, type: "Frigate", cargo: 3_120 },
+  // Keep
+  Recurve: { mass: 10400000, tank: 970, type: "Corvette", cargo: 520 },
+  Reflex: { mass: 9750000, tank: 1750, type: "Corvette", cargo: 520 },
+  Reiver: { mass: 10200000, tank: 1416, type: "Corvette", cargo: 520 },
+  Wend: { mass: 6800000, tank: 200, type: "Shuttle", cargo: 520 },
+  // Synod
+  Chumaq: {
+    mass: 1739489536,
+    tank: 270_585,
     type: "Combat Battlecruiser",
     cargo: 312_000,
   },
-  "Samoskyd-1": { mass: 24_552_000, tank: 300, type: "Frigate", cargo: 5_720 },
-  Strix: { mass: 95_376_000, tank: 1_550, type: "Destroyer", cargo: 4_160 },
-  Ungher: { mass: 74_389_000, tank: 1_400, type: "Frigate", cargo: 3_120 },
-  Val: { mass: 27_210_000, tank: 550, type: "Frigate", cargo: 6_240 },
 } as const;
 
 export function isCompatible(fuel1: FuelName, fuel2: FuelName) {
-  const fuel1_is_basic = fuel1 === "uSOF-20";
-  const fuel2_is_basic = fuel2 === "uSOF-20";
+  const fuel1_is_basic = fuel1 === "D1" || fuel1 === "D2";
+  const fuel2_is_basic = fuel2 === "D1" || fuel2 === "D2";
   return fuel1_is_basic === fuel2_is_basic;
 }
 
@@ -126,81 +115,130 @@ export function getEngine(type: ShipType): Engine {
   throw new Error(`No engine found for type ${type}`);
 }
 
-export type ItemName = string;
-export type Item = {
+const _items = {
+  "D1 Fuel": { volume: 0.28, mass: 20 },
+  "D2 Fuel": { volume: 0.28, mass: 30 },
+  "SOF-40 Fuel": { volume: 0.28, mass: 25 },
+  "EU-40 Fuel": { volume: 0.28, mass: 25 },
+  "SOF-80 Fuel": { volume: 0.28, mass: 30 },
+  "EU-90 Fuel": { volume: 0.28, mass: 30 },
+
+  "Common Ore": { volume: 1, mass: 2_500 },
+  "Metal-rich Ore": { volume: 1, mass: 3_000 },
+  "Carbonaceous Ore": { volume: 1, mass: 1_500 },
+
+  "Building Foam": { volume: 470, mass: 4_700_000 },
+  "Printed Circuits": { volume: 4, mass: 10_500 },
+  "Carbon Weave": { volume: 15, mass: 30_000 },
+  "Reinforced Alloys": { volume: 10, mass: 56_000 },
+  "Thermal Composites": { volume: 10, mass: 24_200 },
+  "Exclave Technocore": { volume: 20, mass: 94_299 },
+  "Synod Technocore": { volume: 20, mass: 94_299 },
+};
+export type ItemName = keyof typeof _items;
+export type ItemAttrs = {
   volume: number;
   mass: number;
 };
-export const items: { [key: ItemName]: Item } = {
-  "uSOF-20 Fuel": { volume: 0.28, mass: 42 },
-  "SOF-40 Fuel": { volume: 0.28, mass: 42 },
-  "EU-40 Fuel": { volume: 0.28, mass: 42 },
-  "SOF-80 Fuel": { volume: 0.28, mass: 42 },
-  "EU-90 Fuel": { volume: 0.28, mass: 42 },
-  "Carbonaceous Ore": { volume: 1, mass: 1671.31 },
-  "Carbonaceous Materials": { volume: 0.01, mass: 20 },
-  Silicates: { volume: 0.01, mass: 30 },
-  "Bulky Cargo Panels": { volume: 100, mass: 294_074 },
-  "Mounting Platform": { volume: 5, mass: 17_044 },
-  Radar: { volume: 1, mass: 904 },
-  "Carbonaceous Fuel": { volume: 1, mass: 1671.31 },
-  Thorium: { volume: 0.01, mass: 117 },
-  "Steel Beams": { volume: 10, mass: 76_200 },
-  "Steel Plates": { volume: 1, mass: 7_620 },
-  "Light Metal Alloy": { volume: 0.1, mass: 400 },
-  "Light Metal Framing": { volume: 10, mass: 40_200 },
-  "Fuel Tank": { volume: 25, mass: 13_442 },
-};
+export const items: { [key in ItemName]: ItemAttrs } = _items;
 
-export type StructureName = string;
-export type StructureBom = { [key: ItemName]: number };
-export const posboms: { [key: StructureName]: StructureBom } = {
+const _posboms = {
+  // Core
+  Refuge: {
+    "Metal-rich Ore": 50,
+  },
   "Portable Refinery": {
-    "Carbonaceous Ore": 400,
+    "Common Ore": 50,
   },
   "Portable Printer": {
-    "Carbonaceous Materials": 420,
-    Silicates: 60,
+    "Carbonaceous Ore": 50,
   },
-  Sepulchre: {
-    "Steel Plates": 400,
-    "Light Metal Alloy": 6,
+  "Network Node": {
+    "Carbon Weave": 10,
+    "Printed Circuits": 10,
+    "Thermal Composites": 10,
   },
-  Refuge: {
-    Silicates: 430,
-    "Steel Plates": 8,
-    "Light Metal Alloy": 300,
+  "Portable Storage": {
+    "Common Ore": 50,
   },
-  "Storage Unit": {
-    "Carbonaceous Ore": 400,
+  // Industry
+  "Printer S": {
+    "Reinforced Alloys": 15,
+    "Printed Circuits": 15,
   },
   "Printer L": {
-    Thorium: 100,
-    "Steel Plates": 200,
-    "Light Metal Alloy": 500,
-    "Bulky Cargo Panels": 50,
+    "Building Foam": 10,
   },
+  Refinery: {
+    "Reinforced Alloys": 15,
+    "Thermal Composites": 15,
+  },
+  "Refinery L": {
+    "Building Foam": 10,
+  },
+  Printer: {
+    "Building Foam": 2,
+  },
+  Assembler: {
+    "Reinforced Alloys": 20,
+    "Carbon Weave": 10,
+    "Printed Circuits": 5,
+  },
+  "Shipyard S": {
+    "Reinforced Alloys": 20,
+    "Carbon Weave": 10,
+    "Printed Circuits": 5,
+  },
+  Shipyard: {
+    "Building Foam": 2,
+    "Exclave Technocore": 1,
+  },
+  "Shipyard L": {
+    "Building Foam": 13,
+    "Synod Technocore": 1,
+  },
+  // Storage
   "Smart Storage Unit": {
-    "Steel Plates": 60,
-    "Light Metal Framing": 6,
-    "Bulky Cargo Panels": 5,
+    "Building Foam": 12,
   },
-  "Smart Turret": {
-    "Steel Plates": 500,
-    "Light Metal Framing": 50,
-    "Mounting Platform": 1,
-    Radar: 1,
+  "Small Storage Unit": {
+    "Common Ore": 250,
+    "Metal-rich Ore": 250,
   },
+  "Storage Unit": {
+    "Building Foam": 2,
+  },
+  // Gates
   "Smart Gate": {
-    Thorium: 100,
-    "Steel Beams": 100,
-    "Light Metal Framing": 100,
-    "Fuel Tank": 160,
+    "Building Foam": 650,
   },
-  Hedgehog: {
-    "Steel Plates": 500,
-    "Steel Beams": 50,
+  // Defense
+  "Smart Turret": {
+    "Building Foam": 1,
+  },
+  // Hangars
+  Hangar: {
+    "Building Foam": 2,
+  },
+  "Large Hangar": {
+    "Building Foam": 13,
+  },
+  // Misc
+  "Totem 1": {
+    "Building Foam": 2,
+  },
+  "Totem 2": {
+    "Building Foam": 2,
+  },
+  "Wall 1": {
+    "Building Foam": 2,
+  },
+  "Wall 2": {
+    "Building Foam": 2,
   },
 };
+export type StructureName = string;
+export type StructureBom = { [key in ItemName]?: number };
+export const posboms: { [key in StructureName]: StructureBom } = _posboms;
 
 export type BaseBom = { [key: StructureName]: number };
