@@ -11,8 +11,7 @@ import typing as t
 import logging
 import os.path
 from pathlib import Path
-
-import jsonpickle
+import json
 
 log = logging.getLogger(__name__)
 
@@ -89,9 +88,8 @@ if __name__ == "__main__":
         data = files[args.resource].read_bytes()
 
         if args.unpickle:
-            jsonpickle.set_encoder_options('json', sort_keys=True, indent=4)
             struct = pickle.loads(data)
-            data = (jsonpickle.encode(struct) + "\n").encode('utf-8')
+            data = (json.dumps(struct, indent=4) + "\n").encode('utf-8')
 
         if args.output is None:
             args.output = os.path.basename(args.resource)
