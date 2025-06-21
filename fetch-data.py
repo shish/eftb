@@ -79,6 +79,10 @@ def fetch_gates(db_path: Path) -> t.List[t.Dict[str, t.Any]]:
     con.close()
     return data
 
+def needs_update(inp: Path, out: Path) -> bool:
+    """Check if the input file is newer than the output file."""
+    return not out.exists() or inp.stat().st_mtime > out.stat().st_mtime
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
@@ -88,7 +92,7 @@ if __name__ == "__main__":
 
     # extracted starmap has NPC gates + solar system locations
     log.info("Checking for extracted starmap")
-    starmap_path = d / 'extracted-starmap.json'
+    starmap_path = d / 'starmap.json'
     if not starmap_path.exists():
         log.error("Extracted starmap not found. Please use restool.py to extract it first.")
         exit(1)
@@ -116,6 +120,6 @@ if __name__ == "__main__":
         log.error("Blockchain database not found. Please run fetch-blockchain.sh and wait for it to sync.")
         exit(1)
     smartgates_path = d / 'smartgates.json'
-    if not smartgates_path.exists() or db_path.stat().st_mtime > smartgates_path.stat().st_mtime:
+    if needs_update(db_path, smartgates_path):
         data = fetch_gates(db_path)
         smartgates_path.write_text(json.dumps(data, indent=4))

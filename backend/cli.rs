@@ -82,7 +82,7 @@ fn main() -> anyhow::Result<()> {
     match &cli.command {
         Some(Commands::Build { max_jump_distance }) => {
             info!("Loading raw data");
-            let raw_star_data = raw::RawStarMap::from_file("data/extracted-starmap.json");
+            let raw_star_data = raw::RawStarMap::from_file("data/starmap.json");
             let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
 
             info!("Building star map");
