@@ -23,7 +23,10 @@ function CargoCalculator() {
 
   useEffect(() => {
     const myItemsBom: { [key: string]: number } = {};
-    for (const [pos, posCount] of Object.entries(baseBom) as [StructureName, number][]) {
+    for (const [pos, posCount] of Object.entries(baseBom) as [
+      StructureName,
+      number,
+    ][]) {
       for (const [item, itemCount] of Object.entries(posboms[pos])) {
         if (!myItemsBom[item]) myItemsBom[item] = 0;
         myItemsBom[item] += itemCount * posCount;
@@ -52,22 +55,24 @@ function CargoCalculator() {
       <h2>How much does this stuff weigh?</h2>
       <table className="form">
         <tbody>
-          {(Object.entries(baseBom) as [StructureName, number][]).map(([posName, count]) => (
-            <tr key={posName}>
-              <th>{posName}</th>
-              <td>
-                <input
-                  type="number"
-                  value={count}
-                  onChange={(e) => {
-                    const newBaseBom = { ...baseBom };
-                    newBaseBom[posName] = e.target.valueAsNumber;
-                    setBaseBom(newBaseBom);
-                  }}
-                />
-              </td>
-            </tr>
-          ))}
+          {(Object.entries(baseBom) as [StructureName, number][]).map(
+            ([posName, count]) => (
+              <tr key={posName}>
+                <th>{posName}</th>
+                <td>
+                  <input
+                    type="number"
+                    value={count}
+                    onChange={(e) => {
+                      const newBaseBom = { ...baseBom };
+                      newBaseBom[posName] = e.target.valueAsNumber;
+                      setBaseBom(newBaseBom);
+                    }}
+                  />
+                </td>
+              </tr>
+            ),
+          )}
         </tbody>
       </table>
       <p>Materials:</p>

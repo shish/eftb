@@ -1,16 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect } from "react";
-import {
-  ships,
-  fuels,
-  isCompatible,
-  getEngine,
-  Ship,
-  ShipName,
-  FuelName,
-  Fuel,
-  items,
-} from "../../consts";
+import { ships, getEngine, Ship, ShipName, items } from "../../consts";
+import { FuelName, Fuel, fuels, isCompatible } from "../../consts/fuels";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/shipfuel";
 import { SettingsContext } from "../../providers/settings";

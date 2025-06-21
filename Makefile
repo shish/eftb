@@ -1,4 +1,7 @@
-all: data/blockchain.db data/smartgates.json data/starmap.bin data/solarsystems.json data/types.json
+all: data/blockchain.db data/smartgates.json \
+	data/starmap.bin \
+	data/solarsystems.json data/types.json data/fuels.json \
+	src/consts/fuels.ts
 .PHONY: all sync-blockchain
 
 data/blockchain.db:
@@ -34,3 +37,12 @@ data/solarsystems.json: tools/api_get.py
 data/types.json: tools/api_get.py
 	python3 tools/api_get.py types \
 	    -o data/types.json
+
+data/fuels.json: tools/api_get.py
+	python3 tools/api_get.py fuels \
+	    -o data/fuels.json
+
+src/consts/fuels.ts: data/fuels.json
+	python3 tools/fuels.py \
+	    -i data/fuels.json \
+	    -o src/consts/fuels.ts

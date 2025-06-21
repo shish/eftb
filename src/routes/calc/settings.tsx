@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useContext } from "react";
 import { SettingsContext } from "../../providers/settings";
-import { FuelName } from "../../consts";
+import { FuelName } from "../../consts/fuels";
 
 export const Route = createFileRoute("/calc/settings")({
   component: Settings,

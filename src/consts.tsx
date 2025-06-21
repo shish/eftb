@@ -1,19 +1,4 @@
-export type FuelName =
-  | "D1"
-  | "D2"
-  | "SOF-40"
-  | "EU-40"
-  | "SOF-80"
-  | "EU-90";
-export type Fuel = number;
-export const fuels: { [key in FuelName]: Fuel } = {
-  D1: 0.1,
-  D2: 0.15,
-  "SOF-40": 0.4,
-  "EU-40": 0.4,
-  "SOF-80": 0.8,
-  "EU-90": 0.9,
-};
+import { FuelName } from "./consts/fuels";
 
 export type ShipType =
   | "Shuttle"
@@ -51,12 +36,12 @@ export const engines: { [key in EngineName]: Engine } = {
   Sojourn: { mass: 150_000, fuel: "D1", types: ["Corvette"] },
   "Tempo CD41": {
     mass: 300_000,
-    fuel: "SOF-80",
+    fuel: "SOF-40",
     types: ["Frigate", "Destroyer"],
   },
   "Velocity CD81": {
     mass: 300_000,
-    fuel: "SOF-80",
+    fuel: "SOF-40",
     types: ["Frigate", "Destroyer"],
   },
 };
@@ -98,12 +83,6 @@ export const ships: { [key in ShipName]: Ship } = {
     cargo: 312_000,
   },
 } as const;
-
-export function isCompatible(fuel1: FuelName, fuel2: FuelName) {
-  const fuel1_is_basic = fuel1 === "D1" || fuel1 === "D2";
-  const fuel2_is_basic = fuel2 === "D1" || fuel2 === "D2";
-  return fuel1_is_basic === fuel2_is_basic;
-}
 
 export function getEngine(type: ShipType): Engine {
   for (const engineNameS of Object.keys(engines)) {

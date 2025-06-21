@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  ships,
-  fuels,
-  isCompatible,
-  getEngine,
-  ShipName,
-  FuelName,
-} from "../consts";
+import { ships, getEngine, ShipName } from "../consts";
+import { FuelName, fuels, isCompatible } from "../consts/fuels";
 import { useSessionStorage } from "usehooks-ts";
 
 export function ShipFuelSelect({
