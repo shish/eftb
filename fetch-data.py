@@ -2,75 +2,120 @@
 
 import json
 import urllib.request
-import pathlib
+from pathlib import Path
 import typing as t
-from tqdm import tqdm
+import logging
+import sqlite3
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    def tqdm(iterable, *args, **kwargs):
+        """A no-op tqdm function for environments where tqdm is not installed."""
+        return iterable
+
+log = logging.getLogger(__name__)
+
 
 def api_get(path: str, base='https://blockchain-gateway-stillness.live.tech.evefrontier.com/v2') -> t.Any:
-    cache = pathlib.Path(f'data/{path}.json')
-    if cache.exists():
-        data = json.loads(cache.read_text())
-    else:
-        url = f'{base}/{path}'
+    url = f'{base}/{path}'
 
-        first = json.loads(urllib.request.urlopen(url).read())
-        total = first["metadata"]["total"]
-        limit = first["metadata"]["limit"]
+    first = json.loads(urllib.request.urlopen(url).read())
+    total = first["metadata"]["total"]
+    limit = first["metadata"]["limit"]
 
-        data = []
-        for offset in tqdm(range(0, total, limit), desc=f'Fetching {path}'):
-            paged_url = f'{url}?limit={limit}&offset={offset}'
-            response = urllib.request.urlopen(paged_url).read()
-            page_data = json.loads(response.decode('utf-8'))
-            if not page_data["data"]:
-                break
-            if offset == 0:
-                data = page_data["data"]
-            else:
-                data.extend(page_data["data"])
-            offset += limit
+    data = []
+    for offset in tqdm(range(0, total, limit), desc=f'Fetching {path}'):
+        paged_url = f'{url}?limit={limit}&offset={offset}'
+        response = urllib.request.urlopen(paged_url).read()
+        page_data = json.loads(response.decode('utf-8'))
+        if not page_data["data"]:
+            break
+        if offset == 0:
+            data = page_data["data"]
+        else:
+            data.extend(page_data["data"])
+        offset += limit
 
-        cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps(data, indent=4))
     return data
 
 
-api_get('solarsystems')
-api_get('types')
+def fetch_gates(db_path: Path) -> t.List[t.Dict[str, t.Any]]:
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
 
-gates_to_gates = []
-for sass in tqdm(api_get('smartassemblies')):
-    if sass['type'] == 'SmartGate' and sass['state'] == "online":
-        # currently there are no smartgates online, so I don't know
-        # what the data for an online gate looks like...
-        print(sass)
-        import sys; sys.exit(1)
-        #try:
-        #    gate = api_get(f'smartassemblies/{sass["id"]}')
-        #    if gate['gateLink']['isLinked']:
-        #        gates_to_gates.append({
-        #            'id': gate['id'],
-        #            'itemId': gate['itemId'],
-        #            'name': gate['name'],
-        #            # 'from': gate['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
-        #            'from': gate['solarSystemId'],  # refers to alpha SolarSystemId
-        #            # 'to': dest['solarSystem']['solarSystemId'],  # refers to phase-V SolarSystemId
-        #            'to': gate['gateLink']['destinationGate']  # refers to alpha SmartAssemblyId
-        #        })
-        #except Exception as e:
-        #    print(f'Error fetching gate {sass["id"][:10]}: {e}')
+    PREFIX = "0xcdb380e0cd3949caf70c45c67079f2e27a77fc47__evefrontier__"
+    # smart_assembly = f'"{PREFIX}smart_assembly"'
+    # smart_gate_config = f'"{PREFIX}smart_gate_config"'
+    smart_gate_link = f'"{PREFIX}smart_gate_link"'
+    location = f'"{PREFIX}location"'
 
-# Now that we've loaded all the gates, update `gate.to` to be a
-# SolarSystemId instead of a GateId
-gate_id_to_solar_system_id = {gate['id']: gate['from'] for gate in gates_to_gates}
-gates_to_solar_systems = []
-for gate in gates_to_gates:
-    ssid = gate_id_to_solar_system_id.get(gate['to'])
-    if ssid:
-        gates_to_solar_systems.append(gate | {'to': ssid})
-    else:
-        print(f'Gate {gate["id"][:10]} has invalid destination ({gate["to"][:10]})')
-# filter out some invalid test-gates
-#gates = [g for g in gates if g['to'] != 0]
-with open('data/smartgates.json', 'w') as f:
-    json.dump(gates_to_solar_systems, f, indent=4)
+    query = f"""
+        SELECT
+            smart_gate_link.source_gate_id,
+            source_location.solar_system_id,
+            destination_location.solar_system_id
+        FROM
+            {smart_gate_link} AS smart_gate_link
+        JOIN
+            {location} AS source_location
+            ON source_location.smart_object_id = smart_gate_link.source_gate_id
+        JOIN
+            {location} AS destination_location
+            ON destination_location.smart_object_id = smart_gate_link.destination_gate_id
+        WHERE
+            smart_gate_link.is_linked = 1
+    """
+
+    data = []
+    for row in tqdm(cur.execute(query), desc='Fetching smart gates'):
+        data.append({
+            'id': row[0].decode(),
+            'itemId': None,
+            'name': None,
+            'from': row[1].decode(),
+            'to': row[2].decode()
+        })
+    con.close()
+    return data
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+
+    d = Path('data')
+    d.mkdir(parents=True, exist_ok=True)
+
+    # extracted starmap has NPC gates + solar system locations
+    log.info("Checking for extracted starmap")
+    starmap_path = d / 'extracted-starmap.json'
+    if not starmap_path.exists():
+        log.error("Extracted starmap not found. Please use restool.py to extract it first.")
+        exit(1)
+
+    # solarsystems API has solar system locations + solar system names
+    log.info("Fetching solarsystems data from API")
+    ss_path = d / 'solarsystems.json'
+    if not ss_path.exists():
+        data = api_get('solarsystems')
+        ss_path.write_text(json.dumps(data, indent=4))
+
+    # types has ship mass / volume for consts.tsx, but
+    # the rest of consts.tsx is manually copy-pasted
+    # from show-info on market items
+    log.info("Fetching types data from API")
+    types_path = d / 'types.json'
+    if not types_path.exists():
+        data = api_get('types')
+        types_path.write_text(json.dumps(data, indent=4))
+
+    # blockchain has player smartgates
+    log.info("Fetching smartgates from blockchain index")
+    db_path = d / 'blockchain.db'
+    if not db_path.exists():
+        log.error("Blockchain database not found. Please run fetch-blockchain.sh and wait for it to sync.")
+        exit(1)
+    smartgates_path = d / 'smartgates.json'
+    if not smartgates_path.exists() or db_path.stat().st_mtime > smartgates_path.stat().st_mtime:
+        data = fetch_gates(db_path)
+        smartgates_path.write_text(json.dumps(data, indent=4))

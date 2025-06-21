@@ -2,8 +2,9 @@
 
 ## How to prepare the data
 
-1. Extract starmap with `./restool.py extract -u res:/staticdata/starmapcache.pickle -o ./data/extracted-starmap.json` (This data is under NDA, don't post it anywhere)
-2. Fetch other data with `./fetch_data.py`
+1. Extract starmap with `./restool.py extract -u res:/staticdata/starmapcache.pickle -o ./data/extracted-starmap.json`
+2. Fetch blockchain data with `./fetch-blockchain.sh` (Leave it running if you want to stay in-sync)
+2. Fetch other data with `./fetch-data.py`
 3. Create `data/starmap.bin` using `cargo run -- build` (This compiles the starmap data into a form that's more optimized for route planning)
 
 ## Testing with the CLI
