@@ -76,6 +76,7 @@ impl std::hash::Hash for Star {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
     pub star_id_to_name: HashMap<SolarSystemId, String>,
@@ -114,6 +115,108 @@ impl Universe {
             bincode::serde::encode_to_vec(&self.star_map, bincode::config::legacy())?,
         )?;
         Ok(())
+    }
+
+    #[cfg(test)]
+    pub fn tiny_test() -> Universe {
+        use uom::si::length::light_year;
+
+        struct MockStar {
+            id: SolarSystemId,
+            name: &'static str,
+            region_id: RegionId,
+            x: f64,
+            y: f64,
+        }
+        struct MockConn {
+            conn_type: ConnType,
+            s1: SolarSystemId,
+            s2: SolarSystemId,
+        }
+
+        /*
+         *   A..B..C
+         *    \   /
+         *    n\ /s
+         *      D
+         */
+        #[rustfmt::skip]
+        let stars = [
+            MockStar { id: 1, name: "A", region_id: 1, x: 0.0, y: 0.0 },
+            MockStar { id: 2, name: "B", region_id: 2, x: 10.0, y: 0.0 },
+            MockStar { id: 3, name: "C", region_id: 2, x: 20.0, y: 0.0 },
+            MockStar { id: 4, name: "D", region_id: 2, x: 10.0, y: 20.0 },
+        ];
+
+        #[rustfmt::skip]
+        let conns = [
+            MockConn { conn_type: ConnType::NpcGate, s1: 1, s2: 4 },
+            MockConn { conn_type: ConnType::SmartGate, s1: 4, s2: 3 },
+            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 2 },
+            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 3 },
+            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 4 },
+            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 3 },
+            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 4 },
+            MockConn { conn_type: ConnType::Jump, s1: 3, s2: 4 },
+        ];
+
+        let mut star_map: HashMap<SolarSystemId, Star> = stars
+            .iter()
+            .map(|s| {
+                (
+                    s.id,
+                    Star {
+                        id: s.id,
+                        region_id: s.region_id,
+                        x: Length::new::<light_year>(s.x).get::<meter>(),
+                        y: Length::new::<light_year>(s.y).get::<meter>(),
+                        z: 0.0,                  // Z is not used in this test
+                        connections: Vec::new(), // Connections will be added later
+                    },
+                )
+            })
+            .collect();
+
+        let mut conn_id = 0;
+        for conn in conns {
+            let star1 = star_map.get(&conn.s1).unwrap().clone();
+            let star2 = star_map.get(&conn.s2).unwrap().clone();
+            let dist = star1.distance(&star2);
+
+            star_map
+                .get_mut(&conn.s1)
+                .unwrap()
+                .connections
+                .push(Connection {
+                    id: conn_id,
+                    conn_type: conn.conn_type.clone(),
+                    distance: dist,
+                    target: star2.id,
+                });
+            conn_id += 1;
+
+            star_map
+                .get_mut(&conn.s2)
+                .unwrap()
+                .connections
+                .push(Connection {
+                    id: conn_id,
+                    conn_type: conn.conn_type,
+                    distance: dist,
+                    target: star1.id,
+                });
+            conn_id += 1;
+        }
+
+        for star in star_map.values_mut() {
+            star.connections.sort();
+        }
+
+        Universe {
+            star_map,
+            star_id_to_name: stars.iter().map(|s| (s.id, s.name.to_string())).collect(),
+            star_name_to_id: stars.iter().map(|s| (s.name.to_string(), s.id)).collect(),
+        }
     }
 }
 

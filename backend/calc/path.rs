@@ -80,7 +80,7 @@ pub fn calc_path(
     timeout: Option<u64>,
 ) -> PathResult {
     let init_conn = Connection {
-        id: 0,
+        id: u64::MAX,
         conn_type: ConnType::Jump,
         distance: Length::new::<light_year>(0.0),
         target: start.id,
@@ -106,56 +106,79 @@ pub fn calc_path(
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use uom::si::length::light_year;
 
     use super::*;
 
+    fn call_calc_path(
+        universe: &Universe,
+        start_id: SolarSystemId,
+        end_id: SolarSystemId,
+        jump_distance: f64,
+        optimize: PathOptimize,
+        use_smart_gates: bool,
+    ) -> PathResult {
+        calc_path(
+            universe,
+            &universe.star_map[&start_id],
+            &universe.star_map[&end_id],
+            Length::new::<light_year>(jump_distance),
+            optimize,
+            use_smart_gates,
+            None,
+        )
+    }
+
+    // Gate uses less fuel than jump
     #[test]
-    fn test_path() {
-        let stars = [
-            Star {
-                id: 1,
-                region_id: 1,
-                connections: vec![Connection {
-                    id: 1,
-                    conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
-                    target: 2,
-                }],
-                ..Default::default()
-            },
-            Star {
-                id: 2,
-                region_id: 2,
-                connections: vec![Connection {
-                    id: 2,
-                    conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
-                    target: 1,
-                }],
-                ..Default::default()
-            },
-        ];
-
-        let universe = Universe {
-            star_map: stars.iter().map(|s| (s.id, s.clone())).collect(),
-            star_id_to_name: HashMap::new(),
-            star_name_to_id: HashMap::new(),
-        };
-
+    fn test_path_fuel_prefer_gate_over_jump() {
+        let universe = Universe::tiny_test();
         assert_eq!(
-            calc_path(
-                &universe,
-                &stars[0],
-                &stars[1],
-                Length::new::<light_year>(20.0),
-                PathOptimize::Fuel,
-                false,
-                None
-            ),
-            PathResult::Found(vec![(stars[0].connections[0].clone())])
+            call_calc_path(&universe, 1, 4, 25.0, PathOptimize::Fuel, true),
+            PathResult::Found(vec![universe.star_map[&1].connections[0].clone()])
+        );
+    }
+
+    // Gate + short-jump uses less fuel than long-jump
+    #[test]
+    fn test_path_fuel_prefer_more_hops_over_more_fuel() {
+        let universe = Universe::tiny_test();
+        assert_eq!(
+            call_calc_path(&universe, 4, 2, 25.0, PathOptimize::Fuel, false),
+            PathResult::Found(vec![
+                universe.star_map[&4].connections[0].clone(),
+                universe.star_map[&1].connections[1].clone(),
+            ])
+        );
+    }
+
+    // One long jump is shorter than a gate and a short jump
+    #[test]
+    fn test_path_distance() {
+        let universe = Universe::tiny_test();
+        assert_eq!(
+            call_calc_path(&universe, 2, 4, 25.0, PathOptimize::Distance, false),
+            PathResult::Found(vec![universe.star_map[&2].connections[2].clone(),])
+        );
+    }
+
+    // Jump instead of smart-gate if smart-gate is disabled
+    #[test]
+    fn test_path_hops_jump_if_smart_gate_disabled() {
+        let universe = Universe::tiny_test();
+        assert_eq!(
+            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, false),
+            PathResult::Found(vec![universe.star_map[&4].connections[4].clone()])
+        );
+    }
+
+    // Take smart gate if enabled
+    #[test]
+    fn test_path_hops_use_smart_gate_if_smart_gate_enabled() {
+        let universe = Universe::tiny_test();
+        assert_eq!(
+            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, true),
+            PathResult::Found(vec![universe.star_map[&4].connections[1].clone()])
         );
     }
 }

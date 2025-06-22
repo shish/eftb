@@ -34,50 +34,24 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Ve
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use uom::si::length::light_year;
 
     use super::*;
 
     #[test]
     fn test_exit() {
-        let stars = [
-            Star {
-                id: 1,
-                region_id: 1,
-                connections: vec![Connection {
-                    id: 1,
-                    conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
-                    target: 2,
-                }],
-                ..Default::default()
-            },
-            Star {
-                id: 2,
-                region_id: 2,
-                connections: vec![Connection {
-                    id: 2,
-                    conn_type: ConnType::Jump,
-                    distance: Length::new::<light_year>(10.0),
-                    target: 1,
-                }],
-                ..Default::default()
-            },
-        ];
-
-        let star_map: std::collections::HashMap<SolarSystemId, Star> =
-            stars.iter().map(|s| (s.id, s.clone())).collect();
-        let universe = Universe {
-            star_map,
-            star_id_to_name: HashMap::new(),
-            star_name_to_id: HashMap::new(),
-        };
+        let universe = Universe::tiny_test();
 
         assert_eq!(
-            calc_exit(&universe, &stars[0], Length::new::<light_year>(20.0)),
-            vec![(stars[0].clone(), stars[1].clone())]
+            calc_exit(
+                &universe,
+                &universe.star_map[&1],
+                Length::new::<light_year>(10.0)
+            ),
+            vec![
+                (universe.star_map[&1].clone(), universe.star_map[&2].clone()),
+                (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
+            ]
         );
     }
 }
