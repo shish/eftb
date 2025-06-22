@@ -10,7 +10,6 @@ use uom::si::length::light_year;
 
 use eftb::data;
 use eftb::raw;
-use uom::si::mass::kilogram;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -32,13 +31,6 @@ enum Commands {
         start_name: String,
         end_name: String,
     },
-    /// Find how much fuel is needed for a given jump
-    Fuel {
-        dist: f64,
-        mass: f64,
-        #[clap(short, long, default_value = "0.4")]
-        efficiency: f64,
-    },
     /// Find the shortest path between two stars
     Path {
         start_name: String,
@@ -49,13 +41,6 @@ enum Commands {
         optimize: eftb::calc::path::PathOptimize,
         #[clap(short, long)]
         use_smart_gates: bool,
-    },
-    /// Figure out how far a given ship can jump
-    Jump {
-        mass: f64,
-        fuel: f64,
-        #[clap(short, long, default_value = "0.4")]
-        efficiency: f64,
     },
     /// Find the exits from a given point
     Exits {
@@ -275,14 +260,6 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        Some(Commands::Jump {
-            mass,
-            fuel,
-            efficiency,
-        }) => {
-            let dist: Length = eftb::calc_jump(Mass::new::<kilogram>(*mass), *fuel, *efficiency);
-            println!("Jump distance: {:.0} ly", dist.get::<light_year>())
-        }
         Some(Commands::Exits {
             start_name,
             jump_distance,
@@ -320,16 +297,6 @@ fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-        }
-        Some(Commands::Fuel {
-            dist,
-            mass,
-            efficiency,
-        }) => {
-            let dist: Length = Length::new::<light_year>(*dist);
-            let mass: Mass = Mass::new::<kilogram>(*mass);
-            let fuel = eftb::calc_fuel(dist, mass, *efficiency);
-            println!("Fuel needed: {:.0}", fuel)
         }
         Some(Commands::Star {
             name,
