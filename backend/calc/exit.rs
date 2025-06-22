@@ -34,6 +34,8 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Ve
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use uom::si::length::light_year;
 
     use super::*;
@@ -67,7 +69,11 @@ mod tests {
 
         let star_map: std::collections::HashMap<SolarSystemId, Star> =
             stars.iter().map(|s| (s.id, s.clone())).collect();
-        let universe = Universe { star_map };
+        let universe = Universe {
+            star_map,
+            star_id_to_name: HashMap::new(),
+            star_name_to_id: HashMap::new(),
+        };
 
         assert_eq!(
             calc_exit(&universe, &stars[0], Length::new::<light_year>(20.0)),

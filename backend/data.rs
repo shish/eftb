@@ -76,25 +76,10 @@ impl std::hash::Hash for Star {
     }
 }
 
-pub fn get_name_maps() -> anyhow::Result<(
-    HashMap<SolarSystemId, String>,
-    HashMap<String, SolarSystemId>,
-)> {
-    let data = std::fs::read_to_string("data/solarsystems.json")?;
-    let json = serde_json::from_str::<Vec<crate::raw::RawStar>>(&data)?;
-    let star_id_to_name: HashMap<SolarSystemId, String> = json
-        .iter()
-        .map(|star| (star.id, star.name.clone()))
-        .collect();
-    let star_name_to_id: HashMap<String, SolarSystemId> = json
-        .iter()
-        .map(|star| (star.name.clone(), star.id))
-        .collect();
-    Ok((star_id_to_name, star_name_to_id))
-}
-
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
+    pub star_id_to_name: HashMap<SolarSystemId, String>,
+    pub star_name_to_id: HashMap<String, SolarSystemId>,
 }
 impl Universe {
     pub fn load() -> anyhow::Result<Universe> {
@@ -103,7 +88,23 @@ impl Universe {
             bincode::config::legacy(),
         )?
         .0;
-        Ok(Universe { star_map })
+
+        let data = std::fs::read_to_string("data/solarsystems.json")?;
+        let json = serde_json::from_str::<Vec<crate::raw::RawStar>>(&data)?;
+        let star_id_to_name: HashMap<SolarSystemId, String> = json
+            .iter()
+            .map(|star| (star.id, star.name.clone()))
+            .collect();
+        let star_name_to_id: HashMap<String, SolarSystemId> = json
+            .iter()
+            .map(|star| (star.name.clone(), star.id))
+            .collect();
+
+        Ok(Universe {
+            star_map,
+            star_id_to_name,
+            star_name_to_id,
+        })
     }
 
     pub fn save(&self) -> anyhow::Result<()> {

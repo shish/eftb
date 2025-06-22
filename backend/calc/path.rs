@@ -106,6 +106,8 @@ pub fn calc_path(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use uom::si::length::light_year;
 
     use super::*;
@@ -139,6 +141,8 @@ mod tests {
 
         let universe = Universe {
             star_map: stars.iter().map(|s| (s.id, s.clone())).collect(),
+            star_id_to_name: HashMap::new(),
+            star_name_to_id: HashMap::new(),
         };
 
         assert_eq!(

@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate rocket;
 
-use std::collections::HashMap;
 use std::io::Cursor;
 use std::path::Path;
 
@@ -43,23 +42,16 @@ impl From<anyhow::Error> for CustomError {
     }
 }
 
-struct Db {
-    universe: data::Universe,
-    star_id_to_name: HashMap<SolarSystemId, String>,
-    star_name_to_id: HashMap<String, SolarSystemId>,
-}
-impl Db {
-    fn get_star(&self, name: String) -> Result<&Star, CustomError> {
-        let id = self.star_name_to_id.get(&name).ok_or(CustomError(
-            Status::NotFound,
-            format!("Solar system {} not found", name),
-        ))?;
-        let star = self.universe.star_map.get(id).ok_or(CustomError(
-            Status::NotFound,
-            format!("Solar system {} not found", name),
-        ))?;
-        Ok(star)
-    }
+fn get_star(universe: &data::Universe, name: String) -> Result<&Star, CustomError> {
+    let id = universe.star_name_to_id.get(&name).ok_or(CustomError(
+        Status::NotFound,
+        format!("Solar system {} not found", name),
+    ))?;
+    let star = universe.star_map.get(id).ok_or(CustomError(
+        Status::NotFound,
+        format!("Solar system {} not found", name),
+    ))?;
+    Ok(star)
 }
 
 #[get("/<_..>", rank = 2)]
@@ -79,7 +71,7 @@ struct StarsReturn {
 }
 
 #[get("/stars")]
-fn get_stars(db: &State<Db>) -> Json<StarsReturn> {
+fn get_stars(db: &State<data::Universe>) -> Json<StarsReturn> {
     let names = db.star_name_to_id.keys().cloned().collect();
     Json(StarsReturn {
         version: 1,
@@ -97,9 +89,13 @@ struct DistReturn {
 }
 
 #[get("/dist?<start>&<end>")]
-fn calc_dist(db: &State<Db>, start: String, end: String) -> Result<Json<DistReturn>, CustomError> {
-    let start = db.get_star(start)?;
-    let end = db.get_star(end)?;
+fn calc_dist(
+    universe: &State<data::Universe>,
+    start: String,
+    end: String,
+) -> Result<Json<DistReturn>, CustomError> {
+    let start = get_star(universe, start)?;
+    let end = get_star(universe, end)?;
     let dist: Length = start.distance(end);
     Ok(Json(DistReturn {
         version: 1,
@@ -130,15 +126,15 @@ struct PathReturn {
 
 #[get("/path?<start>&<end>&<jump>&<optimize>&<use_smart_gates>")]
 fn calc_path(
-    db: &State<Db>,
+    universe: &State<data::Universe>,
     start: String,
     end: String,
     jump: f64,
     optimize: String,
     use_smart_gates: bool,
 ) -> Result<Json<PathReturn>, CustomError> {
-    let start = db.get_star(start)?;
-    let end = db.get_star(end)?;
+    let start = get_star(universe, start)?;
+    let end = get_star(universe, end)?;
     let optimize = match optimize.as_str() {
         "fuel" => PathOptimize::Fuel,
         "distance" => PathOptimize::Distance,
@@ -152,7 +148,7 @@ fn calc_path(
     };
 
     let result = eftb::calc_path(
-        &db.universe,
+        &universe,
         start,
         end,
         Length::new::<uom::si::length::light_year>(jump),
@@ -168,7 +164,7 @@ fn calc_path(
                 result.push(PathStep {
                     from: WebStar {
                         id: last_id,
-                        name: db.star_id_to_name[&last_id].clone(),
+                        name: universe.star_id_to_name[&last_id].clone(),
                     },
                     conn_type: match conn.conn_type {
                         ConnType::Jump => "jump".to_string(),
@@ -178,7 +174,7 @@ fn calc_path(
                     distance: conn.distance.get::<light_year>() as f64,
                     to: WebStar {
                         id: conn.target,
-                        name: db.star_id_to_name[&conn.target].clone(),
+                        name: universe.star_id_to_name[&conn.target].clone(),
                     },
                 });
                 last_id = conn.target;
@@ -208,11 +204,15 @@ struct ExitReturn {
 }
 
 #[get("/exit?<start>&<jump>")]
-fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn>, CustomError> {
-    let start = db.get_star(start)?;
+fn calc_exit(
+    universe: &State<data::Universe>,
+    start: String,
+    jump: f64,
+) -> Result<Json<ExitReturn>, CustomError> {
+    let start = get_star(universe, start)?;
 
     let exits = eftb::calc_exit(
-        &db.universe,
+        &universe,
         start,
         Length::new::<uom::si::length::light_year>(jump),
     );
@@ -220,8 +220,8 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
     let mut result: Vec<(String, String, f64)> = Vec::new();
     for (from, to) in exits {
         result.push((
-            db.star_id_to_name[&from.id].clone(),
-            db.star_id_to_name[&to.id].clone(),
+            universe.star_id_to_name[&from.id].clone(),
+            universe.star_id_to_name[&to.id].clone(),
             from.distance(&to).get::<uom::si::length::light_year>(),
         ));
     }
@@ -237,16 +237,9 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
 #[launch]
 fn rocket() -> _ {
     let universe = data::Universe::load().unwrap();
-    let (star_id_to_name, star_name_to_id) = data::get_name_maps().unwrap();
-
-    let db = Db {
-        universe,
-        star_id_to_name,
-        star_name_to_id,
-    };
 
     rocket::build()
-        .manage(db)
+        .manage(universe)
         .mount("/", rocket::fs::FileServer::from("./dist").rank(1))
         .mount("/api", routes![get_stars, calc_dist, calc_path, calc_exit])
         .mount("/", routes![index])
