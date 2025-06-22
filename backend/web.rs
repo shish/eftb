@@ -15,7 +15,6 @@ use rocket::State;
 use serde::Serialize;
 use uom::si::f64::*;
 use uom::si::length::light_year;
-use uom::si::mass::kilogram;
 
 use eftb::calc::path::PathOptimize;
 use eftb::data;
@@ -85,24 +84,6 @@ fn get_stars(db: &State<Db>) -> Json<StarsReturn> {
     Json(StarsReturn {
         version: 1,
         data: names,
-    })
-}
-
-// ====================================================================
-// calc_jump
-
-#[derive(Debug, Serialize)]
-struct JumpReturn {
-    version: u32,
-    data: f64,
-}
-
-#[get("/jump?<mass>&<fuel>&<efficiency>")]
-fn calc_jump(mass: f64, fuel: f64, efficiency: f64) -> Json<JumpReturn> {
-    let dist: Length = eftb::calc_jump(Mass::new::<kilogram>(mass), fuel, efficiency);
-    Json(JumpReturn {
-        version: 1,
-        data: dist.get::<uom::si::length::light_year>(),
     })
 }
 
@@ -218,27 +199,6 @@ fn calc_path(
 }
 
 // ====================================================================
-// calc_fuel
-
-#[derive(Debug, Serialize)]
-struct FuelReturn {
-    version: u32,
-    data: f64,
-}
-
-#[get("/fuel?<dist>&<mass>&<efficiency>")]
-fn calc_fuel(dist: f64, mass: f64, efficiency: f64) -> Json<FuelReturn> {
-    Json(FuelReturn {
-        version: 1,
-        data: eftb::calc_fuel(
-            Length::new::<uom::si::length::light_year>(dist),
-            Mass::new::<kilogram>(mass),
-            efficiency,
-        ),
-    })
-}
-
-// ====================================================================
 // calc_exit
 
 #[derive(Debug, Serialize)]
@@ -288,9 +248,6 @@ fn rocket() -> _ {
     rocket::build()
         .manage(db)
         .mount("/", rocket::fs::FileServer::from("./dist").rank(1))
-        .mount(
-            "/api",
-            routes![get_stars, calc_jump, calc_dist, calc_path, calc_fuel, calc_exit],
-        )
+        .mount("/api", routes![get_stars, calc_dist, calc_path, calc_exit])
         .mount("/", routes![index])
 }
