@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use uom::si::f64::*;
 use uom::si::length::light_year;
 
@@ -15,13 +13,13 @@ pub enum PathOptimize {
 /// Given a connection, return a list of all possible next-connections,
 /// and what each of those connections costs
 fn successors(
-    star_map: &HashMap<SolarSystemId, Star>,
+    universe: &Universe,
     conn: &Connection,
     jump_distance: Length,
     optimize: PathOptimize,
     use_smart_gates: bool,
 ) -> Vec<(Connection, i64)> {
-    let star = star_map.get(&conn.target).unwrap();
+    let star = universe.star_map.get(&conn.target).unwrap();
     star.connections
         .iter()
         // take gates and short jumps - stop searching after we
@@ -55,8 +53,9 @@ fn successors(
 /// - Return an approximation of the cost from this connection to the end
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
-pub fn heuristic(star_map: &HashMap<SolarSystemId, Star>, conn: &Connection, end: &Star) -> i64 {
-    let d = star_map
+pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> i64 {
+    let d = universe
+        .star_map
         .get(&conn.target)
         .unwrap()
         .distance(end)
@@ -72,7 +71,7 @@ pub enum PathResult {
 }
 
 pub fn calc_path(
-    star_map: &HashMap<SolarSystemId, Star>,
+    universe: &Universe,
     start: &Star,
     end: &Star,
     jump_distance: Length,
@@ -88,8 +87,8 @@ pub fn calc_path(
     };
     let path = pathfinding::astar(
         &init_conn,
-        |conn| successors(&star_map, conn, jump_distance, optimize, use_smart_gates),
-        |conn| heuristic(&star_map, conn, end),
+        |conn| successors(&universe, conn, jump_distance, optimize, use_smart_gates),
+        |conn| heuristic(&universe, conn, end),
         |conn| conn.target == end.id,
         timeout,
     );
@@ -138,12 +137,13 @@ mod tests {
             },
         ];
 
-        let star_map: HashMap<SolarSystemId, Star> =
-            stars.iter().map(|s| (s.id, s.clone())).collect();
+        let universe = Universe {
+            star_map: stars.iter().map(|s| (s.id, s.clone())).collect(),
+        };
 
         assert_eq!(
             calc_path(
-                &star_map,
+                &universe,
                 &stars[0],
                 &stars[1],
                 Length::new::<light_year>(20.0),

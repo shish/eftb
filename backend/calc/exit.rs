@@ -1,14 +1,8 @@
-use std::collections::HashMap;
-
 use uom::si::f64::*;
 
 use crate::data::*;
 
-pub fn calc_exit(
-    star_map: &HashMap<SolarSystemId, Star>,
-    start: &Star,
-    jump_distance: Length,
-) -> Vec<(Star, Star)> {
+pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Vec<(Star, Star)> {
     let mut exits: Vec<(Star, Star)> = Vec::new();
     let mut checked: Vec<SolarSystemId> = Vec::new();
     let mut to_check: Vec<SolarSystemId> = Vec::new();
@@ -18,9 +12,9 @@ pub fn calc_exit(
     while !to_check.is_empty() {
         let current = to_check.pop().unwrap();
         checked.push(current);
-        let star = star_map.get(&current).unwrap();
+        let star = universe.star_map.get(&current).unwrap();
         for conn in &star.connections {
-            let target = star_map.get(&conn.target).unwrap();
+            let target = universe.star_map.get(&conn.target).unwrap();
             if conn.conn_type == ConnType::NpcGate || conn.conn_type == ConnType::SmartGate {
                 if !checked.contains(&target.id) && !to_check.contains(&target.id) {
                     to_check.push(target.id);
@@ -29,7 +23,7 @@ pub fn calc_exit(
                 && conn.distance <= jump_distance
                 && target.region_id != start.region_id
             {
-                let target = star_map.get(&conn.target).unwrap();
+                let target = universe.star_map.get(&conn.target).unwrap();
                 exits.push((star.clone(), target.clone()));
             }
         }
@@ -71,11 +65,12 @@ mod tests {
             },
         ];
 
-        let star_map: HashMap<SolarSystemId, Star> =
+        let star_map: std::collections::HashMap<SolarSystemId, Star> =
             stars.iter().map(|s| (s.id, s.clone())).collect();
+        let universe = Universe { star_map };
 
         assert_eq!(
-            calc_exit(&star_map, &stars[0], Length::new::<light_year>(20.0)),
+            calc_exit(&universe, &stars[0], Length::new::<light_year>(20.0)),
             vec![(stars[0].clone(), stars[1].clone())]
         );
     }

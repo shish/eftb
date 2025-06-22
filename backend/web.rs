@@ -44,7 +44,7 @@ impl From<anyhow::Error> for CustomError {
 }
 
 struct Db {
-    star_map: HashMap<SolarSystemId, Star>,
+    universe: data::Universe,
     star_id_to_name: HashMap<SolarSystemId, String>,
     star_name_to_id: HashMap<String, SolarSystemId>,
 }
@@ -54,7 +54,7 @@ impl Db {
             Status::NotFound,
             format!("Solar system {} not found", name),
         ))?;
-        let star = self.star_map.get(id).ok_or(CustomError(
+        let star = self.universe.star_map.get(id).ok_or(CustomError(
             Status::NotFound,
             format!("Solar system {} not found", name),
         ))?;
@@ -152,7 +152,7 @@ fn calc_path(
     };
 
     let result = eftb::calc_path(
-        &db.star_map,
+        &db.universe,
         start,
         end,
         Length::new::<uom::si::length::light_year>(jump),
@@ -212,7 +212,7 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
     let start = db.get_star(start)?;
 
     let exits = eftb::calc_exit(
-        &db.star_map,
+        &db.universe,
         start,
         Length::new::<uom::si::length::light_year>(jump),
     );
@@ -236,11 +236,11 @@ fn calc_exit(db: &State<Db>, start: String, jump: f64) -> Result<Json<ExitReturn
 
 #[launch]
 fn rocket() -> _ {
-    let star_map = data::get_star_map().unwrap();
+    let universe = data::Universe::load().unwrap();
     let (star_id_to_name, star_name_to_id) = data::get_name_maps().unwrap();
 
     let db = Db {
-        star_map,
+        universe,
         star_id_to_name,
         star_name_to_id,
     };

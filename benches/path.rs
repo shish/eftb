@@ -6,7 +6,7 @@ use uom::si::f64::*;
 use uom::si::length::light_year;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let star_map = eftb::data::get_star_map().unwrap();
+    let universe = eftb::data::Universe::load().unwrap();
 
     //   | E    | N    | I    | L    |
     // --+------+------+------+------+
@@ -24,7 +24,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         ("L.YZG.1RS", 30023494),
     ]
     .iter()
-    .map(|(name, id)| (name.to_string(), star_map.get(id).unwrap().clone()))
+    .map(|(name, id)| (name.to_string(), universe.star_map.get(id).unwrap().clone()))
     .collect();
 
     for optimize in [
@@ -46,7 +46,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                 |b, jump_distance| {
                     b.iter(|| {
                         eftb::calc_path(
-                            &star_map,
+                            &universe,
                             start,
                             end,
                             black_box(*jump_distance),

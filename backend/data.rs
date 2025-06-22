@@ -93,22 +93,27 @@ pub fn get_name_maps() -> anyhow::Result<(
     Ok((star_id_to_name, star_name_to_id))
 }
 
-pub fn save_star_map(star_map: &HashMap<SolarSystemId, Star>) -> anyhow::Result<()> {
-    // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
-    std::fs::write(
-        "data/starmap.bin",
-        bincode::serde::encode_to_vec(&star_map, bincode::config::legacy())?,
-    )?;
-    Ok(())
+pub struct Universe {
+    pub star_map: HashMap<SolarSystemId, Star>,
 }
+impl Universe {
+    pub fn load() -> anyhow::Result<Universe> {
+        let star_map: HashMap<SolarSystemId, Star> = bincode::serde::decode_from_slice(
+            &std::fs::read("data/starmap.bin")?,
+            bincode::config::legacy(),
+        )?
+        .0;
+        Ok(Universe { star_map })
+    }
 
-pub fn get_star_map() -> anyhow::Result<HashMap<SolarSystemId, Star>> {
-    let map: HashMap<SolarSystemId, Star> = bincode::serde::decode_from_slice(
-        &std::fs::read("data/starmap.bin")?,
-        bincode::config::legacy(),
-    )?
-    .0;
-    Ok(map)
+    pub fn save(&self) -> anyhow::Result<()> {
+        // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
+        std::fs::write(
+            "data/starmap.bin",
+            bincode::serde::encode_to_vec(&self.star_map, bincode::config::legacy())?,
+        )?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
