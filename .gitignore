@@ -3,6 +3,7 @@ data
 old
 venv
 frontier
+extracted
 
 # Logs
 logs
