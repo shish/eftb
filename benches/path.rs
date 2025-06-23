@@ -5,8 +5,8 @@ use uom::si::length::light_year;
 fn path(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
     // ~1200LY across dense space, takes ~0.05s on my laptop
-    let start = &universe.star_map[&universe.star_name_to_id["EP7-F5V"]];
-    let end = &universe.star_map[&universe.star_name_to_id["I.CKD.J6H"]];
+    let start = &universe.star_map[&universe.star_name_to_id["E9R-5PC"]];
+    let end = &universe.star_map[&universe.star_name_to_id["E1J-V83"]];
     let jump_distance: Length = Length::new::<light_year>(200.0);
     c.bench_function("calc_path", |b| {
         b.iter(|| {
