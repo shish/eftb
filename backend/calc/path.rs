@@ -12,7 +12,7 @@ pub enum PathOptimize {
 
 /// Given a connection, return a list of all possible next-connections,
 /// and what each of those connections costs
-fn successors(
+pub fn successors(
     universe: &Universe,
     conn: &Connection,
     jump_distance: Length,
@@ -54,10 +54,7 @@ fn successors(
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
 pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> i64 {
-    let d = universe
-        .star_map
-        .get(&conn.target)
-        .unwrap()
+    let d = universe.star_map[&conn.target]
         .distance(end)
         .get::<light_year>();
     return d as i64;
