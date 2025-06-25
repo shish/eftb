@@ -145,18 +145,18 @@ const _posboms = {
     "Reinforced Alloys": 15,
     "Printed Circuits": 15,
   },
+  "Printer M": {
+    "Building Foam": 2,
+  },
   "Printer L": {
     "Building Foam": 10,
   },
-  Refinery: {
+  "Refinery M": {
     "Reinforced Alloys": 15,
     "Thermal Composites": 15,
   },
   "Refinery L": {
     "Building Foam": 10,
-  },
-  Printer: {
-    "Building Foam": 2,
   },
   Assembler: {
     "Reinforced Alloys": 20,
@@ -168,7 +168,7 @@ const _posboms = {
     "Carbon Weave": 10,
     "Printed Circuits": 5,
   },
-  Shipyard: {
+  "Shipyard M": {
     "Building Foam": 2,
     "Exclave Technocore": 1,
   },
@@ -177,15 +177,15 @@ const _posboms = {
     "Synod Technocore": 1,
   },
   // Storage
-  "Smart Storage Unit": {
-    "Building Foam": 12,
-  },
-  "Small Storage Unit": {
+  "Smart Storage Unit S": {
     "Common Ore": 250,
     "Metal-rich Ore": 250,
   },
-  "Storage Unit": {
+  "Smart Storage Unit M": {
     "Building Foam": 2,
+  },
+  "Smart Storage Unit L": {
+    "Building Foam": 12,
   },
   // Gates
   "Smart Gate": {
@@ -196,10 +196,10 @@ const _posboms = {
     "Building Foam": 1,
   },
   // Hangars
-  Hangar: {
+  "Hangar M": {
     "Building Foam": 2,
   },
-  "Large Hangar": {
+  "Hangar L": {
     "Building Foam": 13,
   },
   // Misc
