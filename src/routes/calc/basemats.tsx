@@ -8,12 +8,7 @@ export const Route = createFileRoute("/calc/basemats")({
 });
 
 function CargoCalculator() {
-  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>(
-    "baseBom",
-    Object.fromEntries(
-      Object.entries(posboms).map(([name, _]) => [name, 0]),
-    ) as BaseBom,
-  );
+  const [baseBom, setBaseBom] = useSessionStorage<BaseBom>("baseBom", {});
   const [itemsBom, setItemsBom] = useState<Record<string, number>>({});
   const [cargoMass, setCargoMass] = useSessionStorage<number>("cargoMass", 0);
   const [cargoVolume, setCargoVolume] = useSessionStorage<number>(
@@ -48,31 +43,29 @@ function CargoCalculator() {
     }
     setCargoMass(mass);
     setCargoVolume(volume);
-  }, [itemsBom]);
+  }, [itemsBom, setCargoMass, setCargoVolume]);
 
   return (
     <section>
       <h2>How much does this stuff weigh?</h2>
       <table className="form">
         <tbody>
-          {(Object.entries(baseBom) as [StructureName, number][]).map(
-            ([posName, count]) => (
-              <tr key={posName}>
-                <th>{posName}</th>
-                <td>
-                  <input
-                    type="number"
-                    value={count}
-                    onChange={(e) => {
-                      const newBaseBom = { ...baseBom };
-                      newBaseBom[posName] = e.target.valueAsNumber;
-                      setBaseBom(newBaseBom);
-                    }}
-                  />
-                </td>
-              </tr>
-            ),
-          )}
+          {(Object.keys(posboms) as StructureName[]).map((posName) => (
+            <tr key={posName}>
+              <th>{posName}</th>
+              <td>
+                <input
+                  type="number"
+                  value={baseBom[posName] || 0}
+                  onChange={(e) => {
+                    const newBaseBom = { ...baseBom };
+                    newBaseBom[posName] = e.target.valueAsNumber;
+                    setBaseBom(newBaseBom);
+                  }}
+                />
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <p>Materials:</p>
