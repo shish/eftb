@@ -76,7 +76,7 @@ function FuelCalculator() {
           </tr>
           <tr>
             <th>Fuel needed</th>
-            <td>{tank} units</td>
+            <td>{tank.toLocaleString()} units</td>
           </tr>
         </tbody>
       </table>

@@ -82,8 +82,8 @@ function CargoCalculator() {
             ))}
         </tbody>
       </table>
-      <p>Total Mass: {cargoMass} kg</p>
-      <p>Total Volume: {cargoVolume} m³</p>
+      <p>Total Mass: {cargoMass.toLocaleString()} kg</p>
+      <p>Total Volume: {cargoVolume.toLocaleString()} m³</p>
       <table className="form">
         <tbody></tbody>
       </table>
