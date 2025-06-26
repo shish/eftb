@@ -22,6 +22,7 @@ function CargoCalculator() {
       StructureName,
       number,
     ][]) {
+      if (!posboms[pos]) continue;
       for (const [item, itemCount] of Object.entries(posboms[pos])) {
         if (!myItemsBom[item]) myItemsBom[item] = 0;
         myItemsBom[item] += itemCount * posCount;
