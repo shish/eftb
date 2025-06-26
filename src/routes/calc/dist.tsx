@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, FormEvent, useEffect } from "react";
 import { form_api } from "../../api";
 import { useSessionStorage } from "usehooks-ts";
+import { SystemInput } from "../../components/SystemInput";
 
 export const Route = createFileRoute("/calc/dist")({
   component: DistanceBetweenSystems,
@@ -42,24 +43,20 @@ function DistanceBetweenSystems() {
             <tr>
               <th>System 1</th>
               <td>
-                <input
+                <SystemInput
                   name="start"
-                  type="text"
-                  required={true}
                   value={start}
-                  onChange={(e) => setStart(e.target.value)}
+                  onChange={(s) => setStart(s)}
                 />
               </td>
             </tr>
             <tr>
               <th>System 2</th>
               <td>
-                <input
+                <SystemInput
                   name="end"
-                  type="text"
-                  required={true}
                   value={end}
-                  onChange={(e) => setEnd(e.target.value)}
+                  onChange={(s) => setEnd(s)}
                 />
               </td>
             </tr>

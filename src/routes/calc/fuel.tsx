@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { ShipFuelSelect } from "../../components/shipfuel";
+import { ShipFuelSelect } from "../../components/ShipFuelSelect";
 
 export const Route = createFileRoute("/calc/fuel")({
   component: FuelCalculator,

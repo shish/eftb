@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react";
 import { ships, getEngine, Ship, ShipName, items } from "../../consts";
 import { FuelName, Fuel, fuels, isCompatible } from "../../consts/fuels";
 import { useSessionStorage } from "usehooks-ts";
-import { ShipFuelSelect } from "../../components/shipfuel";
+import { ShipFuelSelect } from "../../components/ShipFuelSelect";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/jump")({
