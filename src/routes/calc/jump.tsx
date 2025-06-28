@@ -133,7 +133,7 @@ function SummaryTable() {
   const [cargoMass, setCargoMass] = useSessionStorage("cargoMass", 0);
   useEffect(() => {
     if (cargoMode === "empty") setCargoMass(0);
-    if (cargoMode === "smartgate") setCargoMass(13802420);
+    if (cargoMode === "smartgate") setCargoMass(3055000000);
   }, [cargoMode]);
 
   return (
