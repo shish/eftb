@@ -43,14 +43,10 @@ impl From<anyhow::Error> for CustomError {
 }
 
 fn get_star(universe: &data::Universe, name: String) -> Result<&Star, CustomError> {
-    let id = universe.star_name_to_id.get(&name).ok_or(CustomError(
+    let star = universe.star_by_name(&name).or(Err(CustomError(
         Status::NotFound,
         format!("Solar system {} not found", name),
-    ))?;
-    let star = universe.star_map.get(id).ok_or(CustomError(
-        Status::NotFound,
-        format!("Solar system {} not found", name),
-    ))?;
+    )))?;
     Ok(star)
 }
 
@@ -71,8 +67,8 @@ struct StarsReturn {
 }
 
 #[get("/stars")]
-fn get_stars(db: &State<data::Universe>) -> Json<StarsReturn> {
-    let names = db.star_name_to_id.keys().cloned().collect();
+fn get_stars(universe: &State<data::Universe>) -> Json<StarsReturn> {
+    let names = universe.star_name_to_id.keys().cloned().collect();
     Json(StarsReturn {
         version: 1,
         data: names,

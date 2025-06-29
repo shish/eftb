@@ -20,6 +20,10 @@ path = "backend/web.rs"
 name = "path"
 harness = false
 
+[[bench]]
+name = "data"
+harness = false
+
 [dependencies]
 anyhow = "1.0.94"
 bincode = { version = "2", features = ["serde"] }

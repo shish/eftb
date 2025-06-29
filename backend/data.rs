@@ -117,6 +117,17 @@ impl Universe {
         Ok(())
     }
 
+    pub fn star_by_name(&self, name: &String) -> anyhow::Result<&Star> {
+        let star_id = self
+            .star_name_to_id
+            .get(name)
+            .ok_or_else(|| anyhow::anyhow!("Star not found: {}", name))?;
+
+        self.star_map
+            .get(star_id)
+            .ok_or_else(|| anyhow::anyhow!("Star not found: {}", name))
+    }
+
     #[cfg(test)]
     pub fn tiny_test() -> Universe {
         use uom::si::length::light_year;

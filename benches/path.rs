@@ -5,8 +5,8 @@ use uom::si::length::light_year;
 fn path(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
     // ~1200LY across dense space, takes ~0.05s on my laptop
-    let start = &universe.star_map[&universe.star_name_to_id["E9R-5PC"]];
-    let end = &universe.star_map[&universe.star_name_to_id["E1J-V83"]];
+    let start = universe.star_by_name(&"E9R-5PC".to_string()).unwrap();
+    let end = universe.star_by_name(&"E1J-V83".to_string()).unwrap();
     let jump_distance: Length = Length::new::<light_year>(200.0);
     c.bench_function("calc_path", |b| {
         b.iter(|| {
@@ -25,8 +25,8 @@ fn path(c: &mut Criterion) {
 
 fn heuristic(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
-    let start = &universe.star_map[&universe.star_name_to_id["U75-4J4"]];
-    let end = &universe.star_map[&universe.star_name_to_id["AJH-6H5"]];
+    let start = universe.star_by_name(&"U75-4J4".to_string()).unwrap();
+    let end = universe.star_by_name(&"AJH-6H5".to_string()).unwrap();
 
     c.bench_function(
         format!("heuristic ({} connections)", start.connections.len()).as_str(),
@@ -44,7 +44,7 @@ fn heuristic(c: &mut Criterion) {
 
 fn successors(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
-    let start = &universe.star_map[&universe.star_name_to_id["U75-4J4"]];
+    let start = universe.star_by_name(&"U75-4J4".to_string()).unwrap();
     let conn = &eftb::data::Connection {
         id: 0,
         conn_type: eftb::data::ConnType::NpcGate,

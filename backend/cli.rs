@@ -186,15 +186,8 @@ fn main() -> anyhow::Result<()> {
             let universe = data::Universe::load()?;
             info!("Loaded star map");
 
-            let start = universe
-                .star_map
-                .get(universe.star_name_to_id.get(start_name).unwrap())
-                .unwrap();
-            let end = universe
-                .star_map
-                .get(universe.star_name_to_id.get(end_name).unwrap())
-                .unwrap();
-
+            let start = universe.star_by_name(start_name)?;
+            let end = universe.star_by_name(end_name)?;
             let distance: Length = start.distance(end);
             println!(
                 "Distance between {} and {} is {} LY",
@@ -215,14 +208,8 @@ fn main() -> anyhow::Result<()> {
             let universe = data::Universe::load()?;
             info!("Loaded star map in {:.3}", now.elapsed().as_secs_f64());
 
-            let start = universe
-                .star_map
-                .get(universe.star_name_to_id.get(start_name).unwrap())
-                .unwrap();
-            let end = universe
-                .star_map
-                .get(universe.star_name_to_id.get(end_name).unwrap())
-                .unwrap();
+            let start = universe.star_by_name(start_name)?;
+            let end = universe.star_by_name(end_name)?;
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding path");
@@ -268,10 +255,7 @@ fn main() -> anyhow::Result<()> {
             let universe = data::Universe::load()?;
             info!("Loaded star map");
 
-            let start = universe
-                .star_map
-                .get(universe.star_name_to_id.get(start_name).unwrap())
-                .unwrap();
+            let start = universe.star_by_name(start_name)?;
             let jump_distance: Length = Length::new::<light_year>(*jump_distance);
 
             info!("Finding exits");
@@ -306,10 +290,7 @@ fn main() -> anyhow::Result<()> {
             let universe = data::Universe::load()?;
             info!("Loaded star map");
 
-            let star = universe
-                .star_map
-                .get(universe.star_name_to_id.get(name).unwrap())
-                .unwrap();
+            let star = universe.star_by_name(name)?;
             println!("{} ({}):", universe.star_id_to_name[&star.id], star.id);
             println!("  Region: {}", star.region_id);
             println!("  Connections:");
@@ -341,10 +322,7 @@ fn main() -> anyhow::Result<()> {
             let universe = data::Universe::load()?;
             info!("Loaded star map");
 
-            let star = universe
-                .star_map
-                .get(universe.star_name_to_id.get(name).unwrap())
-                .unwrap();
+            let star = universe.star_by_name(name)?;
             let mut visited: Vec<SolarSystemId> = Vec::new();
             let mut to_visit: Vec<SolarSystemId> = vec![star.id];
 
