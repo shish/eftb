@@ -18,7 +18,7 @@ pub fn successors(
     jump_distance: Length,
     optimize: PathOptimize,
     use_smart_gates: bool,
-) -> Vec<(Connection, i64)> {
+) -> Vec<(Connection, f64)> {
     let star = universe.star_map.get(&conn.target).unwrap();
     star.connections
         .iter()
@@ -29,7 +29,7 @@ pub fn successors(
         .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
-            let distance = c.distance.get::<light_year>() as i64;
+            let distance = c.distance.get::<light_year>();
             match (optimize, &c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
@@ -39,11 +39,11 @@ pub fn successors(
                 (PathOptimize::Fuel, ConnType::Jump) => (c.clone(), distance),
                 // Gate connections are free (-ish. It still takes a tiny
                 // amount of fuel to warp to a gate)
-                (PathOptimize::Fuel, ConnType::NpcGate) => (c.clone(), 1),
+                (PathOptimize::Fuel, ConnType::NpcGate) => (c.clone(), 1.0),
                 // Smart gates are slightly more expensive than NPC gates
-                (PathOptimize::Fuel, ConnType::SmartGate) => (c.clone(), 2),
+                (PathOptimize::Fuel, ConnType::SmartGate) => (c.clone(), 2.0),
                 // Treat all hops the same, we want to minimise the total
-                (PathOptimize::Hops, _) => (c.clone(), 1),
+                (PathOptimize::Hops, _) => (c.clone(), 1.0),
             }
         })
         .collect()
@@ -53,11 +53,11 @@ pub fn successors(
 /// - Return an approximation of the cost from this connection to the end
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
-pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> i64 {
+pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> f64 {
     let d = universe.star_map[&conn.target]
         .distance(end)
         .get::<light_year>();
-    return d as i64;
+    return d;
 }
 
 #[derive(Debug, PartialEq)]
@@ -211,7 +211,7 @@ mod pathfinding {
     ) -> PathFindResult<N, C>
     where
         N: Eq + Hash + Clone,
-        C: Zero + Ord + Copy,
+        C: Zero + PartialOrd + Copy,
         FN: FnMut(&N) -> IN,
         IN: IntoIterator<Item = (N, C)>,
         FH: FnMut(&N) -> C,
@@ -308,17 +308,20 @@ mod pathfinding {
 
     impl<K: PartialEq> Eq for SmallestCostHolder<K> {}
 
-    impl<K: Ord> PartialOrd for SmallestCostHolder<K> {
+    impl<K: PartialOrd> PartialOrd for SmallestCostHolder<K> {
         fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
             Some(self.cmp(other))
         }
     }
 
-    impl<K: Ord> Ord for SmallestCostHolder<K> {
+    impl<K: PartialOrd> Ord for SmallestCostHolder<K> {
         fn cmp(&self, other: &Self) -> Ordering {
-            match other.estimated_cost.cmp(&self.estimated_cost) {
-                Ordering::Equal => self.cost.cmp(&other.cost),
-                s => s,
+            match other.estimated_cost.partial_cmp(&self.estimated_cost) {
+                Some(Ordering::Equal) | None => match self.cost.partial_cmp(&other.cost) {
+                    Some(o) => o,
+                    None => Ordering::Equal,
+                },
+                Some(s) => s,
             }
         }
     }
