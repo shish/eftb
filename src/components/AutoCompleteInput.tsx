@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, KeyboardEvent } from "react";
+import { useEffect, useRef, useState, KeyboardEvent, useCallback } from "react";
 import { get_word, replace_word, clamp } from "./AutoCompleteInput.util";
 import "./AutoCompleteInput.css";
+import { useDebounceCallback } from "usehooks-ts";
 
 export function AutoCompleteInput({
   name,
@@ -10,6 +11,7 @@ export function AutoCompleteInput({
   placeholder = "",
   getCompletions,
   separator = null,
+  debounce = 50,
 }: {
   name: string;
   value: string;
@@ -18,12 +20,21 @@ export function AutoCompleteInput({
   placeholder?: string;
   getCompletions: (input: string) => string[];
   separator?: string | null;
+  debounce?: number;
 }) {
   const [showCompletions, setShowCompletions] = useState(false);
   const [completions, setCompletions] = useState<string[]>([]);
   const [searchPos, setSearchPos] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const [highlighted, setHighlighted] = useState(0);
+  const refreshCompletions = useCallback(
+    (term: string) => setCompletions(getCompletions(term)),
+    [getCompletions, setCompletions],
+  );
+  const debouncedRefreshCompletions = useDebounceCallback(
+    refreshCompletions,
+    debounce,
+  );
 
   // When moving the cursor, change the currently-selected word
   useEffect(() => {
@@ -42,11 +53,11 @@ export function AutoCompleteInput({
   useEffect(() => {
     const term = separator ? get_word(value, separator, searchPos) : value;
     if (term) {
-      setCompletions(getCompletions(term));
+      debouncedRefreshCompletions(term);
     } else {
       setCompletions([]);
     }
-  }, [value, separator, searchPos, getCompletions]);
+  }, [value, separator, searchPos, debouncedRefreshCompletions]);
 
   // When completions change, highlight the first entry
   useEffect(() => {
