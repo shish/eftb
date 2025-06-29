@@ -124,7 +124,7 @@ function SummaryTable() {
   const [fittingsMass, setFittingsMass] = useSessionStorage("fittingsMass", 0);
   useEffect(() => {
     if (fittingsMode === "empty") setFittingsMass(0);
-  }, [fittingsMode]);
+  }, [fittingsMode, setFittingsMass]);
 
   const [cargoMode, setCargoMode] = useSessionStorage<CargoMode>(
     "jumpSummaryCargoMode",
@@ -134,7 +134,7 @@ function SummaryTable() {
   useEffect(() => {
     if (cargoMode === "empty") setCargoMass(0);
     if (cargoMode === "smartgate") setCargoMass(3055000000);
-  }, [cargoMode]);
+  }, [cargoMode, setCargoMass]);
 
   return (
     <>
