@@ -84,6 +84,9 @@ if __name__ == "__main__":
             print(file)
 
     if args.cmd == "extract":
+        if not args.resource.startswith('res:'):
+            args.resource = 'res:' + args.resource
+
         files = list_resources(args.root)
         data = files[args.resource].read_bytes()
 
