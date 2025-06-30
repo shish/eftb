@@ -76,7 +76,6 @@ fn main() -> anyhow::Result<()> {
                 let id = id_str.parse()?;
                 let star = data::Star {
                     id,
-                    region_id: raw_star.region_id,
                     x: raw_star.center[0],
                     y: raw_star.center[1],
                     z: raw_star.center[2],

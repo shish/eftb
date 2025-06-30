@@ -49,7 +49,6 @@ impl Ord for Connection {
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Star {
     pub id: SolarSystemId,
-    pub region_id: RegionId,
     pub x: f64,
     pub y: f64,
     pub z: f64,
