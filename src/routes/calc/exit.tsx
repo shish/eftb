@@ -30,7 +30,7 @@ function ExitFinder() {
   return (
     <section>
       <h2>How do I get out of here?</h2>
-      <p>Show the places you can jump to from a given constellation</p>
+      <p>Show the places you can jump to from a given gate network</p>
       <form action="/api/exit" method="get" onSubmit={submit}>
         <table className="form">
           <tbody>

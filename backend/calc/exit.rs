@@ -3,31 +3,40 @@ use uom::si::f64::*;
 use crate::data::*;
 
 pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Vec<(Star, Star)> {
-    let mut exits: Vec<(Star, Star)> = Vec::new();
-    let mut checked: Vec<SolarSystemId> = Vec::new();
-    let mut to_check: Vec<SolarSystemId> = Vec::new();
+    let mut gate_network: Vec<SolarSystemId> = Vec::new();
+    let mut to_add_to_network: Vec<SolarSystemId> = Vec::new();
 
-    to_check.push(start.id);
-
-    while !to_check.is_empty() {
-        let current = to_check.pop().unwrap();
-        checked.push(current);
-        let star = universe.star_map.get(&current).unwrap();
-        for conn in &star.connections {
-            let target = universe.star_map.get(&conn.target).unwrap();
-            if conn.conn_type == ConnType::NpcGate || conn.conn_type == ConnType::SmartGate {
-                if !checked.contains(&target.id) && !to_check.contains(&target.id) {
-                    to_check.push(target.id);
-                }
-            } else if conn.conn_type == ConnType::Jump
-                && conn.distance <= jump_distance
-                && target.region_id != start.region_id
+    to_add_to_network.push(start.id);
+    while !to_add_to_network.is_empty() {
+        let current = to_add_to_network.pop().unwrap();
+        gate_network.push(current);
+        for conn in &universe.star_map[&current].connections {
+            if conn.conn_type == ConnType::NpcGate
+            // || conn.conn_type == ConnType::SmartGate
             {
-                let target = universe.star_map.get(&conn.target).unwrap();
-                exits.push((star.clone(), target.clone()));
+                if !gate_network.contains(&conn.target) && !to_add_to_network.contains(&conn.target)
+                {
+                    to_add_to_network.push(conn.target);
+                }
             }
         }
     }
+
+    let mut exits: Vec<(Star, Star)> = Vec::new();
+
+    gate_network.iter().for_each(|id| {
+        let star = &universe.star_map[id];
+        for conn in &star.connections {
+            if conn.conn_type == ConnType::Jump {
+                let other = &universe.star_map[&conn.target];
+                let distance = star.distance(other);
+
+                if distance <= jump_distance {
+                    exits.push((star.clone(), other.clone()));
+                }
+            }
+        }
+    });
 
     return exits;
 }

@@ -262,24 +262,11 @@ fn main() -> anyhow::Result<()> {
             let exits = eftb::calc_exit(&universe, start, jump_distance);
             for (from, to) in exits {
                 println!(
-                    "{} -> {} ({}) ({} ly)",
+                    "{} -> {} ({} ly)",
                     universe.star_id_to_name[&from.id],
                     universe.star_id_to_name[&to.id],
-                    &to.region_id,
                     from.distance(&to).get::<light_year>() as i32
                 );
-                for conn in &universe.star_map[&to.id].connections {
-                    let d = conn.distance.get::<light_year>();
-                    if conn.conn_type == data::ConnType::Jump
-                        && conn.distance < jump_distance
-                        && universe.star_map[&conn.target].region_id != start.region_id
-                    {
-                        println!(
-                            "  -> {} ({} ly)",
-                            universe.star_id_to_name[&conn.target], d as i32
-                        );
-                    }
-                }
             }
         }
         Some(Commands::Star {
@@ -292,7 +279,6 @@ fn main() -> anyhow::Result<()> {
 
             let star = universe.star_by_name(name)?;
             println!("{} ({}):", universe.star_id_to_name[&star.id], star.id);
-            println!("  Region: {}", star.region_id);
             println!("  Connections:");
             for conn in &star.connections {
                 if conn.conn_type != data::ConnType::Jump {
