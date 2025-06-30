@@ -6,7 +6,6 @@ use uom::si::length::meter;
 
 pub type ConnectionId = u64;
 pub type SolarSystemId = u64;
-pub type RegionId = u64;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
@@ -46,7 +45,7 @@ impl Ord for Connection {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Star {
     pub id: SolarSystemId,
     pub x: f64,
@@ -61,6 +60,11 @@ impl Star {
             ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
                 .sqrt(),
         )
+    }
+}
+impl std::fmt::Debug for Star {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Star").field("id", &self.id).finish()
     }
 }
 impl PartialEq for Star {
@@ -134,7 +138,6 @@ impl Universe {
         struct MockStar {
             id: SolarSystemId,
             name: &'static str,
-            region_id: RegionId,
             x: f64,
             y: f64,
         }
@@ -152,10 +155,10 @@ impl Universe {
          */
         #[rustfmt::skip]
         let stars = [
-            MockStar { id: 1, name: "A", region_id: 1, x: 0.0, y: 0.0 },
-            MockStar { id: 2, name: "B", region_id: 2, x: 10.0, y: 0.0 },
-            MockStar { id: 3, name: "C", region_id: 2, x: 20.0, y: 0.0 },
-            MockStar { id: 4, name: "D", region_id: 2, x: 10.0, y: 20.0 },
+            MockStar { id: 1, name: "A", x: 0.0, y: 0.0 },
+            MockStar { id: 2, name: "B", x: 10.0, y: 0.0 },
+            MockStar { id: 3, name: "C", x: 20.0, y: 0.0 },
+            MockStar { id: 4, name: "D", x: 10.0, y: 20.0 },
         ];
 
         #[rustfmt::skip]
@@ -177,7 +180,6 @@ impl Universe {
                     s.id,
                     Star {
                         id: s.id,
-                        region_id: s.region_id,
                         x: Length::new::<light_year>(s.x).get::<meter>(),
                         y: Length::new::<light_year>(s.y).get::<meter>(),
                         z: 0.0,                  // Z is not used in this test

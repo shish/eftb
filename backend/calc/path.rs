@@ -77,7 +77,7 @@ pub fn calc_path(
     timeout: Option<u64>,
 ) -> PathResult {
     let init_conn = Connection {
-        id: u64::MAX,
+        id: ConnectionId::MAX,
         conn_type: ConnType::Jump,
         distance: Length::new::<light_year>(0.0),
         target: start.id,

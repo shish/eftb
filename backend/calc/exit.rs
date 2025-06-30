@@ -59,7 +59,8 @@ mod tests {
             ),
             vec![
                 (universe.star_map[&1].clone(), universe.star_map[&2].clone()),
-                (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
+                // via SmartGate
+                // (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
             ]
         );
     }
