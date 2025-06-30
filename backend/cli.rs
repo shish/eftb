@@ -85,7 +85,7 @@ fn main() -> anyhow::Result<()> {
             }
 
             info!("Building connections from npc gates");
-            let mut conn_count = 0;
+            let mut conn_count = 1; // Connection #0 is reserved for path init
             for raw_jump in raw_star_data.jumps.iter() {
                 // rust only lets us borrow one mutable star at a time, so we can't add
                 // from->to and to->from gates in the same block
@@ -161,7 +161,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
 
-            info!("Sorting connections");
+            info!("Sorting {} connections", conn_count);
             // sort gates first, and then jumps by distance - then when we
             // reach a jump that is too long we can stop searching
             for star in star_map.values_mut().progress() {

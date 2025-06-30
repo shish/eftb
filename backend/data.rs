@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use uom::si::f64::*;
 use uom::si::length::meter;
 
-pub type ConnectionId = u64;
-pub type SolarSystemId = u64;
+pub type ConnectionId = u32;
+pub type SolarSystemId = u32;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {

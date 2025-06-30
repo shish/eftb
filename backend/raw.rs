@@ -37,13 +37,13 @@ pub struct RawJump {
     // #[serde(rename(deserialize = "fromCenter")]
     // from_center: RawJumpCenter,
     #[serde(rename(deserialize = "fromSystemID"))]
-    pub from_system_id: u64,
+    pub from_system_id: u32,
     #[serde(rename(deserialize = "jumpType"))]
     pub jump_type: u8,
     // #[serde(rename(deserialize = "toCenter"))]
     // to_center: RawJumpCenter,
     #[serde(rename(deserialize = "toSystemID"))]
-    pub to_system_id: u64,
+    pub to_system_id: u32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -69,7 +69,7 @@ pub struct RawSolarSystem {
     //#[serde(rename(deserialize = "planetItemIDs"))]
     //pub planet_item_ids: Vec<u64>,
     #[serde(rename(deserialize = "regionID"))]
-    pub region_id: u64,
+    pub region_id: u32,
     //#[serde(rename(deserialize = "sunTypeID"))]
     //pub sun_type_id: u64,
 }
@@ -80,7 +80,7 @@ pub struct RawSolarSystem {
 
 #[derive(Debug, Deserialize)]
 pub struct RawStar {
-    pub id: u64,
+    pub id: u32,
     pub name: String,
     //pub location: RawLocation,
 }
@@ -93,8 +93,8 @@ pub struct RawStar {
 pub struct RawSmartGate {
     pub id: String,
     #[serde(rename(deserialize = "itemId"))]
-    pub item_id: u64,
+    pub item_id: u32,
     pub name: String,
-    pub from: u64,
-    pub to: u64,
+    pub from: u32,
+    pub to: u32,
 }
