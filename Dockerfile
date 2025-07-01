@@ -1,6 +1,5 @@
 # build frontend into /app/dist
-FROM alpine:latest AS build-frontend
-RUN apk add --no-cache nodejs npm
+FROM node:24 AS build-frontend
 COPY . /app
 WORKDIR /app
 RUN --mount=type=cache,target=/app/node_modules \
