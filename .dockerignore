@@ -2,5 +2,6 @@ target
 dist
 node_modules
 old
+data
 .git
 .sl
