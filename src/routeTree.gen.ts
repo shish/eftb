@@ -10,163 +10,69 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as CalcSettingsRouteImport } from './routes/calc/settings'
+import { Route as CalcPathRouteImport } from './routes/calc/path'
+import { Route as CalcJumpRouteImport } from './routes/calc/jump'
+import { Route as CalcFuelcostRouteImport } from './routes/calc/fuelcost'
+import { Route as CalcFuelRouteImport } from './routes/calc/fuel'
+import { Route as CalcExitRouteImport } from './routes/calc/exit'
+import { Route as CalcDistRouteImport } from './routes/calc/dist'
+import { Route as CalcBasematsRouteImport } from './routes/calc/basemats'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/index'
-import { Route as CalcSettingsImport } from './routes/calc/settings'
-import { Route as CalcPathImport } from './routes/calc/path'
-import { Route as CalcJumpImport } from './routes/calc/jump'
-import { Route as CalcFuelcostImport } from './routes/calc/fuelcost'
-import { Route as CalcFuelImport } from './routes/calc/fuel'
-import { Route as CalcExitImport } from './routes/calc/exit'
-import { Route as CalcDistImport } from './routes/calc/dist'
-import { Route as CalcBasematsImport } from './routes/calc/basemats'
+const AboutLazyRouteImport = createFileRoute('/about')()
 
-// Create Virtual Routes
-
-const AboutLazyImport = createFileRoute('/about')()
-
-// Create/Update Routes
-
-const AboutLazyRoute = AboutLazyImport.update({
+const AboutLazyRoute = AboutLazyRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcSettingsRoute = CalcSettingsImport.update({
+const CalcSettingsRoute = CalcSettingsRouteImport.update({
   id: '/calc/settings',
   path: '/calc/settings',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcPathRoute = CalcPathImport.update({
+const CalcPathRoute = CalcPathRouteImport.update({
   id: '/calc/path',
   path: '/calc/path',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcJumpRoute = CalcJumpImport.update({
+const CalcJumpRoute = CalcJumpRouteImport.update({
   id: '/calc/jump',
   path: '/calc/jump',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcFuelcostRoute = CalcFuelcostImport.update({
+const CalcFuelcostRoute = CalcFuelcostRouteImport.update({
   id: '/calc/fuelcost',
   path: '/calc/fuelcost',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcFuelRoute = CalcFuelImport.update({
+const CalcFuelRoute = CalcFuelRouteImport.update({
   id: '/calc/fuel',
   path: '/calc/fuel',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcExitRoute = CalcExitImport.update({
+const CalcExitRoute = CalcExitRouteImport.update({
   id: '/calc/exit',
   path: '/calc/exit',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcDistRoute = CalcDistImport.update({
+const CalcDistRoute = CalcDistRouteImport.update({
   id: '/calc/dist',
   path: '/calc/dist',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CalcBasematsRoute = CalcBasematsImport.update({
+const CalcBasematsRoute = CalcBasematsRouteImport.update({
   id: '/calc/basemats',
   path: '/calc/basemats',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/basemats': {
-      id: '/calc/basemats'
-      path: '/calc/basemats'
-      fullPath: '/calc/basemats'
-      preLoaderRoute: typeof CalcBasematsImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/dist': {
-      id: '/calc/dist'
-      path: '/calc/dist'
-      fullPath: '/calc/dist'
-      preLoaderRoute: typeof CalcDistImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/exit': {
-      id: '/calc/exit'
-      path: '/calc/exit'
-      fullPath: '/calc/exit'
-      preLoaderRoute: typeof CalcExitImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/fuel': {
-      id: '/calc/fuel'
-      path: '/calc/fuel'
-      fullPath: '/calc/fuel'
-      preLoaderRoute: typeof CalcFuelImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/fuelcost': {
-      id: '/calc/fuelcost'
-      path: '/calc/fuelcost'
-      fullPath: '/calc/fuelcost'
-      preLoaderRoute: typeof CalcFuelcostImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/jump': {
-      id: '/calc/jump'
-      path: '/calc/jump'
-      fullPath: '/calc/jump'
-      preLoaderRoute: typeof CalcJumpImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/path': {
-      id: '/calc/path'
-      path: '/calc/path'
-      fullPath: '/calc/path'
-      preLoaderRoute: typeof CalcPathImport
-      parentRoute: typeof rootRoute
-    }
-    '/calc/settings': {
-      id: '/calc/settings'
-      path: '/calc/settings'
-      fullPath: '/calc/settings'
-      preLoaderRoute: typeof CalcSettingsImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -180,7 +86,6 @@ export interface FileRoutesByFullPath {
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutLazyRoute
@@ -193,9 +98,8 @@ export interface FileRoutesByTo {
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutLazyRoute
   '/calc/basemats': typeof CalcBasematsRoute
@@ -207,7 +111,6 @@ export interface FileRoutesById {
   '/calc/path': typeof CalcPathRoute
   '/calc/settings': typeof CalcSettingsRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -247,7 +150,6 @@ export interface FileRouteTypes {
     | '/calc/settings'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutLazyRoute: typeof AboutLazyRoute
@@ -259,6 +161,81 @@ export interface RootRouteChildren {
   CalcJumpRoute: typeof CalcJumpRoute
   CalcPathRoute: typeof CalcPathRoute
   CalcSettingsRoute: typeof CalcSettingsRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/settings': {
+      id: '/calc/settings'
+      path: '/calc/settings'
+      fullPath: '/calc/settings'
+      preLoaderRoute: typeof CalcSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/path': {
+      id: '/calc/path'
+      path: '/calc/path'
+      fullPath: '/calc/path'
+      preLoaderRoute: typeof CalcPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/jump': {
+      id: '/calc/jump'
+      path: '/calc/jump'
+      fullPath: '/calc/jump'
+      preLoaderRoute: typeof CalcJumpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/fuelcost': {
+      id: '/calc/fuelcost'
+      path: '/calc/fuelcost'
+      fullPath: '/calc/fuelcost'
+      preLoaderRoute: typeof CalcFuelcostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/fuel': {
+      id: '/calc/fuel'
+      path: '/calc/fuel'
+      fullPath: '/calc/fuel'
+      preLoaderRoute: typeof CalcFuelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/exit': {
+      id: '/calc/exit'
+      path: '/calc/exit'
+      fullPath: '/calc/exit'
+      preLoaderRoute: typeof CalcExitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/dist': {
+      id: '/calc/dist'
+      path: '/calc/dist'
+      fullPath: '/calc/dist'
+      preLoaderRoute: typeof CalcDistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calc/basemats': {
+      id: '/calc/basemats'
+      path: '/calc/basemats'
+      fullPath: '/calc/basemats'
+      preLoaderRoute: typeof CalcBasematsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -273,59 +250,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalcPathRoute: CalcPathRoute,
   CalcSettingsRoute: CalcSettingsRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/about",
-        "/calc/basemats",
-        "/calc/dist",
-        "/calc/exit",
-        "/calc/fuel",
-        "/calc/fuelcost",
-        "/calc/jump",
-        "/calc/path",
-        "/calc/settings"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/about": {
-      "filePath": "about.lazy.tsx"
-    },
-    "/calc/basemats": {
-      "filePath": "calc/basemats.tsx"
-    },
-    "/calc/dist": {
-      "filePath": "calc/dist.tsx"
-    },
-    "/calc/exit": {
-      "filePath": "calc/exit.tsx"
-    },
-    "/calc/fuel": {
-      "filePath": "calc/fuel.tsx"
-    },
-    "/calc/fuelcost": {
-      "filePath": "calc/fuelcost.tsx"
-    },
-    "/calc/jump": {
-      "filePath": "calc/jump.tsx"
-    },
-    "/calc/path": {
-      "filePath": "calc/path.tsx"
-    },
-    "/calc/settings": {
-      "filePath": "calc/settings.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
