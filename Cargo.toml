@@ -27,10 +27,10 @@ harness = false
 [dependencies]
 anyhow = "1.0.94"
 bincode = { version = "2", features = ["serde"] }
-clap = { version = "4.5.23", features = ["derive"] }
+clap = { version = "4.5.40", features = ["derive"] }
 env_logger = "0.11.5"
-indexmap = "2.7.0"
-indicatif = { version = "0.17.9", features = ["rayon"] }
+indexmap = "2.10.0"
+indicatif = { version = "0.17.12", features = ["rayon"] }
 log = "0.4.22"
 num-traits = "0.2.19"
 rayon = "1.10.0"
