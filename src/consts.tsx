@@ -49,6 +49,7 @@ export const engines: { [key in EngineName]: Engine } = {
 export type ShipName =
   | "HAF"
   | "LORHA"
+  | "MAUL"
   | "MCF"
   | "TADES"
   | "USV"
@@ -67,6 +68,7 @@ export const ships: { [key in ShipName]: Ship } = {
   // Exclave Ventures
   HAF: { mass: 81_883_000, tank: 4_184, type: "Frigate", cargo: 3_120 },
   LORHA: { mass: 31_369_320, tank: 2_508, type: "Frigate", cargo: 6_240 },
+  MAUL: { mass: 548_435_920, tank: 24_160, type: "Cruiser", cargo: 20_800 },
   MCF: { mass: 52_313_760, tank: 6_548, type: "Frigate", cargo: 2_080 },
   TADES: { mass: 74_655_480, tank: 5_972, type: "Destroyer", cargo: 3_120 },
   USV: { mass: 30_266_600, tank: 2_420, type: "Frigate", cargo: 3_120 },
@@ -189,7 +191,7 @@ const _posboms = {
   },
   // Gates
   "Smart Gate": {
-    "Building Foam": 650,
+    "Building Foam": 43,
   },
   // Defense
   "Smart Turret": {
