@@ -11,6 +11,10 @@ export type ShipType =
 
 export type EngineName =
   | "Celerity CD03"
+  | "Tempo CD43"
+  | "Celerity CD02"
+  | "Tempo CD42"
+  | "Velocity CD82"
   | "Celerity CD01"
   | "Embark"
   | "Sojourn"
@@ -22,11 +26,34 @@ export type Engine = {
   types: ShipType[];
 };
 export const engines: { [key in EngineName]: Engine } = {
+  // Large
   "Celerity CD03": {
     mass: 834_540,
     fuel: "SOF-40",
     types: ["Combat Battlecruiser", "Battleship"],
   },
+  "Tempo CD43": {
+    mass: 834_540,
+    fuel: "SOF-40",
+    types: ["Combat Battlecruiser", "Battleship"],
+  },
+  // Medium
+  "Celerity CD02": {
+    mass: 417_280,
+    fuel: "SOF-40",
+    types: ["Destroyer", "Cruiser", "Combat Battlecruiser"],
+  },
+  "Tempo CD42": {
+    mass: 417_280,
+    fuel: "SOF-40",
+    types: ["Destroyer", "Cruiser", "Combat Battlecruiser"],
+  },
+  "Velocity CD82": {
+    mass: 417_280,
+    fuel: "SOF-40",
+    types: ["Destroyer", "Cruiser", "Combat Battlecruiser"],
+  },
+  // Small
   "Celerity CD01": {
     mass: 300_000,
     fuel: "SOF-40",
