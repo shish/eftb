@@ -218,6 +218,9 @@ const _posboms = {
   },
   // Gates
   "Smart Gate": {
+    "Building Foam": 650,
+  },
+  "Small Gate": {
     "Building Foam": 43,
   },
   // Defense
@@ -242,6 +245,24 @@ const _posboms = {
     "Building Foam": 2,
   },
   "Wall 2": {
+    "Building Foam": 2,
+  },
+  "Seer I": {
+    "Building Foam": 2,
+  },
+  "Seer II": {
+    "Building Foam": 2,
+  },
+  "Harbinger I": {
+    "Building Foam": 2,
+  },
+  "Harbinger II": {
+    "Building Foam": 2,
+  },
+  "Rainmaker I": {
+    "Building Foam": 2,
+  },
+  "Rainmaker II": {
     "Building Foam": 2,
   },
 };
