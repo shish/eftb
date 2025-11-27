@@ -21,11 +21,11 @@ export function ShipFuelSelect({
     setFuelType(engData.fuel);
     onMassChange(shipData.mass + engData.mass);
     onTankChange(shipData.tank);
-  }, [ship]);
+  }, [ship, onMassChange, onTankChange]);
 
   useEffect(() => {
     onEfficiencyChange(fuels[fuelType]);
-  }, [fuelType]);
+  }, [fuelType, onEfficiencyChange]);
 
   return (
     <div className="pair">
