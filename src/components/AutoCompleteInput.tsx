@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, KeyboardEvent, useCallback } from "react";
-import { get_word, replace_word, clamp } from "./AutoCompleteInput.util";
-import "./AutoCompleteInput.css";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
+import "./AutoCompleteInput.css";
+import { clamp, get_word, replace_word } from "./AutoCompleteInput.util";
 
 export function AutoCompleteInput({
   name,

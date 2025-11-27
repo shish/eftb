@@ -25,7 +25,6 @@
 ## Code layout
 
 - `backend/`
-
   - `lib.rs` - the heavy number crunching
   - `raw.rs` - data structures imported from CCP's data files
   - `data.rs` - data structures used by the backend for live pathfinding
@@ -33,7 +32,6 @@
   - `cli.rs` - the CLI interface
 
 - `src/` - the React frontend
-
   - `api.tsx` - a simple wrapper around the backend API
   - `routes/` - a .tsx file for each page on the site
 

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/ShipFuelSelect";
 

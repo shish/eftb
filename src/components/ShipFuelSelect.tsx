@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { ships, getEngine, ShipName } from "../consts";
-import { FuelName, fuels, isCompatible } from "../consts/fuels";
+import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
+import { getEngine, ShipName, ships } from "../consts";
+import { FuelName, fuels, isCompatible } from "../consts/fuels";
 
 export function ShipFuelSelect({
   onMassChange,

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext } from "react";
-import { ships, getEngine, Ship, ShipName } from "../../consts";
-import { FuelName, Fuel, fuels, isCompatible } from "../../consts/fuels";
+import { getEngine, Ship, ShipName, ships } from "../../consts";
+import { Fuel, FuelName, fuels, isCompatible } from "../../consts/fuels";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/fuelcost")({
