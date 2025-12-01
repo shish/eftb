@@ -39,9 +39,11 @@ impl PartialOrd for Connection {
 }
 impl Ord for Connection {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.conn_type
-            .cmp(&other.conn_type)
-            .then_with(|| self.distance.partial_cmp(&other.distance).unwrap())
+        self.conn_type.cmp(&other.conn_type).then_with(|| {
+            self.distance
+                .get::<meter>()
+                .total_cmp(&other.distance.get::<meter>())
+        })
     }
 }
 
