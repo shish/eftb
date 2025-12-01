@@ -7,17 +7,16 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Ve
     let mut to_add_to_network: Vec<SolarSystemId> = Vec::new();
 
     to_add_to_network.push(start.id);
-    while !to_add_to_network.is_empty() {
-        let current = to_add_to_network.pop().unwrap();
+    while let Some(current) = to_add_to_network.pop() {
         gate_network.push(current);
         for conn in &universe.star_map[&current].connections {
-            if conn.conn_type == ConnType::NpcGate
-            // || conn.conn_type == ConnType::SmartGate
+            if (
+                conn.conn_type == ConnType::NpcGate
+                // || conn.conn_type == ConnType::SmartGate
+            ) && !gate_network.contains(&conn.target)
+                && !to_add_to_network.contains(&conn.target)
             {
-                if !gate_network.contains(&conn.target) && !to_add_to_network.contains(&conn.target)
-                {
-                    to_add_to_network.push(conn.target);
-                }
+                to_add_to_network.push(conn.target);
             }
         }
     }
@@ -38,7 +37,7 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Ve
         }
     });
 
-    return exits;
+    exits
 }
 
 #[cfg(test)]

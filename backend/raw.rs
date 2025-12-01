@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use anyhow::Result;
 use serde::Deserialize;
 
 // ====================================================================
@@ -16,9 +17,9 @@ pub struct RawStarMap {
 }
 
 impl RawStarMap {
-    pub fn from_file(file: &str) -> Self {
-        let file = std::fs::read_to_string(file).unwrap();
-        serde_json::from_str(&file).unwrap()
+    pub fn from_file(file: &str) -> Result<Self> {
+        let file = std::fs::read_to_string(file)?;
+        serde_json::from_str::<Self>(&file).map_err(|e| e.into())
     }
 }
 

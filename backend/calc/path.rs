@@ -54,10 +54,9 @@ pub fn successors(
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
 pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> f64 {
-    let d = universe.star_map[&conn.target]
+    universe.star_map[&conn.target]
         .distance(end)
-        .get::<light_year>();
-    return d;
+        .get::<light_year>()
 }
 
 #[derive(Debug, PartialEq)]
@@ -84,8 +83,8 @@ pub fn calc_path(
     };
     let path = pathfinding::astar(
         &init_conn,
-        |conn| successors(&universe, conn, jump_distance, optimize, use_smart_gates),
-        |conn| heuristic(&universe, conn, end),
+        |conn| successors(universe, conn, jump_distance, optimize, use_smart_gates),
+        |conn| heuristic(universe, conn, end),
         |conn| conn.target == end.id,
         timeout,
     );
@@ -94,10 +93,10 @@ pub fn calc_path(
         pathfinding::PathFindResult::Found((path, _)) => {
             // The first connection is the one we invented
             // to start the search, so we can skip it
-            return PathResult::Found(path[1..].to_vec());
+            PathResult::Found(path[1..].to_vec())
         }
-        pathfinding::PathFindResult::NotFound => return PathResult::NotFound,
-        pathfinding::PathFindResult::Timeout => return PathResult::Timeout,
+        pathfinding::PathFindResult::NotFound => PathResult::NotFound,
+        pathfinding::PathFindResult::Timeout => PathResult::Timeout,
     }
 }
 
@@ -227,8 +226,10 @@ mod pathfinding {
         let mut parents: FxIndexMap<N, (usize, C)> = FxIndexMap::default();
         parents.insert(start.clone(), (usize::MAX, Zero::zero()));
         while let Some(SmallestCostHolder { cost, index, .. }) = to_see.pop() {
-            if timeout.is_some() && start_time.elapsed().as_secs() >= timeout.unwrap() {
-                return PathFindResult::Timeout;
+            if let Some(timeout) = timeout {
+                if start_time.elapsed().as_secs() >= timeout {
+                    return PathFindResult::Timeout;
+                }
             }
             let successors = {
                 let (node, &(_, c)) = parents.get_index(index).unwrap(); // Cannot fail
