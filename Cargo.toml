@@ -27,9 +27,9 @@ harness = false
 [dependencies]
 anyhow = "1.0.100"
 bincode = { version = "2", features = ["serde"] }
-clap = { version = "4.5.53", features = ["derive"] }
+clap = { version = "4.5.56", features = ["derive"] }
 env_logger = "0.11.5"
-indexmap = "2.12.1"
+indexmap = "2.13.0"
 indicatif = { version = "0.18.3", features = ["rayon"] }
 log = "0.4.29"
 num-traits = "0.2.19"
@@ -37,7 +37,7 @@ rayon = "1.11.0"
 rocket = { version = "0.5.1", features = ["serde_json", "json"] }
 rustc-hash = "2.1.0"
 serde = { version = "1.0.216", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 uom = { version = "0.37.0", features = ["serde"] }
 
 [dev-dependencies]
