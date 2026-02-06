@@ -1,5 +1,5 @@
 all: data/blockchain.db data/smartgates.json \
-	data/starmap.bin \
+	data/starmap.rkyv \
 	data/solarsystems.json data/types.json data/fuels.json \
 	src/consts/fuels.ts src/consts/systemnames.json
 .PHONY: all sync-blockchain
@@ -27,7 +27,7 @@ data/starmap.json: frontier/index_stillness.txt tools/restool.py
 	    res:/staticdata/starmapcache.pickle \
 		-o data/starmap.json
 
-data/starmap.bin: data/starmap.json data/smartgates.json
+data/starmap.rkyv: data/starmap.json data/smartgates.json
 	cargo run --release -- build
 
 data/solarsystems.json: tools/api_get.py

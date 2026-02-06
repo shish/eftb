@@ -1,20 +1,24 @@
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
+use rkyv::{Archive, Deserialize, Serialize};
 
 use crate::units::Meters;
 
 pub type ConnectionId = u32;
 pub type SolarSystemId = u32;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Archive, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[archive(compare(PartialEq))]
+#[archive_attr(derive(Debug))]
 pub enum ConnType {
     NpcGate,
     SmartGate,
     Jump,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Archive, Deserialize, Serialize, Clone)]
+#[archive(compare(PartialEq))]
+#[archive_attr(derive(Debug))]
 pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
@@ -45,7 +49,9 @@ impl Ord for Connection {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[derive(Archive, Deserialize, Serialize, Clone, Default)]
+#[archive(compare(PartialEq))]
+#[archive_attr(derive(Debug))]
 pub struct Star {
     pub id: SolarSystemId,
     pub x: f64,
@@ -79,7 +85,8 @@ impl std::hash::Hash for Star {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Archive, Deserialize, Serialize, Clone)]
+#[archive_attr(derive(Debug))]
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
     pub star_id_to_name: HashMap<SolarSystemId, String>,
@@ -87,11 +94,9 @@ pub struct Universe {
 }
 impl Universe {
     pub fn load() -> anyhow::Result<Universe> {
-        let star_map: HashMap<SolarSystemId, Star> = bincode::serde::decode_from_slice(
-            &std::fs::read("data/starmap.bin")?,
-            bincode::config::legacy(),
-        )?
-        .0;
+        let bytes = std::fs::read("data/starmap.rkyv")?;
+        let archived = unsafe { rkyv::archived_root::<HashMap<SolarSystemId, Star>>(&bytes) };
+        let star_map: HashMap<SolarSystemId, Star> = archived.deserialize(&mut rkyv::Infallible)?;
 
         let data = std::fs::read_to_string("data/solarsystems.json")?;
         let json = serde_json::from_str::<Vec<crate::raw::RawStar>>(&data)?;
@@ -113,10 +118,8 @@ impl Universe {
 
     pub fn save(&self) -> anyhow::Result<()> {
         // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
-        std::fs::write(
-            "data/starmap.bin",
-            bincode::serde::encode_to_vec(&self.star_map, bincode::config::legacy())?,
-        )?;
+        let bytes = rkyv::to_bytes::<_, 256>(&self.star_map)?;
+        std::fs::write("data/starmap.rkyv", bytes.as_ref())?;
         Ok(())
     }
 

@@ -1,7 +1,21 @@
-use serde::{Deserialize, Serialize};
+use rkyv::{Archive, Deserialize, Serialize};
+use serde::{Deserialize as SerdeDeserialize, Serialize as SerdeSerialize};
 
 /// Distance in meters
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    PartialOrd,
+    SerdeSerialize,
+    SerdeDeserialize,
+    Archive,
+    Deserialize,
+    Serialize,
+)]
+#[archive(compare(PartialEq))]
+#[archive_attr(derive(Debug))]
 pub struct Meters(pub f64);
 
 // Conversion constant: 1 light year = 9.4607304725808e15 meters
