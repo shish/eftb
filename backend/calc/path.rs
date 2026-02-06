@@ -1,7 +1,5 @@
-use uom::si::f64::*;
-use uom::si::length::light_year;
-
 use crate::data::*;
+use crate::units::Meters;
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PathOptimize {
@@ -15,7 +13,7 @@ pub enum PathOptimize {
 pub fn successors(
     universe: &Universe,
     conn: &Connection,
-    jump_distance: Length,
+    jump_distance: Meters,
     optimize: PathOptimize,
     use_smart_gates: bool,
 ) -> Vec<(Connection, f64)> {
@@ -29,7 +27,7 @@ pub fn successors(
         .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
-            let distance = c.distance.get::<light_year>();
+            let distance = c.distance.to_light_years();
             match (optimize, &c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
@@ -56,7 +54,7 @@ pub fn successors(
 pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> f64 {
     universe.star_map[&conn.target]
         .distance(end)
-        .get::<light_year>()
+        .to_light_years()
 }
 
 #[derive(Debug, PartialEq)]
@@ -70,7 +68,7 @@ pub fn calc_path(
     universe: &Universe,
     start: &Star,
     end: &Star,
-    jump_distance: Length,
+    jump_distance: Meters,
     optimize: PathOptimize,
     use_smart_gates: bool,
     timeout: Option<u64>,
@@ -78,7 +76,7 @@ pub fn calc_path(
     let init_conn = Connection {
         id: 0,
         conn_type: ConnType::Jump,
-        distance: Length::new::<light_year>(0.0),
+        distance: Meters::from_light_years(0.0),
         target: start.id,
     };
     let path = pathfinding::astar(
@@ -102,8 +100,6 @@ pub fn calc_path(
 
 #[cfg(test)]
 mod tests {
-    use uom::si::length::light_year;
-
     use super::*;
 
     fn call_calc_path(
@@ -118,7 +114,7 @@ mod tests {
             universe,
             &universe.star_map[&start_id],
             &universe.star_map[&end_id],
-            Length::new::<light_year>(jump_distance),
+            Meters::from_light_years(jump_distance),
             optimize,
             use_smart_gates,
             None,

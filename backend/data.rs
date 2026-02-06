@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use uom::si::f64::*;
-use uom::si::length::meter;
+
+use crate::units::Meters;
 
 pub type ConnectionId = u32;
 pub type SolarSystemId = u32;
@@ -18,7 +18,7 @@ pub enum ConnType {
 pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
-    pub distance: Length,
+    pub distance: Meters,
     pub target: SolarSystemId,
 }
 impl PartialEq for Connection {
@@ -39,11 +39,9 @@ impl PartialOrd for Connection {
 }
 impl Ord for Connection {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.conn_type.cmp(&other.conn_type).then_with(|| {
-            self.distance
-                .get::<meter>()
-                .total_cmp(&other.distance.get::<meter>())
-        })
+        self.conn_type
+            .cmp(&other.conn_type)
+            .then_with(|| self.distance.cmp(&other.distance))
     }
 }
 
@@ -57,8 +55,8 @@ pub struct Star {
 }
 
 impl Star {
-    pub fn distance(&self, other: &Star) -> Length {
-        Length::new::<meter>(
+    pub fn distance(&self, other: &Star) -> Meters {
+        Meters::new(
             ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
                 .sqrt(),
         )
@@ -135,8 +133,6 @@ impl Universe {
 
     #[cfg(test)]
     pub fn tiny_test() -> Universe {
-        use uom::si::length::light_year;
-
         struct MockStar {
             id: SolarSystemId,
             name: &'static str,
@@ -182,8 +178,8 @@ impl Universe {
                     s.id,
                     Star {
                         id: s.id,
-                        x: Length::new::<light_year>(s.x).get::<meter>(),
-                        y: Length::new::<light_year>(s.y).get::<meter>(),
+                        x: Meters::from_light_years(s.x).get(),
+                        y: Meters::from_light_years(s.y).get(),
                         z: 0.0,                  // Z is not used in this test
                         connections: Vec::new(), // Connections will be added later
                     },
@@ -191,7 +187,7 @@ impl Universe {
             })
             .collect();
 
-        let mut conn_id = 0;
+        let mut conn_id = 1; // Connection #0 is reserved for path init
         for conn in conns {
             let star1 = star_map.get(&conn.s1).unwrap().clone();
             let star2 = star_map.get(&conn.s2).unwrap().clone();
@@ -254,7 +250,7 @@ mod tests {
             z: 0.0,
             ..Default::default()
         };
-        assert_eq!(a.distance(&b), Length::new::<meter>(1.0));
+        assert_eq!(a.distance(&b), Meters::new(1.0));
     }
 
     /// Check that connections are sorted by type (Jump last) then distance
@@ -266,37 +262,37 @@ mod tests {
         let a = Connection {
             id: 1,
             conn_type: ConnType::Jump,
-            distance: Length::new::<meter>(2.0),
+            distance: Meters::new(2.0),
             target: 1,
         };
         let b = Connection {
             id: 2,
             conn_type: ConnType::NpcGate,
-            distance: Length::new::<meter>(2.0),
+            distance: Meters::new(2.0),
             target: 1,
         };
         let c = Connection {
             id: 3,
             conn_type: ConnType::SmartGate,
-            distance: Length::new::<meter>(2.0),
+            distance: Meters::new(2.0),
             target: 1,
         };
         let d = Connection {
             id: 4,
             conn_type: ConnType::Jump,
-            distance: Length::new::<meter>(1.0),
+            distance: Meters::new(1.0),
             target: 1,
         };
         let e = Connection {
             id: 5,
             conn_type: ConnType::NpcGate,
-            distance: Length::new::<meter>(1.0),
+            distance: Meters::new(1.0),
             target: 1,
         };
         let f = Connection {
             id: 6,
             conn_type: ConnType::SmartGate,
-            distance: Length::new::<meter>(1.0),
+            distance: Meters::new(1.0),
             target: 1,
         };
         let mut conns = vec![
@@ -309,5 +305,25 @@ mod tests {
         ];
         conns.sort();
         assert_eq!(conns, vec![e, b, f, c, d, a]);
+    }
+
+    #[test]
+    fn test_tiny_test_star1_sorting() {
+        let universe = Universe::tiny_test();
+        let star1 = &universe.star_map[&1];
+
+        // First connection should be the NPC gate to star 4
+        assert_eq!(star1.connections[0].conn_type, ConnType::NpcGate);
+        assert_eq!(star1.connections[0].target, 4);
+
+        // All NPC gates should come before all jumps
+        let mut seen_jump = false;
+        for conn in &star1.connections {
+            if conn.conn_type == ConnType::Jump {
+                seen_jump = true;
+            } else if seen_jump {
+                panic!("Found non-jump connection after jump: {:?}", conn);
+            }
+        }
     }
 }

@@ -2,14 +2,12 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 use clap::{Parser, Subcommand};
+use eftb::data;
 use eftb::data::SolarSystemId;
+use eftb::raw;
+use eftb::units::Meters;
 use indicatif::ProgressIterator;
 use log::{info, warn};
-use uom::si::f64::*;
-use uom::si::length::light_year;
-
-use eftb::data;
-use eftb::raw;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -68,7 +66,7 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::Build { max_jump_distance }) => {
             info!("Loading raw data");
             let raw_star_data = raw::RawStarMap::from_file("data/starmap.json")?;
-            let max_jump_dist: Length = Length::new::<light_year>(*max_jump_distance);
+            let max_jump_dist: Meters = Meters::from_light_years(*max_jump_distance);
 
             info!("Building star map");
             let mut star_map: HashMap<data::SolarSystemId, data::Star> = HashMap::new();
@@ -95,7 +93,7 @@ fn main() -> anyhow::Result<()> {
                 ] {
                     let to_star = star_map.get(&tid).unwrap().clone();
                     let from_star = star_map.get_mut(&fid).unwrap();
-                    let distance: Length = from_star.distance(&to_star);
+                    let distance: Meters = from_star.distance(&to_star);
                     let conn_type = match raw_jump.jump_type {
                         0 => data::ConnType::NpcGate,
                         1 => data::ConnType::NpcGate, // What are these ???
@@ -131,7 +129,7 @@ fn main() -> anyhow::Result<()> {
                 }
                 let to_star = star_map.get(&gate.to).unwrap().clone();
                 let from_star = star_map.get_mut(&gate.from).unwrap();
-                let distance: Length = from_star.distance(&to_star);
+                let distance: Meters = from_star.distance(&to_star);
                 from_star.connections.push(data::Connection {
                     id: conn_count,
                     conn_type: data::ConnType::SmartGate,
@@ -148,7 +146,7 @@ fn main() -> anyhow::Result<()> {
                     if star.id == other_star.id {
                         continue;
                     }
-                    let distance: Length = star.distance(&other_star);
+                    let distance: Meters = star.distance(&other_star);
                     if distance < max_jump_dist {
                         star.connections.push(data::Connection {
                             id: conn_count,
@@ -187,12 +185,12 @@ fn main() -> anyhow::Result<()> {
 
             let start = universe.star_by_name(start_name)?;
             let end = universe.star_by_name(end_name)?;
-            let distance: Length = start.distance(end);
+            let distance: Meters = start.distance(end);
             println!(
                 "Distance between {} and {} is {} LY",
                 universe.star_id_to_name[&start.id],
                 universe.star_id_to_name[&end.id],
-                distance.get::<light_year>() as i32
+                distance.to_light_years() as i32
             );
         }
         Some(Commands::Path {
@@ -209,7 +207,7 @@ fn main() -> anyhow::Result<()> {
 
             let start = universe.star_by_name(start_name)?;
             let end = universe.star_by_name(end_name)?;
-            let jump_distance: Length = Length::new::<light_year>(*jump_distance);
+            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
 
             info!("Finding path");
             let now = Instant::now();
@@ -233,7 +231,7 @@ fn main() -> anyhow::Result<()> {
                             universe.star_id_to_name[&last_id],
                             universe.star_id_to_name[&conn.target],
                             conn.conn_type,
-                            conn.distance.get::<light_year>() as i32
+                            conn.distance.to_light_years() as i32
                         );
                         last_id = conn.target;
                     }
@@ -255,7 +253,7 @@ fn main() -> anyhow::Result<()> {
             info!("Loaded star map");
 
             let start = universe.star_by_name(start_name)?;
-            let jump_distance: Length = Length::new::<light_year>(*jump_distance);
+            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
 
             info!("Finding exits");
             let exits = eftb::calc_exit(&universe, start, jump_distance);
@@ -264,7 +262,7 @@ fn main() -> anyhow::Result<()> {
                     "{} -> {} ({} ly)",
                     universe.star_id_to_name[&from.id],
                     universe.star_id_to_name[&to.id],
-                    from.distance(&to).get::<light_year>() as i32
+                    from.distance(&to).to_light_years() as i32
                 );
             }
         }
@@ -285,14 +283,14 @@ fn main() -> anyhow::Result<()> {
                         "    {} ({:?}, {} ly)",
                         universe.star_id_to_name[&conn.target],
                         conn.conn_type,
-                        conn.distance.get::<light_year>() as i32
+                        conn.distance.to_light_years() as i32
                     );
                 }
             }
             if let Some(jump_distance) = jump_distance {
                 println!("  Nearby stars:");
                 for conn in &star.connections {
-                    let d = conn.distance.get::<light_year>();
+                    let d = conn.distance.to_light_years();
                     if conn.conn_type == data::ConnType::Jump && d < *jump_distance {
                         println!(
                             "    {} ({} ly)",

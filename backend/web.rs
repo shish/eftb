@@ -4,6 +4,10 @@ extern crate rocket;
 use std::io::Cursor;
 use std::path::Path;
 
+use eftb::calc::path::PathOptimize;
+use eftb::data;
+use eftb::data::{ConnType, SolarSystemId, Star};
+use eftb::units::Meters;
 use rocket::fs::NamedFile;
 use rocket::http::ContentType;
 use rocket::http::Status;
@@ -12,12 +16,6 @@ use rocket::response::{self, Responder, Response};
 use rocket::serde::json::Json;
 use rocket::State;
 use serde::Serialize;
-use uom::si::f64::*;
-use uom::si::length::light_year;
-
-use eftb::calc::path::PathOptimize;
-use eftb::data;
-use eftb::data::{ConnType, SolarSystemId, Star};
 
 // ====================================================================
 // common
@@ -92,10 +90,10 @@ fn calc_dist(
 ) -> Result<Json<DistReturn>, CustomError> {
     let start = get_star(universe, start)?;
     let end = get_star(universe, end)?;
-    let dist: Length = start.distance(end);
+    let dist: Meters = start.distance(end);
     Ok(Json(DistReturn {
         version: 1,
-        data: dist.get::<uom::si::length::light_year>(),
+        data: dist.to_light_years(),
     }))
 }
 
@@ -147,7 +145,7 @@ fn calc_path(
         &universe,
         start,
         end,
-        Length::new::<uom::si::length::light_year>(jump),
+        Meters::from_light_years(jump),
         optimize,
         use_smart_gates,
         Some(5),
@@ -167,7 +165,7 @@ fn calc_path(
                         ConnType::NpcGate => "npc_gate".to_string(),
                         ConnType::SmartGate => "smart_gate".to_string(),
                     },
-                    distance: conn.distance.get::<light_year>() as f64,
+                    distance: conn.distance.to_light_years() as f64,
                     to: WebStar {
                         id: conn.target,
                         name: universe.star_id_to_name[&conn.target].clone(),
@@ -207,18 +205,14 @@ fn calc_exit(
 ) -> Result<Json<ExitReturn>, CustomError> {
     let start = get_star(universe, start)?;
 
-    let exits = eftb::calc_exit(
-        &universe,
-        start,
-        Length::new::<uom::si::length::light_year>(jump),
-    );
+    let exits = eftb::calc_exit(&universe, start, Meters::from_light_years(jump));
 
     let mut result: Vec<(String, String, f64)> = Vec::new();
     for (from, to) in exits {
         result.push((
             universe.star_id_to_name[&from.id].clone(),
             universe.star_id_to_name[&to.id].clone(),
-            from.distance(&to).get::<uom::si::length::light_year>(),
+            from.distance(&to).to_light_years(),
         ));
     }
     Ok(Json(ExitReturn {

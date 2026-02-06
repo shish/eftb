@@ -1,13 +1,12 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use uom::si::f64::*;
-use uom::si::length::light_year;
+use eftb::units::Meters;
 
 fn path(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
     // ~1200LY across dense space, takes ~0.05s on my laptop
     let start = universe.star_by_name(&"E9R-5PC".to_string()).unwrap();
     let end = universe.star_by_name(&"E1J-V83".to_string()).unwrap();
-    let jump_distance: Length = Length::new::<light_year>(200.0);
+    let jump_distance = Meters::from_light_years(200.0);
     c.bench_function("calc_path", |b| {
         b.iter(|| {
             eftb::calc_path(
@@ -48,10 +47,10 @@ fn successors(c: &mut Criterion) {
     let conn = &eftb::data::Connection {
         id: 0,
         conn_type: eftb::data::ConnType::NpcGate,
-        distance: Length::new::<light_year>(100.0),
+        distance: Meters::from_light_years(100.0),
         target: start.id,
     };
-    let jump_distance = Length::new::<light_year>(100.0);
+    let jump_distance = Meters::from_light_years(100.0);
 
     for opt in [
         eftb::calc::path::PathOptimize::Distance,

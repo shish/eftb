@@ -1,8 +1,7 @@
-use uom::si::f64::*;
-
 use crate::data::*;
+use crate::units::Meters;
 
-pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Vec<(Star, Star)> {
+pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Meters) -> Vec<(Star, Star)> {
     let mut gate_network: Vec<SolarSystemId> = Vec::new();
     let mut to_add_to_network: Vec<SolarSystemId> = Vec::new();
 
@@ -42,8 +41,6 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Length) -> Ve
 
 #[cfg(test)]
 mod tests {
-    use uom::si::length::light_year;
-
     use super::*;
 
     #[test]
@@ -54,7 +51,7 @@ mod tests {
             calc_exit(
                 &universe,
                 &universe.star_map[&1],
-                Length::new::<light_year>(10.0)
+                Meters::from_light_years(10.0)
             ),
             vec![
                 (universe.star_map[&1].clone(), universe.star_map[&2].clone()),
