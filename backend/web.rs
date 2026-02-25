@@ -113,9 +113,15 @@ struct PathStep {
     to: WebStar,
 }
 #[derive(Debug, Serialize)]
+enum PathResult {
+    Found(Vec<PathStep>),
+    Timeout,
+    NotFound,
+}
+#[derive(Debug, Serialize)]
 struct PathReturn {
     version: u32,
-    data: Vec<PathStep>,
+    data: PathResult,
 }
 
 #[get("/path?<start>&<end>&<jump>&<optimize>&<use_smart_gates>")]
@@ -174,17 +180,18 @@ fn calc_path(
                 last_id = conn.target;
             }
             Ok(Json(PathReturn {
-                version: 2,
-                data: result,
+                version: 3,
+                data: PathResult::Found(result),
             }))
         }
-        eftb::calc::path::PathResult::NotFound => {
-            Err(CustomError(Status::NotFound, format!("No path found")))
-        }
-        eftb::calc::path::PathResult::Timeout => Err(CustomError(
-            Status::InternalServerError,
-            format!("Path calculation timed out"),
-        )),
+        eftb::calc::path::PathResult::Timeout => Ok(Json(PathReturn {
+            version: 3,
+            data: PathResult::Timeout,
+        })),
+        eftb::calc::path::PathResult::NotFound => Ok(Json(PathReturn {
+            version: 3,
+            data: PathResult::NotFound,
+        })),
     }
 }
 
