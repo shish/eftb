@@ -25,12 +25,12 @@ name = "data"
 harness = false
 
 [dependencies]
-anyhow = "1.0.100"
+anyhow = "1.0.102"
 rkyv = "0.7"
-clap = { version = "4.5.56", features = ["derive"] }
-env_logger = "0.11.5"
+clap = { version = "4.5.60", features = ["derive"] }
+env_logger = "0.11.9"
 indexmap = "2.13.0"
-indicatif = { version = "0.18.3", features = ["rayon"] }
+indicatif = { version = "0.18.4", features = ["rayon"] }
 log = "0.4.29"
 num-traits = "0.2.19"
 rayon = "1.11.0"
