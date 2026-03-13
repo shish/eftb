@@ -136,13 +136,13 @@ fn calc_path(
         _ => {
             return Err(CustomError(
                 Status::BadRequest,
-                format!("Invalid optimize value"),
+                "Invalid optimize value".to_string(),
             ))
         }
     };
 
     let result = eftb::calc_path(
-        &universe,
+        universe,
         start,
         end,
         Meters::from_light_years(jump),
@@ -165,7 +165,7 @@ fn calc_path(
                         ConnType::NpcGate => "npc_gate".to_string(),
                         ConnType::SmartGate => "smart_gate".to_string(),
                     },
-                    distance: conn.distance.to_light_years() as f64,
+                    distance: conn.distance.to_light_years(),
                     to: WebStar {
                         id: conn.target,
                         name: universe.star_id_to_name[&conn.target].clone(),
@@ -179,11 +179,11 @@ fn calc_path(
             }))
         }
         eftb::calc::path::PathResult::NotFound => {
-            Err(CustomError(Status::NotFound, format!("No path found")))
+            Err(CustomError(Status::NotFound, "No path found".to_string()))
         }
         eftb::calc::path::PathResult::Timeout => Err(CustomError(
             Status::InternalServerError,
-            format!("Path calculation timed out"),
+            "Path calculation timed out".to_string(),
         )),
     }
 }
@@ -205,7 +205,7 @@ fn calc_exit(
 ) -> Result<Json<ExitReturn>, CustomError> {
     let start = get_star(universe, start)?;
 
-    let exits = eftb::calc_exit(&universe, start, Meters::from_light_years(jump));
+    let exits = eftb::calc_exit(universe, start, Meters::from_light_years(jump));
 
     let mut result: Vec<(String, String, f64)> = Vec::new();
     for (from, to) in exits {

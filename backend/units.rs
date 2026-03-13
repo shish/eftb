@@ -7,7 +7,6 @@ use serde::{Deserialize as SerdeDeserialize, Serialize as SerdeSerialize};
     Clone,
     Copy,
     PartialEq,
-    PartialOrd,
     SerdeSerialize,
     SerdeDeserialize,
     Archive,
@@ -41,6 +40,12 @@ impl Meters {
 
 // Allow comparing Meters values
 impl Eq for Meters {}
+
+impl PartialOrd for Meters {
+    fn partial_cmp(&self, other: &Meters) -> Option<std::cmp::Ordering> {
+       Some(self.cmp(other))
+    }
+}
 
 impl Ord for Meters {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {

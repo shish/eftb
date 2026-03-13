@@ -146,7 +146,7 @@ fn main() -> anyhow::Result<()> {
                     if star.id == other_star.id {
                         continue;
                     }
-                    let distance: Meters = star.distance(&other_star);
+                    let distance: Meters = star.distance(other_star);
                     if distance < max_jump_dist {
                         star.connections.push(data::Connection {
                             id: conn_count,
