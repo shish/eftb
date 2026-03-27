@@ -1,6 +1,6 @@
-import React, { createContext } from "react";
+import { createContext, type ReactNode } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { FuelName } from "../consts/fuels";
+import type { FuelName } from "../consts/fuels";
 
 const dustCost = 50000;
 type FuelCosts = { [key in FuelName]: number };
@@ -18,11 +18,9 @@ export interface SettingsContextType {
   setFuelCosts: (newFuelCosts: FuelCosts) => void;
 }
 
-export const SettingsContext = createContext<SettingsContextType>(
-  {} as SettingsContextType,
-);
+export const SettingsContext = createContext<SettingsContextType>({} as SettingsContextType);
 
-export function SettingsProvider(props: { children: React.ReactNode }) {
+export function SettingsProvider(props: { children: ReactNode }) {
   const [fuelCosts, setFuelCosts] = useLocalStorage<{
     [key in FuelName]?: number;
   }>("fuel_costs", {});

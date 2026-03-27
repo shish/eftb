@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext } from "react";
-import { getEngine, Ship, ShipName, ships } from "../../consts";
-import { Fuel, FuelName, fuels, isCompatible } from "../../consts/fuels";
+import { getEngine, type Ship, type ShipName, ships } from "../../consts";
+import { type Fuel, type FuelName, fuels, isCompatible } from "../../consts/fuels";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/fuelcost")({
@@ -26,28 +26,26 @@ function SummaryTable() {
   const dfuels = Object.entries(fuels) as [FuelName, Fuel][];
 
   return (
-    <>
-      <table className="jumpSummary">
-        <thead>
-          <tr>
-            <th>Ship</th>
-            {dfuels.map(([fuelType]) => (
-              <th key={fuelType}>{fuelType}</th>
+    <table className="jumpSummary">
+      <thead>
+        <tr>
+          <th>Ship</th>
+          {dfuels.map(([fuelType]) => (
+            <th key={fuelType}>{fuelType}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {sorted_ships.map(([shipName, ship]) => (
+          <tr key={shipName}>
+            <th>{shipName}</th>
+            {dfuels.map(([fuelName, _]) => (
+              <SummaryCell key={fuelName} fuelName={fuelName} ship={ship} />
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {sorted_ships.map(([shipName, ship]) => (
-            <tr key={shipName}>
-              <th>{shipName}</th>
-              {dfuels.map(([fuelName, _]) => (
-                <SummaryCell key={fuelName} fuelName={fuelName} ship={ship} />
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+        ))}
+      </tbody>
+    </table>
   );
 }
 

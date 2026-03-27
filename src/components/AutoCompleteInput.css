@@ -9,8 +9,6 @@
   padding: 5px;
   cursor: pointer;
 }
-.autocomplete LI.highlighted {
-}
 
 /*@media (prefers-color-scheme: light) {*/
 .autocomplete {

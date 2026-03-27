@@ -1,4 +1,4 @@
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import "./AutoCompleteInput.css";
 import { clamp, get_word, replace_word } from "./AutoCompleteInput.util";
@@ -27,14 +27,8 @@ export function AutoCompleteInput({
   const [searchPos, setSearchPos] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const [highlighted, setHighlighted] = useState(0);
-  const refreshCompletions = useCallback(
-    (term: string) => setCompletions(getCompletions(term)),
-    [getCompletions, setCompletions],
-  );
-  const debouncedRefreshCompletions = useDebounceCallback(
-    refreshCompletions,
-    debounce,
-  );
+  const refreshCompletions = useCallback((term: string) => setCompletions(getCompletions(term)), [getCompletions]);
+  const debouncedRefreshCompletions = useDebounceCallback(refreshCompletions, debounce);
 
   // When moving the cursor, change the currently-selected word
   useEffect(() => {
@@ -75,7 +69,7 @@ export function AutoCompleteInput({
     }
     // if enter or right are pressed while a completion is selected, add the selected completion
     else if (
-      (event.code === "Enter" || event.code == "ArrowRight") &&
+      (event.code === "Enter" || event.code === "ArrowRight") &&
       showCompletions &&
       highlighted < completions.length &&
       highlighted >= 0
@@ -91,9 +85,7 @@ export function AutoCompleteInput({
   }
 
   function setTerm(term: string) {
-    const newVal = separator
-      ? replace_word(value, separator, searchPos, term)
-      : term;
+    const newVal = separator ? replace_word(value, separator, searchPos, term) : term;
     onChange(newVal);
     inputRef?.current?.focus();
   }
@@ -115,41 +107,38 @@ export function AutoCompleteInput({
         onBlur={() => setShowCompletions(false)}
         placeholder={placeholder}
       />
-      {showCompletions &&
-        completions.length > 0 &&
-        completions[0] != value &&
-        inputRect && (
-          <ul
-            className="autocomplete"
-            style={{
-              position: "absolute",
-              top: inputRect.top + inputRect.height + "px",
-              left: inputRect.left + "px",
-              width: inputRect.width ?? "auto",
-            }}
-          >
-            {completions.slice(0, 20).map((c, n) => (
-              <li
-                key={c}
-                // onClick happens after onBlur, so if we use that, the list will close
-                // and the click will not register. onMouseDown and onTouchStart happen
-                // before onBlur, so they work.
-                onMouseDown={(e) => {
-                  setTerm(c);
-                  e.preventDefault();
-                }}
-                onTouchStart={(e) => {
-                  setTerm(c);
-                  e.preventDefault();
-                }}
-                onMouseMove={() => setHighlighted(n)}
-                className={n === highlighted ? "highlighted" : ""}
-              >
-                {c}
-              </li>
-            ))}
-          </ul>
-        )}
+      {showCompletions && completions.length > 0 && completions[0] !== value && inputRect && (
+        <ul
+          className="autocomplete"
+          style={{
+            position: "absolute",
+            top: `${inputRect.top + inputRect.height}px`,
+            left: `${inputRect.left}px`,
+            width: inputRect.width ?? "auto",
+          }}
+        >
+          {completions.slice(0, 20).map((c, n) => (
+            <li
+              key={c}
+              // onClick happens after onBlur, so if we use that, the list will close
+              // and the click will not register. onMouseDown and onTouchStart happen
+              // before onBlur, so they work.
+              onMouseDown={(e) => {
+                setTerm(c);
+                e.preventDefault();
+              }}
+              onTouchStart={(e) => {
+                setTerm(c);
+                e.preventDefault();
+              }}
+              onMouseMove={() => setHighlighted(n)}
+              className={n === highlighted ? "highlighted" : ""}
+            >
+              {c}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { form_api } from "../../api";
 import { SystemInput } from "../../components/SystemInput";
@@ -28,10 +28,7 @@ function CopyFormattedButton(props: { path: PathStep[] }) {
     const text =
       `${props.path[0].from.name} → ${props.path[props.path.length - 1].to.name}\n\n` +
       props.path
-        .map(
-          (p) =>
-            `<a href="showinfo:5//${p.to.id}">${p.to.name}</a> (${p.conn_type}, ${p.distance.toFixed()}ly)`,
-        )
+        .map((p) => `<a href="showinfo:5//${p.to.id}">${p.to.name}</a> (${p.conn_type}, ${p.distance.toFixed()}ly)`)
         .join("\n");
 
     navigator.clipboard.writeText(text).catch(() => alert("Failed to copy :("));
@@ -39,13 +36,8 @@ function CopyFormattedButton(props: { path: PathStep[] }) {
 
   return (
     <>
-      <input
-        type="button"
-        value="Copy with EVE-Links"
-        onClick={copyFormatted}
-      />
-      (If you paste with EVE-Links into an in-game notepad, you get clickable
-      links)
+      <input type="button" value="Copy with EVE-Links" onClick={copyFormatted} />
+      (If you paste with EVE-Links into an in-game notepad, you get clickable links)
     </>
   );
 }
@@ -56,18 +48,13 @@ function TextPath(props: { path: PathStep[] }) {
       <ul>
         {props.path.map((p) => (
           <li key={p.from.id}>
-            {p.from.name} &rarr; {p.to.name} ({p.conn_type},{" "}
-            {p.distance.toFixed(2)} ly)
+            {p.from.name} &rarr; {p.to.name} ({p.conn_type}, {p.distance.toFixed(2)} ly)
           </li>
         ))}
       </ul>
-      {props.path.length} hops (
-      {props.path.filter((c) => c.conn_type == "jump").length} jumps),{" "}
+      {props.path.length} hops ({props.path.filter((c) => c.conn_type === "jump").length} jumps),{" "}
       {props.path.reduce((a, b) => a + b.distance, 0).toFixed(2)} ly travelled (
-      {props.path
-        .reduce((a, b) => a + (b.conn_type == "jump" ? b.distance : 0), 0)
-        .toFixed(2)}{" "}
-      ly jumped)
+      {props.path.reduce((a, b) => a + (b.conn_type === "jump" ? b.distance : 0), 0).toFixed(2)} ly jumped)
     </>
   );
 }
@@ -76,14 +63,8 @@ function PathFinder() {
   const [start, setStart] = useSessionStorage<string>("start", "E.G1G.6GD");
   const [end, setEnd] = useSessionStorage<string>("end", "Nod");
   const [jump, setJump] = useSessionStorage<number>("jump", 80);
-  const [optimize, setOptimize] = useSessionStorage<PathOptimize>(
-    "optimize",
-    "fuel",
-  );
-  const [useSmartGates, setUseSmartGates] = useSessionStorage<boolean>(
-    "useSmartGates",
-    true,
-  );
+  const [optimize, setOptimize] = useSessionStorage<PathOptimize>("optimize", "fuel");
+  const [useSmartGates, setUseSmartGates] = useSessionStorage<boolean>("useSmartGates", true);
 
   const [path, setPath] = useState<null | PathStep[]>(null);
   const [error, setError] = useState<null | Error>(null);
@@ -93,7 +74,7 @@ function PathFinder() {
     setError(null);
   }, [start, end, jump, optimize]);
 
-  function submit(e: FormEvent<HTMLFormElement>) {
+  function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     form_api(e.target as HTMLFormElement, 2, setPath, setError);
   }
@@ -107,21 +88,13 @@ function PathFinder() {
             <tr>
               <th>System 1</th>
               <td>
-                <SystemInput
-                  name="start"
-                  value={start}
-                  onChange={(s) => setStart(s)}
-                />
+                <SystemInput name="start" value={start} onChange={(s) => setStart(s)} />
               </td>
             </tr>
             <tr>
               <th>System 2</th>
               <td>
-                <SystemInput
-                  name="end"
-                  value={end}
-                  onChange={(s) => setEnd(s)}
-                />
+                <SystemInput name="end" value={end} onChange={(s) => setEnd(s)} />
               </td>
             </tr>
             <tr>
@@ -141,11 +114,7 @@ function PathFinder() {
             <tr>
               <th>Optimize for</th>
               <td>
-                <select
-                  name="optimize"
-                  value={optimize}
-                  onChange={(e) => setOptimize(e.target.value as PathOptimize)}
-                >
+                <select name="optimize" value={optimize} onChange={(e) => setOptimize(e.target.value as PathOptimize)}>
                   <option value="fuel">Fuel (Prefer gates)</option>
                   <option value="distance">Distance (Prefer jumps)</option>
                   <option value="hops">Hops (Minimise clicks)</option>
@@ -170,7 +139,7 @@ function PathFinder() {
               </td>
               <td>
                 {path && <TextPath path={path} />}
-                {error && error.message}
+                {error?.message}
               </td>
             </tr>
           </tbody>

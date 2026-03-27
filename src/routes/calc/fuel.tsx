@@ -15,7 +15,7 @@ function FuelCalculator() {
   const [tank, setTank] = useState<number>(0);
 
   useEffect(() => {
-    setTank(parseInt(((dist / (effi * 1e7)) * mass).toFixed(0)));
+    setTank(parseInt(((dist / (effi * 1e7)) * mass).toFixed(0), 10));
   }, [mass, dist, effi]);
 
   return (
@@ -27,11 +27,7 @@ function FuelCalculator() {
           <tr>
             <th>Ship / Fuel</th>
             <td>
-              <ShipFuelSelect
-                onMassChange={setMass}
-                onTankChange={setTank}
-                onEfficiencyChange={setEffi}
-              />
+              <ShipFuelSelect onMassChange={setMass} onTankChange={setTank} onEfficiencyChange={setEffi} />
             </td>
             <td>(Just a shortcut to set mass &amp; fuel)</td>
           </tr>

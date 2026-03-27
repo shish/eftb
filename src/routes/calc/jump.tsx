@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/ShipFuelSelect";
-import { getEngine, items, Ship, ShipName, ships } from "../../consts";
-import { Fuel, FuelName, fuels, isCompatible } from "../../consts/fuels";
+import { getEngine, items, type Ship, type ShipName, ships } from "../../consts";
+import { type Fuel, type FuelName, fuels, isCompatible } from "../../consts/fuels";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/jump")({
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/calc/jump")({
 });
 
 function jumpRange(mass: number, tank: number, efficiency: number): number {
-  return parseInt(((tank / mass) * efficiency * 1e7).toFixed(0));
+  return parseInt(((tank / mass) * efficiency * 1e7).toFixed(0), 10);
 }
 
 function JumpCapacityCalculator() {
@@ -43,11 +43,7 @@ function Calculator() {
         <tr>
           <th>Ship / Fuel</th>
           <td>
-            <ShipFuelSelect
-              onMassChange={setMass}
-              onTankChange={setTank}
-              onEfficiencyChange={setEffi}
-            />
+            <ShipFuelSelect onMassChange={setMass} onTankChange={setTank} onEfficiencyChange={setEffi} />
           </td>
           <td>(Just a shortcut to set mass &amp; fuel)</td>
         </tr>
@@ -108,28 +104,17 @@ type CargoMode = "empty" | "fuel" | "smartgate" | "custom";
 function SummaryTable() {
   const sorted_ships = Object.entries(ships) as [ShipName, Ship][];
   sorted_ships.sort((a, b) => a[1].mass - b[1].mass);
-  const dfuels = (Object.entries(fuels) as [FuelName, Fuel][]).filter(
-    ([fuelName, _]) => fuelName !== "EU-40",
-  );
+  const dfuels = (Object.entries(fuels) as [FuelName, Fuel][]).filter(([fuelName, _]) => fuelName !== "EU-40");
 
-  const [mode, setMode] = useSessionStorage<SummaryMode>(
-    "jumpSummaryMode",
-    "dist",
-  );
+  const [mode, setMode] = useSessionStorage<SummaryMode>("jumpSummaryMode", "dist");
 
-  const [fittingsMode, setFittingsMode] = useSessionStorage<FittingsMode>(
-    "jumpSummaryFittingsMode",
-    "engine",
-  );
+  const [fittingsMode, setFittingsMode] = useSessionStorage<FittingsMode>("jumpSummaryFittingsMode", "engine");
   const [fittingsMass, setFittingsMass] = useSessionStorage("fittingsMass", 0);
   useEffect(() => {
     if (fittingsMode === "empty") setFittingsMass(0);
   }, [fittingsMode, setFittingsMass]);
 
-  const [cargoMode, setCargoMode] = useSessionStorage<CargoMode>(
-    "jumpSummaryCargoMode",
-    "empty",
-  );
+  const [cargoMode, setCargoMode] = useSessionStorage<CargoMode>("jumpSummaryCargoMode", "empty");
   const [cargoMass, setCargoMass] = useSessionStorage("cargoMass", 0);
   useEffect(() => {
     if (cargoMode === "empty") setCargoMass(0);
@@ -143,10 +128,7 @@ function SummaryTable() {
           <tr>
             <th>Mode</th>
             <td>
-              <select
-                value={mode}
-                onChange={(e) => setMode(e.target.value as SummaryMode)}
-              >
+              <select value={mode} onChange={(e) => setMode(e.target.value as SummaryMode)}>
                 <option value="dist">Distance (ly)</option>
                 <option value="effi">Fuel Efficiency (ly per fuel unit)</option>
                 <option value="ceff">Travel Cost (lux per ly)</option>
@@ -155,19 +137,14 @@ function SummaryTable() {
           </tr>
           <tr>
             <th>Fittings</th>
-            <td className={fittingsMode == "custom" ? "pair" : undefined}>
-              <select
-                value={fittingsMode}
-                onChange={(e) =>
-                  setFittingsMode(e.target.value as FittingsMode)
-                }
-              >
+            <td className={fittingsMode === "custom" ? "pair" : undefined}>
+              <select value={fittingsMode} onChange={(e) => setFittingsMode(e.target.value as FittingsMode)}>
                 <option value="empty">Empty</option>
                 <option value="engine">Engine</option>
                 <option value="custom">Custom</option>
               </select>
               <input
-                type={fittingsMode == "custom" ? "number" : "hidden"}
+                type={fittingsMode === "custom" ? "number" : "hidden"}
                 value={fittingsMass}
                 onChange={(e) => setFittingsMass(e.target.valueAsNumber)}
               />
@@ -175,18 +152,15 @@ function SummaryTable() {
           </tr>
           <tr>
             <th>Cargo</th>
-            <td className={cargoMode == "custom" ? "pair" : undefined}>
-              <select
-                value={cargoMode}
-                onChange={(e) => setCargoMode(e.target.value as CargoMode)}
-              >
+            <td className={cargoMode === "custom" ? "pair" : undefined}>
+              <select value={cargoMode} onChange={(e) => setCargoMode(e.target.value as CargoMode)}>
                 <option value="empty">Empty</option>
                 <option value="fuel">Full of Fuel</option>
                 <option value="smartgate">Materials for one Smart Gate</option>
                 <option value="custom">Custom</option>
               </select>
               <input
-                type={cargoMode == "custom" ? "number" : "hidden"}
+                type={cargoMode === "custom" ? "number" : "hidden"}
                 value={cargoMass}
                 onChange={(e) => setCargoMass(e.target.valueAsNumber)}
               />
@@ -217,16 +191,8 @@ function SummaryTable() {
                   efficiency={efficiency}
                   ship={ship}
                   mode={mode}
-                  fittingsMass={
-                    fittingsMode === "engine"
-                      ? getEngine(ship.type).mass
-                      : fittingsMass
-                  }
-                  cargoMass={
-                    cargoMode === "fuel"
-                      ? ship.tank * items["D1 Fuel"].mass
-                      : cargoMass
-                  }
+                  fittingsMass={fittingsMode === "engine" ? getEngine(ship.type).mass : fittingsMass}
+                  cargoMass={cargoMode === "fuel" ? ship.tank * items["D1 Fuel"].mass : cargoMass}
                 />
               ))}
             </tr>
@@ -261,19 +227,13 @@ function SummaryCell({
     case "dist":
       return <td>{jumpRange(totalMass, ship.tank, efficiency)}</td>;
     case "effi":
-      return (
-        <td>
-          {(jumpRange(totalMass, ship.tank, efficiency) / ship.tank).toFixed(3)}
-        </td>
-      );
+      return <td>{(jumpRange(totalMass, ship.tank, efficiency) / ship.tank).toFixed(3)}</td>;
     case "ceff":
       return (
         <td>
           {parseInt(
-            (
-              (ship.tank * fuelCosts[fuelName]) /
-              jumpRange(totalMass, ship.tank, efficiency)
-            ).toFixed(0),
+            ((ship.tank * fuelCosts[fuelName]) / jumpRange(totalMass, ship.tank, efficiency)).toFixed(0),
+            10,
           ).toLocaleString()}
         </td>
       );

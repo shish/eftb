@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { getEngine, ShipName, ships } from "../consts";
-import { FuelName, fuels, isCompatible } from "../consts/fuels";
+import { getEngine, type ShipName, ships } from "../consts";
+import { type FuelName, fuels, isCompatible } from "../consts/fuels";
 
 export function ShipFuelSelect({
   onMassChange,
@@ -48,9 +48,7 @@ export function ShipFuelSelect({
         }}
       >
         {Object.keys(fuels)
-          .filter((name) =>
-            isCompatible(getEngine(ships[ship].type).fuel, name as FuelName),
-          )
+          .filter((name) => isCompatible(getEngine(ships[ship].type).fuel, name as FuelName))
           .map((name) => (
             <option key={name} value={name}>
               {name}

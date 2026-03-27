@@ -14,7 +14,7 @@ export function form_api(
   const form_data = new FormData(form);
   // eslint-disable-next-line
   const params = new URLSearchParams(form_data as any).toString();
-  const url = form.action + "?" + params;
+  const url = `${form.action}?${params}`;
   api(url, expected_version, onData, onError);
 }
 
@@ -26,13 +26,9 @@ export function api(
   onError: (error: null | Error) => void,
 ) {
   fetch(url)
-    .then((response) =>
-      response.ok
-        ? response.json()
-        : response.text().then((text) => Promise.reject(Error(text))),
-    )
+    .then((response) => (response.ok ? response.json() : response.text().then((text) => Promise.reject(Error(text)))))
     .then((data: ApiReturn) => {
-      if (data.version == expected_version) {
+      if (data.version === expected_version) {
         onError(null);
         onData(data.data);
       } else {

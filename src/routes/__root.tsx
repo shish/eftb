@@ -16,9 +16,8 @@ export const Route = createRootRoute({
     <>
       <h1>EVE Frontier Toolbox</h1>
       <p>
-        Work in progress - let Shish know if something seems off - if you get an
-        error, please refresh the page and try again to make sure you&apos;re
-        running the latest code before reporting it &lt;3
+        Work in progress - let Shish know if something seems off - if you get an error, please refresh the page and try
+        again to make sure you&apos;re running the latest code before reporting it &lt;3
       </p>
       <hr />
       <Outlet />
@@ -83,11 +82,7 @@ export const Route = createRootRoute({
           </a>
         </li>
         <li>
-          <a
-            href="https://github.com/shish/eftb"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://github.com/shish/eftb" target="_blank" rel="noreferrer">
             GitHub
           </a>
         </li>

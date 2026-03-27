@@ -1,13 +1,5 @@
-export function find_word(
-  value: string,
-  separator: string,
-  position: number,
-): [number, number] {
-  if (
-    position < 1 ||
-    position > value.length ||
-    value[position - 1] === separator
-  ) {
+export function find_word(value: string, separator: string, position: number): [number, number] {
+  if (position < 1 || position > value.length || value[position - 1] === separator) {
     return [0, 0];
   }
 
@@ -23,28 +15,14 @@ export function find_word(
   return [start, end];
 }
 
-export function get_word(
-  value: string,
-  separator: string,
-  position: number,
-): string {
+export function get_word(value: string, separator: string, position: number): string {
   const [start, end] = find_word(value, separator, position);
   return value.substring(start, end);
 }
 
-export function replace_word(
-  value: string,
-  separator: string,
-  position: number,
-  replacement: string,
-): string {
+export function replace_word(value: string, separator: string, position: number, replacement: string): string {
   const [start, end] = find_word(value, separator, position);
-  return (
-    value.substring(0, start) +
-    replacement +
-    (value[end] === separator ? "" : separator) +
-    value.substring(end)
-  );
+  return value.substring(0, start) + replacement + (value[end] === separator ? "" : separator) + value.substring(end);
 }
 
 export function clamp(val: number, min: number, max: number): number {

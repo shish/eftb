@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { form_api } from "../../api";
 import { SystemInput } from "../../components/SystemInput";
@@ -21,7 +21,7 @@ function DistanceBetweenSystems() {
     setError(null);
   }, [start, end]);
 
-  function submit(e: FormEvent<HTMLFormElement>) {
+  function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     form_api(
       e.target as HTMLFormElement,
@@ -43,21 +43,13 @@ function DistanceBetweenSystems() {
             <tr>
               <th>System 1</th>
               <td>
-                <SystemInput
-                  name="start"
-                  value={start}
-                  onChange={(s) => setStart(s)}
-                />
+                <SystemInput name="start" value={start} onChange={(s) => setStart(s)} />
               </td>
             </tr>
             <tr>
               <th>System 2</th>
               <td>
-                <SystemInput
-                  name="end"
-                  value={end}
-                  onChange={(s) => setEnd(s)}
-                />
+                <SystemInput name="end" value={end} onChange={(s) => setEnd(s)} />
               </td>
             </tr>
             <tr>
@@ -66,7 +58,7 @@ function DistanceBetweenSystems() {
               </td>
               <td>
                 {dist && `${dist.toFixed(2)} ly`}
-                {error && error.message}
+                {error?.message}
               </td>
             </tr>
           </tbody>

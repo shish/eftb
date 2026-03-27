@@ -25,9 +25,7 @@ export function SystemInput({
   }, []);
 
   function getCompletions(input: string): string[] {
-    return systemNames.filter((v) =>
-      v.toLowerCase().startsWith(input.toLowerCase()),
-    );
+    return systemNames.filter((v) => v.toLowerCase().startsWith(input.toLowerCase()));
   }
 
   return (

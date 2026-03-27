@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { form_api } from "../../api";
 import { SystemInput } from "../../components/SystemInput";
@@ -22,7 +22,7 @@ function ExitFinder() {
     setError(null);
   }, [start, jump]);
 
-  function submit(e: FormEvent<HTMLFormElement>) {
+  function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     form_api(e.target as HTMLFormElement, 1, setExits, setError);
   }
@@ -37,11 +37,7 @@ function ExitFinder() {
             <tr>
               <th>Solar System</th>
               <td>
-                <SystemInput
-                  name="start"
-                  value={start}
-                  onChange={(s) => setStart(s)}
-                />
+                <SystemInput name="start" value={start} onChange={(s) => setStart(s)} />
               </td>
             </tr>
             <tr>
@@ -70,7 +66,7 @@ function ExitFinder() {
                     ))}
                   </ul>
                 )}
-                {error && error.message}
+                {error?.message}
               </td>
             </tr>
           </tbody>
