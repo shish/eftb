@@ -12,16 +12,16 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.168.10",
-    "@tanstack/react-router-devtools": "^1.163.3",
-    "@tanstack/router-plugin": "^1.167.12",
+    "@tanstack/react-router": "^1.168.18",
+    "@tanstack/react-router-devtools": "^1.166.13",
+    "@tanstack/router-plugin": "^1.167.18",
     "react": "^19",
     "react-dom": "^19",
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.10",
-    "@types/node": "^25.3.3",
+    "@biomejs/biome": "2.4.11",
+    "@types/node": "^25.6.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
