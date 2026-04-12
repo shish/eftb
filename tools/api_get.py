@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+# /// script
+# dependencies = [
+#   "tqdm",
+# ]
+# ///
+
 import json
 import urllib.request
 from pathlib import Path

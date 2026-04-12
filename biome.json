@@ -1,15 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "files": { "includes": ["**", "!!**/dist"] },
+  "files": { "includes": ["**", "!src/routeTree.gen.ts", "!!**/dist"] },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 120,
-    "includes": ["**", "!src/routeTree.gen.ts"]
+    "lineWidth": 120
   },
   "linter": {
-    "includes": ["**", "!src/routeTree.gen.ts"],
     "rules": {
       "correctness": {
         "useExhaustiveDependencies": "off"
@@ -18,8 +16,5 @@
         "noExplicitAny": "off"
       }
     }
-  },
-  "assist": {
-    "actions": { "source": { "organizeImports": "on" } }
   }
 }

@@ -1,10 +1,13 @@
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  devtools: {
+    enabled: true,
+  },
   plugins: [
     tanstackRouter(),
     react(),
@@ -22,10 +25,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          if (
-            id.includes("node_modules/react") ||
-            id.includes("node_modules/react-dom")
-          ) {
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
             return "react";
           }
           if (id.includes("node_modules/@tanstack")) {
@@ -45,7 +45,7 @@ export default defineConfig({
       },
     },
     watch: {
-      ignored: ["**/frontier/**"],
+      ignored: ["**/frontier/**", "**/.venv/**"],
     },
   },
 });
