@@ -3,18 +3,10 @@ use serde::{Deserialize as SerdeDeserialize, Serialize as SerdeSerialize};
 
 /// Distance in meters
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    SerdeSerialize,
-    SerdeDeserialize,
-    Archive,
-    Deserialize,
-    Serialize,
+    Debug, Clone, Copy, PartialEq, SerdeSerialize, SerdeDeserialize, Archive, Deserialize, Serialize,
 )]
-#[archive(compare(PartialEq))]
-#[archive_attr(derive(Debug))]
+#[rkyv(compare(PartialEq))]
+#[rkyv(derive(Debug))]
 pub struct Meters(pub f64);
 
 // Conversion constant: 1 light year = 9.4607304725808e15 meters
@@ -43,7 +35,7 @@ impl Eq for Meters {}
 
 impl PartialOrd for Meters {
     fn partial_cmp(&self, other: &Meters) -> Option<std::cmp::Ordering> {
-       Some(self.cmp(other))
+        Some(self.cmp(other))
     }
 }
 

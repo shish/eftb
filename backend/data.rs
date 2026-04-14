@@ -8,8 +8,8 @@ pub type ConnectionId = u32;
 pub type SolarSystemId = u32;
 
 #[derive(Debug, Archive, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[archive(compare(PartialEq))]
-#[archive_attr(derive(Debug))]
+#[rkyv(compare(PartialEq))]
+#[rkyv(derive(Debug))]
 pub enum ConnType {
     NpcGate,
     SmartGate,
@@ -17,8 +17,8 @@ pub enum ConnType {
 }
 
 #[derive(Debug, Archive, Deserialize, Serialize, Clone)]
-#[archive(compare(PartialEq))]
-#[archive_attr(derive(Debug))]
+#[rkyv(compare(PartialEq))]
+#[rkyv(derive(Debug))]
 pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
@@ -50,8 +50,8 @@ impl Ord for Connection {
 }
 
 #[derive(Archive, Deserialize, Serialize, Clone, Default)]
-#[archive(compare(PartialEq))]
-#[archive_attr(derive(Debug))]
+#[rkyv(compare(PartialEq))]
+#[rkyv(derive(Debug))]
 pub struct Star {
     pub id: SolarSystemId,
     pub x: f64,
@@ -86,7 +86,7 @@ impl std::hash::Hash for Star {
 }
 
 #[derive(Debug, Archive, Deserialize, Serialize, Clone)]
-#[archive_attr(derive(Debug))]
+#[rkyv(derive(Debug))]
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
     pub star_id_to_name: HashMap<SolarSystemId, String>,
@@ -95,8 +95,11 @@ pub struct Universe {
 impl Universe {
     pub fn load() -> anyhow::Result<Universe> {
         let bytes = std::fs::read("data/starmap.rkyv")?;
-        let archived = unsafe { rkyv::archived_root::<HashMap<SolarSystemId, Star>>(&bytes) };
-        let star_map: HashMap<SolarSystemId, Star> = archived.deserialize(&mut rkyv::Infallible)?;
+        let archived = unsafe {
+            rkyv::access_unchecked::<rkyv::Archived<HashMap<SolarSystemId, Star>>>(&bytes)
+        };
+        let star_map: HashMap<SolarSystemId, Star> =
+            rkyv::deserialize::<HashMap<SolarSystemId, Star>, rkyv::rancor::Error>(archived)?;
 
         let data = std::fs::read_to_string("data/solarsystems.json")?;
         let json = serde_json::from_str::<Vec<crate::raw::RawStar>>(&data)?;
@@ -118,7 +121,7 @@ impl Universe {
 
     pub fn save(&self) -> anyhow::Result<()> {
         // std::fs::write("data/starmap.json", serde_json::to_string(&star_map)?)?;
-        let bytes = rkyv::to_bytes::<_, 256>(&self.star_map)?;
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&self.star_map)?;
         std::fs::write("data/starmap.rkyv", bytes.as_ref())?;
         Ok(())
     }
