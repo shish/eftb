@@ -226,7 +226,7 @@ fn calc_exit(
 
 #[launch]
 fn rocket() -> _ {
-    let universe = data::Universe::load().unwrap();
+    let universe = data::Universe::load().expect("Failed to load universe data");
 
     rocket::build()
         .manage(universe)

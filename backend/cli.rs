@@ -91,8 +91,17 @@ fn main() -> anyhow::Result<()> {
                     (raw_jump.from_system_id, raw_jump.to_system_id),
                     (raw_jump.to_system_id, raw_jump.from_system_id),
                 ] {
-                    let to_star = star_map.get(&tid).unwrap().clone();
-                    let from_star = star_map.get_mut(&fid).unwrap();
+                    let Some(to_star) = star_map.get(&tid).cloned() else {
+                        warn!("Jump has unknown target {}", tid);
+                        continue;
+                    };
+                    let Some(from_star) = star_map.get_mut(&fid) else {
+                        warn!("Jump has unknown source {}", fid);
+                        continue;
+                    };
+
+                    //let to_star = star_map.get(&tid).unwrap().clone();
+                    //let from_star = star_map.get_mut(&fid).unwrap();
                     let distance: Meters = from_star.distance(&to_star);
                     let conn_type = match raw_jump.jump_type {
                         0 => data::ConnType::NpcGate,
@@ -119,16 +128,15 @@ fn main() -> anyhow::Result<()> {
             let smart_gates: Vec<raw::RawSmartGate> =
                 serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
             for gate in smart_gates.iter() {
-                if !star_map.contains_key(&gate.from) {
-                    warn!("Smart gate has unknown source {}", gate.from);
-                    continue;
-                }
-                if !star_map.contains_key(&gate.to) {
+                let Some(to_star) = star_map.get(&gate.to).cloned() else {
                     warn!("Smart gate has unknown target {}", gate.to);
                     continue;
-                }
-                let to_star = star_map.get(&gate.to).unwrap().clone();
-                let from_star = star_map.get_mut(&gate.from).unwrap();
+                };
+                let Some(from_star) = star_map.get_mut(&gate.from) else {
+                    warn!("Smart gate has unknown source {}", gate.from);
+                    continue;
+                };
+
                 let distance: Meters = from_star.distance(&to_star);
                 from_star.connections.push(data::Connection {
                     id: conn_count,

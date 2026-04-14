@@ -17,7 +17,10 @@ pub fn successors(
     optimize: PathOptimize,
     use_smart_gates: bool,
 ) -> Vec<(Connection, f64)> {
-    let star = universe.star_map.get(&conn.target).unwrap();
+    let star = universe
+        .star_map
+        .get(&conn.target)
+        .expect("Target star not found in universe");
     star.connections
         .iter()
         // take gates and short jumps - stop searching after we
@@ -228,7 +231,9 @@ mod pathfinding {
                 }
             }
             let successors = {
-                let (node, &(_, c)) = parents.get_index(index).unwrap(); // Cannot fail
+                let (node, &(_, c)) = parents
+                    .get_index(index)
+                    .expect("Can't find index which we inserted earlier");
                 if success(node) {
                     let path = reverse_path(&parents, |&(p, _)| p, index);
                     return PathFindResult::Found((path, cost));
