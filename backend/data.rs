@@ -95,9 +95,11 @@ pub struct Universe {
 impl Universe {
     pub fn load() -> anyhow::Result<Universe> {
         let bytes = std::fs::read("data/starmap.rkyv")?;
-        let archived = unsafe {
-            rkyv::access_unchecked::<rkyv::Archived<HashMap<SolarSystemId, Star>>>(&bytes)
-        };
+        let archived = rkyv::access::<
+            rkyv::Archived<HashMap<SolarSystemId, Star>>,
+            rkyv::rancor::Error,
+        >(&bytes)
+        .map_err(|e| anyhow::anyhow!("Invalid archive format: {}", e))?;
         let star_map: HashMap<SolarSystemId, Star> =
             rkyv::deserialize::<HashMap<SolarSystemId, Star>, rkyv::rancor::Error>(archived)?;
 
