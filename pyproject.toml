@@ -1,0 +1,20 @@
+[project]
+name = "eftb-tools"
+version = "1.0.0"
+description = "Various tools to process EVE Frontier data into EFTB formats"
+readme = "README.md"
+requires-python = "~=3.12.0"
+dependencies = [
+    "tqdm>=4.67.3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "types-tqdm>=4.67.3.20260518",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120

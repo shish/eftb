@@ -3,15 +3,15 @@
 # Using https://github.com/frontier-reapers/frontier-static-data
 # as a reference for the file formats
 
-import pickle
 import argparse
-import sys
 import csv
-import typing as t
+import json
 import logging
 import os.path
+import pickle
+import sys
+import typing as t
 from pathlib import Path
-import json
 
 log = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ def read_index_file(root: Path, index_path: Path) -> t.Dict[str, Path]:
     log.info(f"Reading index file: {index_path}")
     resources: t.Dict[str, Path] = {}
     if index_path.is_file():
-        with index_path.open('r', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        with index_path.open("r", newline="") as csvfile:
+            reader = csv.reader(csvfile, delimiter=",", quotechar='"')
             for row in reader:
                 if len(row) >= 2:
                     resources[row[0]] = Path(root / "ResFiles" / row[1])
@@ -39,9 +39,9 @@ def read_index_file(root: Path, index_path: Path) -> t.Dict[str, Path]:
 def list_resources(root: Path) -> t.Dict[str, Path]:
     indexFiles: t.List[Path] = []
 
-    metaIndex = read_index_file(root, root / 'index_stillness.txt')
+    metaIndex = read_index_file(root, root / "index_stillness.txt")
     for fn, path in metaIndex.items():
-        if fn.startswith('app:/resfileindex'):
+        if fn.startswith("app:/resfileindex"):
             indexFiles.append(path)
             log.debug(f"Found index file: {path}")
 
@@ -51,14 +51,25 @@ def list_resources(root: Path) -> t.Dict[str, Path]:
     return resources
 
 
+def extract_resource(root: Path, resource_name: str, unpickle: bool = False) -> bytes:
+    resources = list_resources(root)
+    if resource_name not in resources:
+        raise FileNotFoundError(f"Resource {resource_name} not found.")
+
+    resource_path = resources[resource_name]
+    log.info(f"Extracting resource {resource_name} from {resource_path}")
+    data = resource_path.read_bytes()
+    if unpickle:
+        struct = pickle.loads(data)
+        data = (json.dumps(struct, indent=4) + "\n").encode("utf-8")
+    return data
+
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
     defpath = None
-    for path in [
-        "./frontier",
-        "C:/CCP/EVE Frontier"
-    ]:
+    for path in ["./frontier", "C:/CCP/EVE Frontier"]:
         if Path(path).is_dir():
             defpath = Path(path)
             break
@@ -67,15 +78,21 @@ if __name__ == "__main__":
         sys.exit(1)
 
     parser = argparse.ArgumentParser(sys.argv[0])
-    parser.add_argument('--root', type=Path, help='the root directory containing ResFiles.', default=defpath)
-    subparsers = parser.add_subparsers(dest='cmd')
+    parser.add_argument("--root", type=Path, help="the root directory containing ResFiles.", default=defpath)
+    subparsers = parser.add_subparsers(dest="cmd")
 
-    list_parser = subparsers.add_parser('list')
+    list_parser = subparsers.add_parser("list")
 
-    ex_parser = subparsers.add_parser('extract')
-    ex_parser.add_argument('resource', help='the relative name of the resource file.')
-    ex_parser.add_argument('--unpickle', '-u', action='store_true', default=False, help='unpickle the resource file.',)
-    ex_parser.add_argument('--output', '-o', help='file to output to', default=None)
+    ex_parser = subparsers.add_parser("extract")
+    ex_parser.add_argument("resource", help="the relative name of the resource file.")
+    ex_parser.add_argument(
+        "--unpickle",
+        "-u",
+        action="store_true",
+        default=False,
+        help="unpickle the resource file.",
+    )
+    ex_parser.add_argument("--output", "-o", help="file to output to", default=None)
 
     args = parser.parse_args()
 
@@ -84,20 +101,15 @@ if __name__ == "__main__":
             print(file)
 
     if args.cmd == "extract":
-        if not args.resource.startswith('res:'):
-            args.resource = 'res:' + args.resource
+        if not args.resource.startswith("res:"):
+            args.resource = "res:" + args.resource
 
-        files = list_resources(args.root)
-        data = files[args.resource].read_bytes()
-
-        if args.unpickle:
-            struct = pickle.loads(data)
-            data = (json.dumps(struct, indent=4) + "\n").encode('utf-8')
+        data = extract_resource(args.root, args.resource, unpickle=args.unpickle)
 
         if args.output is None:
             args.output = os.path.basename(args.resource)
         if args.output == "-":
-            print(data.decode('utf-8'))
+            print(data.decode("utf-8"))
         else:
-            with open(args.output, 'wb') as output_file:
+            with open(args.output, "wb") as output_file:
                 output_file.write(data)
