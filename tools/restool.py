@@ -5,10 +5,12 @@
 
 import argparse
 import csv
+import importlib
 import json
 import logging
 import os.path
 import pickle
+import platform
 import sys
 import typing as t
 from pathlib import Path
@@ -64,11 +66,73 @@ def extract_resource(root: Path, resource_name: str, decode: bool = False) -> by
         data = resource_path.read_bytes()
         struct = pickle.loads(data)
         data = (json.dumps(struct, indent=4) + "\n").encode("utf-8")
+    elif decode and resource_name.endswith(".fsdbinary") and platform.system() != "Windows":
+        raise ValueError("Decoding .fsdbinary files is only supported on Windows due to the use of .pyd loaders.")
+    elif decode and resource_name.endswith(".fsdbinary"):
+        bin64_path = root / "stillness" / "bin64"
+
+        # bin64/myFooLoader.pyd -> {myfoo: myFooLoader}
+        loaders = {l.stem.replace("Loader", "").lower(): l.stem for l in bin64_path.glob("*Loader.pyd")}
+        loader = loaders.get(Path(resource_name).stem.lower())
+        if not loader:
+            raise ValueError(f"No loader found for {resource_name}. Available loaders: {list(loaders.keys())}")
+
+        l10n_file = resources["res:/localizationfsd/localization_fsd_en-us.pickle"]
+        strings = pickle.loads(l10n_file.read_bytes())[1]
+        log.debug(f"Loaded {len(strings)} localization strings from {l10n_file}")
+
+        bin64_in_path = str(bin64_path) in sys.path
+        if not bin64_in_path:
+            sys.path.insert(0, str(bin64_path))
+        lib = importlib.import_module(loader)
+        data = lib.load(str(resource_path))
+        if not bin64_in_path:
+            sys.path.pop(0)
+        struct = decode_cfsd(None, data, strings)
+        data = (json.dumps(struct, indent=4) + "\n").encode("utf-8")
+
     elif decode:
-        raise ValueError("Decoding is only supported for .pickle files.")
+        raise ValueError("Decoding is only supported for .pickle and .fsdbinary files.")
     else:
         data = resource_path.read_bytes()
     return data
+
+
+def decode_cfsd(key: str | None, data: t.Any, strings: dict[int, list[str]]) -> t.Any:
+    """
+    https://github.com/VULTUR-EveFrontier/eve-frontier-tools
+    """
+    data_type = type(data)
+
+    if data_type.__module__ == "cfsd" and data_type.__name__ == "dict":
+        return {k: decode_cfsd(k, v, strings) for k, v in data.items()}
+
+    if data_type.__module__.endswith("Loader"):
+        return {x: decode_cfsd(x, getattr(data, x), strings) for x in dir(data) if not x.startswith("__")}
+
+    if data_type.__module__ == "cfsd" and data_type.__name__ == "list":
+        return [decode_cfsd(None, v, strings) for v in data]
+
+    if isinstance(data, tuple):
+        return tuple([decode_cfsd(None, v, strings) for v in data])
+
+    if data_type.__name__.endswith("_vector"):
+        # TODO: Handle vector types
+        return None
+
+    if isinstance(data, int) or data_type.__name__ == "long":
+        # In case it is a NameID, look up the name
+        if key is not None and key.lower().endswith("nameid") and key != "dungeonNameID":
+            return strings[data][0]
+        return data
+
+    if isinstance(data, float):
+        return data
+
+    if isinstance(data, str):
+        return data
+
+    raise ValueError(f"Unknown type: {type(data)}")
 
 
 def get_ef_directory() -> Path:
