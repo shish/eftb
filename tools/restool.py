@@ -51,34 +51,42 @@ def list_resources(root: Path) -> t.Dict[str, Path]:
     return resources
 
 
-def extract_resource(root: Path, resource_name: str, unpickle: bool = False) -> bytes:
+def extract_resource(root: Path, resource_name: str, decode: bool = False) -> bytes:
     resources = list_resources(root)
     if resource_name not in resources:
         raise FileNotFoundError(f"Resource {resource_name} not found.")
 
     resource_path = resources[resource_name]
-    log.info(f"Extracting resource {resource_name} from {resource_path}")
-    data = resource_path.read_bytes()
-    if unpickle:
+    if not resource_path.is_file():
+        raise FileNotFoundError(f"Resource file {resource_path.absolute()} not found.")
+
+    if decode and resource_name.endswith(".pickle"):
+        data = resource_path.read_bytes()
         struct = pickle.loads(data)
         data = (json.dumps(struct, indent=4) + "\n").encode("utf-8")
+    elif decode:
+        raise ValueError("Decoding is only supported for .pickle files.")
+    else:
+        data = resource_path.read_bytes()
     return data
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-
-    defpath = None
+def get_ef_directory() -> Path:
     for path in ["./frontier", "C:/CCP/EVE Frontier"]:
         if Path(path).is_dir():
-            defpath = Path(path)
-            break
-    if defpath is None:
-        log.error("No valid root directory found. Please specify the --root argument.")
-        sys.exit(1)
+            return Path(path)
+    raise FileNotFoundError("No valid root directory found. Please specify the --root argument.")
 
+
+def base_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(sys.argv[0])
-    parser.add_argument("--root", type=Path, help="the root directory containing ResFiles.", default=defpath)
+    parser.add_argument("--root", type=Path, help="the root directory containing ResFiles.", default=get_ef_directory())
+    parser.add_argument("--debug", action="store_true", help="enable debug logging")
+    return parser
+
+
+if __name__ == "__main__":
+    parser = base_parser()
     subparsers = parser.add_subparsers(dest="cmd")
 
     list_parser = subparsers.add_parser("list")
@@ -96,6 +104,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO, format="%(asctime)s %(message)s")
+
     if args.cmd == "list":
         for file in list_resources(args.root).keys():
             print(file)
@@ -104,7 +114,7 @@ if __name__ == "__main__":
         if not args.resource.startswith("res:"):
             args.resource = "res:" + args.resource
 
-        data = extract_resource(args.root, args.resource, unpickle=args.unpickle)
+        data = extract_resource(args.root, args.resource, decode=args.unpickle)
 
         if args.output is None:
             args.output = os.path.basename(args.resource)
