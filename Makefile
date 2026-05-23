@@ -1,26 +1,8 @@
-all: data/blockchain.db data/smartgates.json \
+all: data/smartgates.json \
 	data/starmap.rkyv \
 	data/solarsystems.json data/types.json data/fuels.json \
 	src/consts/fuels.ts src/consts/systemnames.json src/consts/bounds.json
-.PHONY: all sync-blockchain
-
-data/blockchain.db:
-	make sync-blockchain
-
-sync-blockchain:
-	docker run \
-        --init --rm -ti \
-        -v $(pwd)/data:/data \
-        -e RPC_HTTP_URL=https://pyrope-external-sync-node-rpc.live.tech.evefrontier.com \
-        -e STORE_ADDRESS=0xcdb380e0cd3949caf70c45c67079f2e27a77fc47 \
-        -e SQLITE_FILENAME=/data/blockchain.db \
-        ghcr.io/latticexyz/store-indexer:sha-6508c1d \
-        node ./bin/sqlite-indexer.js
-
-data/smartgates.json: data/blockchain.db tools/smartgates.py
-	python3 tools/smartgates.py \
-		--db data/blockchain.db \
-		-o data/smartgates.json
+.PHONY: all
 
 data/starmap.json: frontier/index_stillness.txt tools/restool.py
 	python3 tools/restool.py extract -u \

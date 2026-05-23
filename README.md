@@ -2,8 +2,8 @@
 
 ## How to prepare the data
 
-1. Fetch blockchain data with `make sync-blockchain` (Leave it running if you want to stay in-sync)
-2. Fetch and compile other data with `make`
+1. Have EVE Frontier installed
+2. Fetch and compile static data with `make`
 
 ## Testing with the CLI
 
