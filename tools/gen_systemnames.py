@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch smartgates from the blockchain database.")
+    parser = argparse.ArgumentParser(description="Generate system names JSON from solarsystem data.")
     parser.add_argument('--debug', action='store_true', help="Enable debug logging")
     parser.add_argument("--input", '-i', type=Path, default=Path('data/solarsystems.json'), help="Path to downloaded solarsystem data")
     parser.add_argument('--output', '-o', type=Path, default=None, help="Where to write data")

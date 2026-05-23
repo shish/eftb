@@ -1,7 +1,7 @@
 all: data/blockchain.db data/smartgates.json \
 	data/starmap.rkyv \
 	data/solarsystems.json data/types.json data/fuels.json \
-	src/consts/fuels.ts src/consts/systemnames.json
+	src/consts/fuels.ts src/consts/systemnames.json src/consts/bounds.json
 .PHONY: all sync-blockchain
 
 data/blockchain.db:
@@ -43,11 +43,16 @@ data/fuels.json: tools/api_get.py
 	    -o data/fuels.json
 
 src/consts/fuels.ts: data/fuels.json
-	python3 tools/fuels.py \
+	python3 tools/gen_fuels.py \
 	    -i data/fuels.json \
 	    -o src/consts/fuels.ts
 
 src/consts/systemnames.json: data/solarsystems.json
-	python3 tools/systemnames.py \
+	python3 tools/gen_systemnames.py \
 	    -i data/solarsystems.json \
 	    -o src/consts/systemnames.json
+
+src/consts/bounds.json: data/solarsystems.json
+	python3 tools/gen_bounds.py \
+	    -i data/solarsystems.json \
+	    -o src/consts/bounds.json
