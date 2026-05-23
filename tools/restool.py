@@ -78,7 +78,7 @@ def extract_resource(root: Path, resource_name: str, decode: bool = False) -> by
             raise ValueError(f"No loader found for {resource_name}. Available loaders: {list(loaders.keys())}")
 
         l10n_file = resources["res:/localizationfsd/localization_fsd_en-us.pickle"]
-        strings = pickle.loads(l10n_file.read_bytes())[1]
+        _locale, strings = pickle.loads(l10n_file.read_bytes())
         log.debug(f"Loaded {len(strings)} localization strings from {l10n_file}")
 
         bin64_in_path = str(bin64_path) in sys.path
