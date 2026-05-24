@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { getEngine, type ShipName, ships } from "../consts";
+import { getEngine, type ShipName, ships } from "../consts/ships";
 import { type FuelName, fuels, isCompatible } from "../consts/fuels";
 
 export function ShipFuelSelect({
@@ -24,7 +24,7 @@ export function ShipFuelSelect({
   }, [ship, onMassChange, onTankChange]);
 
   useEffect(() => {
-    onEfficiencyChange(fuels[fuelType]);
+    onEfficiencyChange(fuels[fuelType].efficiency);
   }, [fuelType, onEfficiencyChange]);
 
   return (

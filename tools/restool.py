@@ -31,7 +31,7 @@ def read_index_file(root: Path, index_path: Path) -> t.Dict[str, Path]:
             for row in reader:
                 if len(row) >= 2:
                     resources[row[0]] = Path(root / "ResFiles" / row[1])
-                    log.debug(f"Added resource {row[0]} with path {row[1]}")
+                    # log.debug(f"Added resource {row[0]} with path {row[1]}")
                 else:
                     log.warning(f"Skipping malformed row: {row}")
     else:
@@ -82,7 +82,7 @@ def extract_resource(root: Path, resource_name: str, decode: bool = False) -> by
             bin64_path = root / "stillness" / "bin64"
 
             # bin64/myFooLoader.pyd -> {myfoo: myFooLoader}
-            loaders = {l.stem.replace("Loader", "").lower(): l.stem for l in bin64_path.glob("*Loader.pyd")}
+            loaders = {lo.stem.replace("Loader", "").lower(): lo.stem for lo in bin64_path.glob("*Loader.pyd")}
             loader = loaders.get(Path(resource_name).stem.lower())
             if not loader:
                 raise ValueError(f"No loader found for {resource_name}. Available loaders: {list(loaders.keys())}")
@@ -150,15 +150,48 @@ def get_ef_directory() -> Path:
     raise FileNotFoundError("No valid root directory found. Please specify the --root argument.")
 
 
-def base_parser(description: str | None = None) -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(sys.argv[0], description=description)
-    parser.add_argument("--root", type=Path, help="the root directory containing ResFiles.", default=get_ef_directory())
-    parser.add_argument("--debug", action="store_true", help="enable debug logging")
-    return parser
+_N = t.TypeVar("_N")
+
+
+class ArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, add_output=True, **kwargs) -> None:  # type: ignore
+        self.output_file: Path | None = None
+        super().__init__(*args, **kwargs)  # type: ignore
+        if kwargs.get("prog") is None:  # subparsers will call this constructor with "prog" set to not-None
+            self.add_argument(
+                "--root", type=Path, help="the directory containing ResFiles.", default=get_ef_directory()
+            )
+            self.add_argument("--debug", action="store_true", help="enable debug logging")
+            if add_output:
+                self.add_argument("--output", "-o", type=Path, default=None, help="Where to write data")
+
+    def parse_args(self, args=None, namespace=None) -> argparse.Namespace:  # type: ignore
+        parsed_args = super().parse_args(args, namespace)  # type: ignore
+        level = logging.DEBUG if parsed_args.debug else logging.INFO
+        logging.basicConfig(level=level, format="%(asctime)s %(message)s")
+        if not (parsed_args.root / "ResFiles").is_dir():
+            raise FileNotFoundError(f"Root directory {parsed_args.root} does not contain a ResFiles directory.")
+        self.output_file = parsed_args.output
+        return parsed_args
+
+    def output(self, data: str | bytes) -> None:
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+
+        if self.output_file is None:
+            sys.stdout.buffer.write(data)
+        else:
+            self.output_file.write_bytes(data)
+
+    def output_struct(self, struct: t.Any) -> None:
+        if self.output_file and self.output_file.suffix in [".ts"]:
+            self.output("export default " + json.dumps(struct, indent=2) + " as const;\n")
+        else:
+            self.output(json.dumps(struct, indent=2) + "\n")
 
 
 if __name__ == "__main__":
-    parser = base_parser()
+    parser = ArgumentParser(add_output=False, description="Tool for working with EVE Frontier resource files.")
     subparsers = parser.add_subparsers(dest="cmd")
 
     list_parser = subparsers.add_parser("list")
@@ -175,8 +208,6 @@ if __name__ == "__main__":
     ex_parser.add_argument("--output", "-o", help="file to output to", default=None)
 
     args = parser.parse_args()
-
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO, format="%(asctime)s %(message)s")
 
     if args.cmd == "list":
         for file in list_resources(args.root).keys():

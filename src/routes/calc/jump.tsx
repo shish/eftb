@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/ShipFuelSelect";
-import { getEngine, items, type Ship, type ShipName, ships } from "../../consts";
+import { getEngine, type Ship, type ShipName, ships } from "../../consts/ships";
+import { items } from "../../consts/items";
 import { type Fuel, type FuelName, fuels, isCompatible } from "../../consts/fuels";
 import { SettingsContext } from "../../providers/settings";
 
@@ -184,11 +185,11 @@ function SummaryTable() {
           {sorted_ships.map(([shipName, ship]) => (
             <tr key={shipName}>
               <th>{shipName}</th>
-              {dfuels.map(([fuelName, efficiency]) => (
+              {dfuels.map(([fuelName, fuel]) => (
                 <SummaryCell
                   key={fuelName}
                   fuelName={fuelName}
-                  efficiency={efficiency}
+                  efficiency={fuel.efficiency}
                   ship={ship}
                   mode={mode}
                   fittingsMass={fittingsMode === "engine" ? getEngine(ship.type).mass : fittingsMass}

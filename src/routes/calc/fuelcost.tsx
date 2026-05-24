@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext } from "react";
-import { getEngine, type Ship, type ShipName, ships } from "../../consts";
+import { getEngine, type Ship, type ShipName, ships } from "../../consts/ships";
 import { type Fuel, type FuelName, fuels, isCompatible } from "../../consts/fuels";
 import { SettingsContext } from "../../providers/settings";
 

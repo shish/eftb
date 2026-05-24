@@ -14,7 +14,7 @@ export function SystemInput({
   const [systemNames, setSystemNames] = useState<string[]>([]);
 
   useEffect(() => {
-    import("../consts/systemnames.json")
+    import("../consts/system_names.json")
       .then((data) => {
         setSystemNames(data.default);
       })

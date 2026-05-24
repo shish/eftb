@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 
-import json
-import logging
-from pathlib import Path
-
 import restool
 
-if __name__ == "__main__":
-    parser = restool.base_parser(description="Generate bounds JSON from solarsystem data.")
-    parser.add_argument("--output", "-o", type=Path, default=None, help="Where to write data")
-    args = parser.parse_args()
-    logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.INFO,
-        format="%(asctime)s %(message)s",
-    )
+RES_STARMAP = "res:/staticdata/starmapcache.pickle"
 
-    data = restool.extract_resource(args.root, "res:/staticdata/starmapcache.pickle", decode=True)
+if __name__ == "__main__":
+    parser = restool.ArgumentParser()
+    args = parser.parse_args()
+
+    data = restool.extract_resource(args.root, RES_STARMAP, decode=True)
 
     min_x = 0
     max_x = 0
@@ -35,7 +28,4 @@ if __name__ == "__main__":
 
     bounds = {"x": [min_x, max_x], "y": [min_y, max_y], "z": [min_z, max_z]}
 
-    if args.output:
-        args.output.write_text(json.dumps(bounds, indent=2))
-    else:
-        print(json.dumps(bounds, indent=2))
+    parser.output_struct(bounds)

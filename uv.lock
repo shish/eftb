@@ -55,7 +55,7 @@ requires-dist = [{ name = "tqdm", specifier = ">=4.67.3" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mypy", specifier = ">=1.13.0" },
+    { name = "mypy", specifier = ">=2.1.0" },
     { name = "ruff", specifier = ">=0.8.0" },
     { name = "types-tqdm", specifier = ">=4.67.3.20260518" },
 ]
