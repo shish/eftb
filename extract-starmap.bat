@@ -1,1 +1,0 @@
-uv run .\tools\restool.py extract -u res:/staticdata/starmapcache.pickle -o data/starmap.json

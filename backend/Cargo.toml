@@ -1,0 +1,48 @@
+[package]
+name = "eve-frontiers-toolbox"
+version = "0.1.0"
+edition = "2021"
+default-run = "cli"
+
+[lib]
+name = "eftb"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cli"
+path = "src/cli.rs"
+
+[[bin]]
+name = "web"
+path = "src/web.rs"
+
+[[bench]]
+name = "path"
+harness = false
+
+[[bench]]
+name = "data"
+harness = false
+
+[dependencies]
+anyhow = "1.0.102"
+rkyv = "0.8"
+clap = { version = "4.6.1", features = ["derive"] }
+env_logger = "0.11.9"
+indexmap = "2.14.0"
+indicatif = { version = "0.18.4", features = ["rayon"] }
+log = "0.4.29"
+num-traits = "0.2.19"
+rayon = "1.11.0"
+rocket = { version = "0.5.1", features = ["serde_json", "json"] }
+rustc-hash = "2.1.2"
+serde = { version = "1.0.216", features = ["derive"] }
+serde_json = "1.0.149"
+
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+
+[lints.clippy]
+dbg_macro = "deny"
+unwrap_used = "deny"
+#expect_used = "deny"

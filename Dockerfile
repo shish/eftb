@@ -1,18 +1,18 @@
-# build frontend into /app/dist
+# build frontend into /app/frontend/dist
 FROM node:25 AS build-frontend
-COPY . /app
-WORKDIR /app
-RUN --mount=type=cache,target=/app/node_modules \
+COPY frontend /app/frontend
+WORKDIR /app/frontend
+RUN --mount=type=cache,target=/app/frontend/node_modules \
     npm install
-RUN --mount=type=cache,target=/app/node_modules \
+RUN --mount=type=cache,target=/app/frontend/node_modules \
     npm run build
 
-# output backend code in /app/web
+# output backend binary in /app/web
 FROM rust:1.95 AS build-backend
-COPY . /app
-WORKDIR /app
+COPY backend /app/backend
+WORKDIR /app/backend
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/app/target \
+    --mount=type=cache,target=/app/backend/target \
     cargo build --release --bin web && \
     cp target/release/web /app/web
 
@@ -22,7 +22,7 @@ HEALTHCHECK --interval=1m --timeout=3s --start-interval=1s --start-period=30s \
     CMD curl --fail http://127.0.0.1:8000/ || exit 1
 RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build-backend /app/web /app/
-COPY --from=build-frontend /app/dist /app/dist
+COPY --from=build-frontend /app/frontend/dist /app/dist
 
 WORKDIR /app
 ENV RUST_LOG=info

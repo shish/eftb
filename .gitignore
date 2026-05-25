@@ -4,6 +4,7 @@ old
 .venv
 frontier
 extracted
+*.egg-info
 
 # Logs
 logs
