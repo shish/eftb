@@ -1,5 +1,5 @@
 # build frontend into /app/frontend/dist
-FROM node:25 AS build-frontend
+FROM node:26 AS build-frontend
 COPY frontend /app/frontend
 WORKDIR /app/frontend
 RUN --mount=type=cache,target=/app/frontend/node_modules \
