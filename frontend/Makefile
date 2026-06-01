@@ -32,3 +32,8 @@ all: src/consts/system_names.json
 src/consts/system_names.json: ../tools/src/gen_system_names.py
 	uv run gen_system_names \
 	    -o src/consts/system_names.json
+
+all: src/consts/items_data.ts
+src/consts/items_data.ts: ../tools/src/gen_items.py
+	uv run gen_items \
+	    -o src/consts/items_data.ts

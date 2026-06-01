@@ -11,7 +11,7 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 def main() -> None:
     parser = restool.ArgumentParser()
-    args = parser.parse_args()
+    args = parser.parse_args_and_setup()
 
     types: dict[int, dict[str, t.Any]] = restool.extract_resource(args.root, RES_TYPES, decode=True)
 

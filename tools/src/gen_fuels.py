@@ -12,7 +12,7 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 def main() -> None:
     parser = restool.ArgumentParser(description="Generate bounds JSON from solarsystem data.")
-    args = parser.parse_args()
+    args = parser.parse_args_and_setup()
 
     groupID_to_groupName: dict[int, str] = {}
     groups: dict[int, dict[str, t.Any]] = restool.extract_resource(args.root, RES_GROUPS, decode=True)

@@ -9,7 +9,7 @@ RES_L10N_ENUS = "res:/localizationfsd/localization_fsd_en-us.pickle"
 
 def main() -> None:
     parser = restool.ArgumentParser()
-    args = parser.parse_args()
+    args = parser.parse_args_and_setup()
 
     ssid_to_name: dict[int, str] = {}
     l10n_main = restool.extract_resource(args.root, RES_L10N_MAIN, decode=True)["labels"].values()

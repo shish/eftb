@@ -165,8 +165,8 @@ class ArgumentParser(argparse.ArgumentParser):
             if add_output:
                 self.add_argument("--output", "-o", type=Path, default=None, help="Where to write data")
 
-    def parse_args(self, args=None, namespace=None) -> argparse.Namespace:  # type: ignore
-        parsed_args = super().parse_args(args, namespace)  # type: ignore
+    def parse_args_and_setup(self) -> argparse.Namespace:
+        parsed_args = super().parse_args()  # type: ignore
         level = logging.DEBUG if parsed_args.debug else logging.INFO
         logging.basicConfig(level=level, format="%(asctime)s %(message)s")
         if not (parsed_args.root / "ResFiles").is_dir():

@@ -14,7 +14,7 @@ RES_TYPE_DOGMA = "res:/staticdata/typedogma.fsdbinary"
 
 def main() -> None:
     parser = restool.ArgumentParser()
-    args = parser.parse_args()
+    args = parser.parse_args_and_setup()
 
     groups: dict[int, dict[str, t.Any]] = restool.extract_resource(args.root, RES_GROUPS, decode=True)
     groupID_to_groupName: dict[int, str] = {}

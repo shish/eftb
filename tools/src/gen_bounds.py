@@ -7,7 +7,7 @@ RES_STARMAP = "res:/staticdata/starmapcache.pickle"
 
 def main() -> None:
     parser = restool.ArgumentParser()
-    args = parser.parse_args()
+    args = parser.parse_args_and_setup()
 
     data = restool.extract_resource(args.root, RES_STARMAP, decode=True)
 
