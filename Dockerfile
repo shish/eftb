@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/app/frontend/node_modules \
     npm run build
 
 # output backend binary in /app/web
-FROM rust:1.95 AS build-backend
+FROM rust:1.96 AS build-backend
 COPY backend /app/backend
 WORKDIR /app/backend
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
