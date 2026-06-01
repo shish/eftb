@@ -1,46 +1,46 @@
 version: 2
 updates:
-- package-ecosystem: github-actions
-  directory: /
-  schedule:
-    interval: monthly
-- package-ecosystem: npm
-  directory: /
-  schedule:
-    interval: monthly
-  groups:
-    minor-bumps:
-      applies-to: version-updates
-      patterns:
-      - '*'
-      update-types:
-      - minor
-      - patch
-- package-ecosystem: cargo
-  directory: /
-  schedule:
-    interval: monthly
-  groups:
-    minor-bumps:
-      applies-to: version-updates
-      patterns:
-      - '*'
-      update-types:
-      - minor
-      - patch
-- package-ecosystem: pip
-  directory: /
-  schedule:
-    interval: monthly
-  groups:
-    minor-bumps:
-      applies-to: version-updates
-      patterns:
-      - '*'
-      update-types:
-      - minor
-      - patch
-- package-ecosystem: docker
-  directory: /
-  schedule:
-    interval: monthly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: monthly
+    groups:
+      minor-bumps:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: cargo
+    directory: /backend
+    schedule:
+      interval: monthly
+    groups:
+      minor-bumps:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: pip
+    directory: /tools
+    schedule:
+      interval: monthly
+    groups:
+      minor-bumps:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
