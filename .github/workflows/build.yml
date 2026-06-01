@@ -21,7 +21,7 @@ jobs:
         with:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ vars.DOCKER_IMAGE }}:latest
+          tags: ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
