@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: watchtower update
         run: |
-          curl -X POST https://watchtower.shish.io/v1/update \
+          curl -sS -X POST https://watchtower.shish.io/v1/update \
             -H "Authorization: Bearer ${{ secrets.WATCHTOWER_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"images": ["${{ vars.DOCKER_IMAGE }}"]}'
