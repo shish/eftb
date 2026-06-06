@@ -25,7 +25,7 @@ fn path(c: &mut Criterion) {
 fn heuristic(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
     let start = universe.star_by_name(&"U75-4J4".to_string()).unwrap();
-    let end = universe.star_by_name(&"AJH-6H5".to_string()).unwrap();
+    let end = universe.star_by_name(&"OVD-1SM".to_string()).unwrap();
 
     c.bench_function(
         format!("heuristic ({} connections)", start.connections.len()).as_str(),
