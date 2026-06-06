@@ -28,11 +28,14 @@ fn heuristic(c: &mut Criterion) {
     let end = universe.star_by_name(&"OVD-1SM".to_string()).unwrap();
 
     c.bench_function(
-        format!("heuristic ({} connections)", start.connections.len()).as_str(),
+        format!(
+            "heuristic ({} connections)",
+            universe.connections[&start.id].len()
+        )
+        .as_str(),
         |b| {
             b.iter(|| {
-                start
-                    .connections
+                universe.connections[&start.id]
                     .iter()
                     .map(|conn| eftb::calc::path::heuristic(&universe, conn, end))
                     .collect::<Vec<_>>()

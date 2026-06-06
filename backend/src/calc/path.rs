@@ -17,11 +17,7 @@ pub fn successors(
     optimize: PathOptimize,
     use_smart_gates: bool,
 ) -> Vec<(Connection, f64)> {
-    let star = universe
-        .star_map
-        .get(&conn.target)
-        .expect("Target star not found in universe");
-    star.connections
+    universe.connections[&conn.target]
         .iter()
         // take gates and short jumps - stop searching after we
         // find a long jump
@@ -130,7 +126,7 @@ mod tests {
         let universe = Universe::tiny_test();
         assert_eq!(
             call_calc_path(&universe, 1, 4, 25.0, PathOptimize::Fuel, true),
-            PathResult::Found(vec![universe.star_map[&1].connections[0].clone()])
+            PathResult::Found(vec![universe.connections[&1][0].clone()])
         );
     }
 
@@ -141,8 +137,8 @@ mod tests {
         assert_eq!(
             call_calc_path(&universe, 4, 2, 25.0, PathOptimize::Fuel, false),
             PathResult::Found(vec![
-                universe.star_map[&4].connections[0].clone(),
-                universe.star_map[&1].connections[1].clone(),
+                universe.connections[&4][0].clone(),
+                universe.connections[&1][1].clone(),
             ])
         );
     }
@@ -153,7 +149,7 @@ mod tests {
         let universe = Universe::tiny_test();
         assert_eq!(
             call_calc_path(&universe, 2, 4, 25.0, PathOptimize::Distance, false),
-            PathResult::Found(vec![universe.star_map[&2].connections[2].clone(),])
+            PathResult::Found(vec![universe.connections[&2][2].clone(),])
         );
     }
 
@@ -163,7 +159,7 @@ mod tests {
         let universe = Universe::tiny_test();
         assert_eq!(
             call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, false),
-            PathResult::Found(vec![universe.star_map[&4].connections[4].clone()])
+            PathResult::Found(vec![universe.connections[&4][4].clone()])
         );
     }
 
@@ -173,7 +169,7 @@ mod tests {
         let universe = Universe::tiny_test();
         assert_eq!(
             call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, true),
-            PathResult::Found(vec![universe.star_map[&4].connections[1].clone()])
+            PathResult::Found(vec![universe.connections[&4][1].clone()])
         );
     }
 }

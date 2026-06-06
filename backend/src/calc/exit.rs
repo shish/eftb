@@ -24,7 +24,7 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Meters) -> Ve
 
     gate_network.iter().for_each(|id| {
         let star = &universe.star_map[id];
-        for conn in &star.connections {
+        for conn in &universe.connections[&star.id] {
             if conn.conn_type == ConnType::Jump {
                 let other = &universe.star_map[&conn.target];
                 let distance = star.distance(other);
