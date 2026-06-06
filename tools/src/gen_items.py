@@ -9,7 +9,7 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
 class GenItems(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         # Hard-coded list of items to extract
         item_names = [
             "Unstable Fuel",
@@ -36,7 +36,7 @@ class GenItems(restool.ResToolBase):
         items: dict[str, dict[str, t.Any]] = {}
 
         for _typeID, typeData in types.items():
-            typeName = typeData["typeNameID"]
+            typeName = typeData["_typeNameID"]
             if typeName in item_names:
                 items[typeName] = {
                     "volume": typeData["volume"],
@@ -51,7 +51,7 @@ class GenItems(restool.ResToolBase):
 
 
 def main() -> None:
-    GenItems()
+    GenItems().main()
 
 
 if __name__ == "__main__":

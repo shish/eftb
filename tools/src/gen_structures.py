@@ -10,13 +10,13 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
 class GenStructures(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         types: dict[int, dict[str, t.Any]] = self.extract_resource(RES_TYPES, decode=True)
 
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
         groupID_to_groupName: dict[int, str] = {}
         for groupID, groupData in groups.items():
-            groupID_to_groupName[groupID] = groupData["groupNameID"]
+            groupID_to_groupName[groupID] = groupData["_groupNameID"]
 
         structures = {}
         space_components: dict[int, dict[str, t.Any]] = self.extract_resource(RES_SPACE_COMPONENTS, decode=True)
@@ -30,8 +30,8 @@ class GenStructures(restool.ResToolBase):
             if constructedItem is None or not inputItems:
                 continue
 
-            structures[types[constructedItem]["typeNameID"]] = {
-                "components": {types[item]["typeNameID"]: count for item, count in inputItems.items()},
+            structures[types[constructedItem]["_typeNameID"]] = {
+                "components": {types[item]["_typeNameID"]: count for item, count in inputItems.items()},
                 "group": groupID_to_groupName[types[constructedItem]["groupID"]],
             }
 
@@ -39,7 +39,7 @@ class GenStructures(restool.ResToolBase):
 
 
 def main() -> None:
-    GenStructures()
+    GenStructures().main()
 
 
 if __name__ == "__main__":

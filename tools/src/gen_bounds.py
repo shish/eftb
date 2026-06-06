@@ -6,7 +6,7 @@ RES_STARMAP = "res:/staticdata/starmapcache.pickle"
 
 
 class GenBounds(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         data = self.extract_resource(RES_STARMAP, decode=True)
 
         min_x = 0
@@ -31,7 +31,7 @@ class GenBounds(restool.ResToolBase):
 
 
 def main() -> None:
-    GenBounds()
+    GenBounds().main()
 
 
 if __name__ == "__main__":

@@ -11,11 +11,11 @@ RES_GROUPS = "res:/staticdata/groups.fsdbinary"
 
 
 class GenShips(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
         groupID_to_groupName: dict[int, str] = {}
         for groupID, groupData in groups.items():
-            groupID_to_groupName[groupID] = groupData["groupNameID"]
+            groupID_to_groupName[groupID] = groupData["_groupNameID"]
 
         # Can we get these from a parent group somehow?
         ship_groups = {
@@ -34,7 +34,7 @@ class GenShips(restool.ResToolBase):
         dogma = self.load_dogma_attributes()
         types: dict[int, dict[str, t.Any]] = self.extract_resource(RES_TYPES, decode=True)
         for typeID, typeData in types.items():
-            typeName = typeData["typeNameID"]
+            typeName = self.strings[typeData["typeNameID"]]
             groupID = typeData["groupID"]
             if groupID in ship_groups:
                 if not typeData["published"]:
@@ -53,7 +53,7 @@ class GenShips(restool.ResToolBase):
 
 
 def main() -> None:
-    GenShips()
+    GenShips().main()
 
 
 if __name__ == "__main__":

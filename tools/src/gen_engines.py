@@ -11,17 +11,17 @@ RES_GROUPS = "res:/staticdata/groups.fsdbinary"
 
 
 class GenEngines(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
         groupID_to_groupName: dict[int, str] = {}
         for groupID, groupData in groups.items():
-            groupID_to_groupName[groupID] = groupData["groupNameID"]
+            groupID_to_groupName[groupID] = groupData["_groupNameID"]
 
         engines: dict[str, dict[str, t.Any]] = defaultdict(dict)
         dogma = self.load_dogma_attributes()
         types: dict[int, dict[str, t.Any]] = self.extract_resource(RES_TYPES, decode=True)
         for typeID, typeData in types.items():
-            typeName = typeData["typeNameID"]
+            typeName = typeData["_typeNameID"]
             if typeData["groupID"] in (4619, 4741):
                 if not typeData["published"]:
                     logging.debug(f"Skipping unpublished engine: {typeName}")
@@ -45,7 +45,7 @@ class GenEngines(restool.ResToolBase):
 
 
 def main() -> None:
-    GenEngines()
+    GenEngines().main()
 
 
 if __name__ == "__main__":

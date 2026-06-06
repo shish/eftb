@@ -16,6 +16,7 @@ import sys
 import typing as t
 from pathlib import Path
 from typing import overload
+from time import time
 
 log = logging.getLogger(__name__)
 
@@ -54,15 +55,35 @@ class ResToolBase:
         self.args = args
         self.root = args.root
         self.output_file: Path | None = args.output if self.ADD_OUTPUT else None
-        self.resources = self._list_resources()
+        self._resources: dict[str, Path] | None = None
         self._strings: dict[int, str] | None = None
-
-        self.main(self.args)
+        self._args = args
 
     def custom_args(self, parser: argparse.ArgumentParser) -> None: ...
 
+    def main(self) -> None:
+        t = time()
+        self.tool_main(self._args)
+        log.info(f"Execution time: {time() - t:.2f} seconds")
+
     @abc.abstractmethod
-    def main(self, args: argparse.Namespace) -> None: ...
+    def tool_main(self, args: argparse.Namespace) -> None: ...
+
+    @property
+    def resources(self) -> t.Dict[str, Path]:
+        if self._resources is None:
+            indexFiles: t.List[Path] = []
+
+            metaIndex = self._read_index_file(self.root / "index_stillness.txt")
+            for fn, path in metaIndex.items():
+                if fn.startswith("app:/resfileindex"):
+                    indexFiles.append(path)
+                    log.debug(f"Found index file: {path}")
+
+            self._resources = {}
+            for index in indexFiles:
+                self._resources.update(self._read_index_file(index))
+        return self._resources
 
     @property
     def strings(self) -> dict[int, str]:
@@ -90,20 +111,6 @@ class ResToolBase:
                         log.warning(f"Skipping malformed row: {row}")
         else:
             log.error(f"Index file {index_path.absolute()} not found.")
-        return resources
-
-    def _list_resources(self) -> t.Dict[str, Path]:
-        indexFiles: t.List[Path] = []
-
-        metaIndex = self._read_index_file(self.root / "index_stillness.txt")
-        for fn, path in metaIndex.items():
-            if fn.startswith("app:/resfileindex"):
-                indexFiles.append(path)
-                log.debug(f"Found index file: {path}")
-
-        resources: t.Dict[str, Path] = {}
-        for index in indexFiles:
-            resources.update(self._read_index_file(index))
         return resources
 
     @overload
@@ -145,39 +152,40 @@ class ResToolBase:
                 data = lib.load(str(resource_path))
                 if not bin64_in_path:
                     sys.path.pop(0)
-                struct = self.decode_cfsd(None, data)
+                struct = self.decode_cfsd(data)
                 return struct
             else:
                 raise ValueError("Decoding is only supported for .pickle and .fsdbinary files.")
         else:
             return resource_path.read_bytes()
 
-    def decode_cfsd(self, key: str | None, data: t.Any) -> t.Any:
+    def decode_cfsd(self, data: t.Any) -> t.Any:
         """
         https://github.com/VULTUR-EveFrontier/eve-frontier-tools
         """
         data_type: type[t.Any] = type(data)
 
         if data_type.__module__ == "cfsd" and data_type.__name__ == "dict":
-            return {k: self.decode_cfsd(k, v) for k, v in data.items()}
-
-        if data_type.__module__.endswith("Loader"):
-            return {x: self.decode_cfsd(x, getattr(data, x)) for x in dir(data) if not x.startswith("__")}
+            return {k: self.decode_cfsd(v) for k, v in data.items()}
 
         if data_type.__module__ == "cfsd" and data_type.__name__ == "list":
-            return [self.decode_cfsd(None, v) for v in data]
+            return [self.decode_cfsd(v) for v in data]
+
+        if data_type.__module__.endswith("Loader"):
+            result: dict[str, t.Any] = dict()
+            for x in dir(data):
+                if x.startswith("__"):
+                    continue
+                else:
+                    result[x] = self.decode_cfsd(getattr(data, x))
+                    if x.endswith("NameID"):
+                        result[f"_{x}"] = self.strings[getattr(data, x)]
+            return result
 
         if isinstance(data, tuple):
-            return tuple([self.decode_cfsd(None, v) for v in data])
+            return tuple([self.decode_cfsd(v) for v in data])
 
-        if data_type.__name__.endswith("_vector"):
-            # TODO: Handle vector types
-            return None
-
-        if isinstance(data, int) or data_type.__name__ == "long":
-            # In case it is a NameID, look up the name
-            if key is not None and isinstance(key, str) and key.lower().endswith("nameid") and key != "dungeonNameID":
-                return self.strings[data]
+        if isinstance(data, int):
             return data
 
         if isinstance(data, float):
@@ -242,7 +250,7 @@ class ResTool(ResToolBase):
         )
         ex_parser.add_argument("--output", "-o", help="file to output to", default=None)
 
-    def main(self, args: argparse.Namespace) -> None:
+    def tool_main(self, args: argparse.Namespace) -> None:
         if args.cmd == "list":
             for file in self.resources.keys():
                 print(file)

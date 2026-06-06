@@ -10,17 +10,17 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
 class GenFuels(restool.ResToolBase):
-    def main(self, args: restool.Namespace) -> None:
+    def tool_main(self, args: restool.Namespace) -> None:
         groupID_to_groupName: dict[int, str] = {}
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
         for groupID, groupData in groups.items():
-            groupID_to_groupName[groupID] = groupData["groupNameID"]
+            groupID_to_groupName[groupID] = groupData["_groupNameID"]
 
         fuels: dict[str, dict[str, t.Any]] = {}
         types = self.extract_resource(RES_TYPES, decode=True)
         dogma = self.load_dogma_attributes()
         for typeID, typeData in types.items():
-            typeName = typeData["typeNameID"]
+            typeName = typeData["_typeNameID"]
             if typeData.get("marketGroupID") == 3559 or typeID == 77818:  # Ship Engine Fuel
                 if not typeData["published"]:
                     logging.debug(f"Skipping unpublished fuel: {typeName}")
@@ -36,7 +36,7 @@ class GenFuels(restool.ResToolBase):
 
 
 def main() -> None:
-    GenFuels()
+    GenFuels().main()
 
 
 if __name__ == "__main__":
