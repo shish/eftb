@@ -9,7 +9,7 @@ RES_GROUPS = "res:/staticdata/groups.fsdbinary"
 RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
-class GenFuels(restool.ResTool):
+class GenFuels(restool.ResToolBase):
     def main(self, args: restool.Namespace) -> None:
         groupID_to_groupName: dict[int, str] = {}
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
@@ -33,3 +33,11 @@ class GenFuels(restool.ResTool):
         fuels = dict(sorted(fuels.items(), key=lambda item: item[1]["efficiency"], reverse=True))
 
         self.output_struct(fuels)
+
+
+def main() -> None:
+    GenFuels()
+
+
+if __name__ == "__main__":
+    main()

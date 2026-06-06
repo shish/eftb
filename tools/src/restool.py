@@ -156,7 +156,7 @@ class ResToolBase:
         """
         https://github.com/VULTUR-EveFrontier/eve-frontier-tools
         """
-        data_type = type(data)
+        data_type: type[t.Any] = type(data)
 
         if data_type.__module__ == "cfsd" and data_type.__name__ == "dict":
             return {k: self.decode_cfsd(k, v) for k, v in data.items()}
@@ -177,7 +177,7 @@ class ResToolBase:
         if isinstance(data, int) or data_type.__name__ == "long":
             # In case it is a NameID, look up the name
             if key is not None and isinstance(key, str) and key.lower().endswith("nameid") and key != "dungeonNameID":
-                return self.strings[data][0]
+                return self.strings[data]
             return data
 
         if isinstance(data, float):
@@ -262,3 +262,11 @@ class ResTool(ResToolBase):
             else:
                 with open(args.output, "wb") as output_file:
                     output_file.write(data)
+
+
+def main() -> None:
+    ResTool()
+
+
+if __name__ == "__main__":
+    main()

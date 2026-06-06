@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:analyze": "tsc -b && ANALYZE=true vite build",
+    "build": "tsc -p tsconfig.json && vite build",
+    "build:analyze": "tsc -p tsconfig.json && ANALYZE=true vite build",
     "lint": "biome check .",
     "preview": "vite preview",
     "format": "biome format --write ."

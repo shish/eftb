@@ -13,14 +13,14 @@ package = true
 
 [project.scripts]
 apitool = "apitool:main"
-restool = "restool:ResTool"
-gen_bounds = "gen_bounds:GenBounds"
-gen_engines = "gen_engines:GenEngines"
-gen_fuels = "gen_fuels:GenFuels"
-gen_items = "gen_items:GenItems"
-gen_ships = "gen_ships:GenShips"
-gen_structures = "gen_structures:GenStructures"
-gen_system_names = "gen_system_names:GenSystemNames"
+restool = "restool:main"
+gen_bounds = "gen_bounds:main"
+gen_engines = "gen_engines:main"
+gen_fuels = "gen_fuels:main"
+gen_items = "gen_items:main"
+gen_ships = "gen_ships:main"
+gen_structures = "gen_structures:main"
+gen_system_names = "gen_system_names:main"
 
 [dependency-groups]
 dev = [

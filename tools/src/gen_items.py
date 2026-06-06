@@ -8,7 +8,7 @@ import restool
 RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
-class GenItems(restool.ResTool):
+class GenItems(restool.ResToolBase):
     def main(self, args: restool.Namespace) -> None:
         # Hard-coded list of items to extract
         item_names = [
@@ -35,7 +35,7 @@ class GenItems(restool.ResTool):
 
         items: dict[str, dict[str, t.Any]] = {}
 
-        for typeID, typeData in types.items():
+        for _typeID, typeData in types.items():
             typeName = typeData["typeNameID"]
             if typeName in item_names:
                 items[typeName] = {
@@ -48,3 +48,11 @@ class GenItems(restool.ResTool):
         items = {name: items[name] for name in item_names if name in items}
 
         self.output_struct(items)
+
+
+def main() -> None:
+    GenItems()
+
+
+if __name__ == "__main__":
+    main()

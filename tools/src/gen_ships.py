@@ -10,7 +10,7 @@ RES_TYPES = "res:/staticdata/types.fsdbinary"
 RES_GROUPS = "res:/staticdata/groups.fsdbinary"
 
 
-class GenShips(restool.ResTool):
+class GenShips(restool.ResToolBase):
     def main(self, args: restool.Namespace) -> None:
         groups: dict[int, dict[str, t.Any]] = self.extract_resource(RES_GROUPS, decode=True)
         groupID_to_groupName: dict[int, str] = {}
@@ -50,3 +50,11 @@ class GenShips(restool.ResTool):
                 }
 
         self.output_struct(ships)
+
+
+def main() -> None:
+    GenShips()
+
+
+if __name__ == "__main__":
+    main()

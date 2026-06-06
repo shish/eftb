@@ -7,7 +7,7 @@ RES_L10N_MAIN = "res:/localizationfsd/localization_fsd_main.pickle"
 RES_L10N_ENUS = "res:/localizationfsd/localization_fsd_en-us.pickle"
 
 
-class GenSystemNames(restool.ResTool):
+class GenSystemNames(restool.ResToolBase):
     def main(self, args: restool.Namespace) -> None:
         ssid_to_name: dict[int, str] = {}
         l10n_main = self.extract_resource(RES_L10N_MAIN, decode=True)["labels"].values()
@@ -24,3 +24,11 @@ class GenSystemNames(restool.ResTool):
         system_names.sort()
 
         self.output_struct(system_names)
+
+
+def main() -> None:
+    GenSystemNames()
+
+
+if __name__ == "__main__":
+    main()

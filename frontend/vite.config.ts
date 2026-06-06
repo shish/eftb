@@ -24,8 +24,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+        manualChunks: (id: string) => {
+          if (id.includes("node_modules/react")) {
             return "react";
           }
           if (id.includes("node_modules/@tanstack")) {
@@ -43,9 +43,6 @@ export default defineConfig({
         secure: false,
         ws: true,
       },
-    },
-    watch: {
-      ignored: ["**/frontier/**", "**/.venv/**"],
     },
   },
 });

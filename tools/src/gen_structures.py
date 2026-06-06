@@ -9,7 +9,7 @@ RES_GROUPS = "res:/staticdata/groups.fsdbinary"
 RES_TYPES = "res:/staticdata/types.fsdbinary"
 
 
-class GenStructures(restool.ResTool):
+class GenStructures(restool.ResToolBase):
     def main(self, args: restool.Namespace) -> None:
         types: dict[int, dict[str, t.Any]] = self.extract_resource(RES_TYPES, decode=True)
 
@@ -36,3 +36,11 @@ class GenStructures(restool.ResTool):
             }
 
         self.output_struct(structures)
+
+
+def main() -> None:
+    GenStructures()
+
+
+if __name__ == "__main__":
+    main()
