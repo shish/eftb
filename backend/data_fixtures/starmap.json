@@ -1,0 +1,51 @@
+{
+  "solarSystems": [
+      {
+        "name": "SS1000",
+        "solarSystemID": 1000,
+        "center": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "regionID": 1000
+      },
+      {
+        "name": "SS1001",
+        "solarSystemID": 1001,
+        "center": [
+          0.0,
+          10.0,
+          0.0
+        ],
+        "regionID": 1001
+      },
+      {
+        "name": "SS1002",
+        "solarSystemID": 1002,
+        "center": [
+          0.0,
+          20.0,
+          0.0
+        ],
+        "regionID": 1002
+      },
+      {
+        "name": "SS1003",
+        "solarSystemID": 1003,
+        "center": [
+          20.0,
+          20.0,
+          0.0
+        ],
+        "regionID": 1003
+      }
+  ],
+  "jumps": [
+      {
+        "jumpType": 0,
+        "fromSystemID": 1003,
+        "toSystemID": 1000
+      }
+  ]
+}

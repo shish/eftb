@@ -1,0 +1,16 @@
+[
+    {
+        "id": "dvbnbfdssdfsdfs",
+        "itemId": 12345,
+        "name": "Smart Gate 1A",
+        "from": 1002,
+        "to": 1003
+    },
+    {
+        "id": "dvbnbfdssdfsdfs",
+        "itemId": 12345,
+        "name": "Smart Gate 1B",
+        "from": 1003,
+        "to": 1002
+    }
+]

@@ -48,15 +48,14 @@ mod tests {
         let universe = Universe::tiny_test();
 
         assert_eq!(
-            calc_exit(
-                &universe,
-                &universe.star_map[&1],
-                Meters::from_light_years(10.0)
-            ),
+            calc_exit(&universe, &universe.star_map[&1000], Meters::new(10.0)),
             vec![
-                (universe.star_map[&1].clone(), universe.star_map[&2].clone()),
+                (
+                    universe.star_map[&1000].clone(),
+                    universe.star_map[&1001].clone()
+                ),
                 // via SmartGate
-                // (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
+                // (universe.star_map[&1002].clone(), universe.star_map[&1001].clone()),
             ]
         );
     }

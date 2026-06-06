@@ -101,7 +101,16 @@ impl Universe {
     pub fn build(max_jump_dist: Meters) -> anyhow::Result<Universe> {
         info!("Loading raw data");
         let raw_star_data = raw::RawStarMap::from_file("data/starmap.json")?;
+        let raw_smart_gates: Vec<raw::RawSmartGate> =
+            serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
+        Universe::build_from_raw(raw_star_data, raw_smart_gates, max_jump_dist)
+    }
 
+    pub fn build_from_raw(
+        raw_star_data: raw::RawStarMap,
+        raw_smart_gates: Vec<raw::RawSmartGate>,
+        max_jump_dist: Meters,
+    ) -> anyhow::Result<Universe> {
         info!("Building star map");
         let mut star_map: HashMap<SolarSystemId, Star> = HashMap::new();
         for raw_star in raw_star_data.solar_systems.iter() {
@@ -156,9 +165,7 @@ impl Universe {
         }
 
         info!("Building connections from smart gates");
-        let smart_gates: Vec<raw::RawSmartGate> =
-            serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
-        for gate in smart_gates.iter() {
+        for gate in raw_smart_gates.iter() {
             let Some(to_star) = star_map.get(&gate.to).cloned() else {
                 warn!("Smart gate has unknown target {}", gate.to);
                 continue;
@@ -250,108 +257,40 @@ impl Universe {
 
     #[cfg(test)]
     pub fn tiny_test() -> Universe {
-        struct MockStar {
-            id: SolarSystemId,
-            name: &'static str,
-            x: f64,
-            y: f64,
-        }
-        struct MockConn {
-            conn_type: ConnType,
-            s1: SolarSystemId,
-            s2: SolarSystemId,
-        }
+        Universe::tiny_test_r().unwrap()
+    }
 
-        /*
-         *   A..B..C
-         *    \   /
-         *    n\ /s
-         *      D
-         */
-        #[rustfmt::skip]
-        let stars = [
-            MockStar { id: 1, name: "A", x: 0.0, y: 0.0 },
-            MockStar { id: 2, name: "B", x: 10.0, y: 0.0 },
-            MockStar { id: 3, name: "C", x: 20.0, y: 0.0 },
-            MockStar { id: 4, name: "D", x: 10.0, y: 20.0 },
-        ];
-
-        #[rustfmt::skip]
-        let conns = [
-            MockConn { conn_type: ConnType::NpcGate, s1: 1, s2: 4 },
-            MockConn { conn_type: ConnType::SmartGate, s1: 4, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 2 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 4 },
-            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 4 },
-            MockConn { conn_type: ConnType::Jump, s1: 3, s2: 4 },
-        ];
-
-        let mut star_map: HashMap<SolarSystemId, Star> = stars
-            .iter()
-            .map(|s| {
-                (
-                    s.id,
-                    Star {
-                        id: s.id,
-                        loc: [
-                            Meters::from_light_years(s.x).get(),
-                            Meters::from_light_years(s.y).get(),
-                            0.0, // Z is not used in this test
-                        ],
-                        connections: Vec::new(), // Connections will be added later
-                    },
-                )
-            })
-            .collect();
-
-        let mut conn_id = 1; // Connection #0 is reserved for path init
-        for conn in conns {
-            let star1 = star_map.get(&conn.s1).unwrap().clone();
-            let star2 = star_map.get(&conn.s2).unwrap().clone();
-            let dist = star1.distance(&star2);
-
-            star_map
-                .get_mut(&conn.s1)
-                .unwrap()
-                .connections
-                .push(Connection {
-                    id: conn_id,
-                    conn_type: conn.conn_type.clone(),
-                    distance: dist,
-                    target: star2.id,
-                });
-            conn_id += 1;
-
-            star_map
-                .get_mut(&conn.s2)
-                .unwrap()
-                .connections
-                .push(Connection {
-                    id: conn_id,
-                    conn_type: conn.conn_type,
-                    distance: dist,
-                    target: star1.id,
-                });
-            conn_id += 1;
-        }
-
-        for star in star_map.values_mut() {
-            star.connections.sort();
-        }
-
-        Universe {
-            star_map,
-            star_id_to_name: stars.iter().map(|s| (s.id, s.name.to_string())).collect(),
-            star_name_to_id: stars.iter().map(|s| (s.name.to_string(), s.id)).collect(),
-        }
+    #[cfg(test)]
+    pub fn tiny_test_r() -> anyhow::Result<Universe> {
+        let raw_star_data = raw::RawStarMap::from_file("data_fixtures/starmap.json")?;
+        let raw_smart_gates: Vec<raw::RawSmartGate> =
+            serde_json::from_str(&std::fs::read_to_string("data_fixtures/smartgates.json")?)?;
+        Universe::build_from_raw(raw_star_data, raw_smart_gates, Meters::new(50.0))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /*
+     *   0..1..2
+     *    \ . /
+     *  npc\./smart
+     *      3
+     */
+    #[test]
+    fn test_tiny_universe() {
+        let universe = Universe::tiny_test();
+        assert_eq!(universe.star_map.len(), 4);
+        assert_eq!(universe.star_id_to_name.len(), 4);
+        assert_eq!(universe.star_name_to_id.len(), 4);
+
+        assert_eq!(universe.star_map[&1000].connections.len(), 4);
+        assert_eq!(universe.star_map[&1001].connections.len(), 3);
+        assert_eq!(universe.star_map[&1002].connections.len(), 4);
+        assert_eq!(universe.star_map[&1003].connections.len(), 5);
+    }
 
     #[test]
     fn test_distance() {
@@ -425,11 +364,11 @@ mod tests {
     #[test]
     fn test_tiny_test_star1_sorting() {
         let universe = Universe::tiny_test();
-        let star1 = &universe.star_map[&1];
+        let star1 = &universe.star_map[&1000];
 
         // First connection should be the NPC gate to star 4
         assert_eq!(star1.connections[0].conn_type, ConnType::NpcGate);
-        assert_eq!(star1.connections[0].target, 4);
+        assert_eq!(star1.connections[0].target, 1003);
 
         // All NPC gates should come before all jumps
         let mut seen_jump = false;

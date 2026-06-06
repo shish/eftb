@@ -30,22 +30,22 @@ pub fn successors(
         .filter(|c| use_smart_gates || c.conn_type != ConnType::SmartGate)
         // Turn the connection into a (connection, cost) tuple
         .map(|c| {
-            let distance = c.distance.to_light_years();
-            match (optimize, &c.conn_type) {
+            let distance = match (optimize, &c.conn_type) {
                 // For shortest path, we only care about the distance
                 // and don't care about the type of connection
-                (PathOptimize::Distance, _) => (c.clone(), distance),
+                (PathOptimize::Distance, _) => c.distance,
                 // For fuel efficient, we only care about the distance
                 // if it's a jump
-                (PathOptimize::Fuel, ConnType::Jump) => (c.clone(), distance),
+                (PathOptimize::Fuel, ConnType::Jump) => c.distance,
                 // Gate connections are free (-ish. It still takes a tiny
                 // amount of fuel to warp to a gate)
-                (PathOptimize::Fuel, ConnType::NpcGate) => (c.clone(), 1.0),
+                (PathOptimize::Fuel, ConnType::NpcGate) => Meters::new(1.0),
                 // Smart gates are slightly more expensive than NPC gates
-                (PathOptimize::Fuel, ConnType::SmartGate) => (c.clone(), 2.0),
+                (PathOptimize::Fuel, ConnType::SmartGate) => Meters::new(2.0),
                 // Treat all hops the same, we want to minimise the total
-                (PathOptimize::Hops, _) => (c.clone(), 1.0),
-            }
+                (PathOptimize::Hops, _) => Meters::new(1.0),
+            };
+            (c.clone(), distance.to_light_years())
         })
         .collect()
 }
@@ -112,69 +112,88 @@ mod tests {
         jump_distance: f64,
         optimize: PathOptimize,
         use_smart_gates: bool,
-    ) -> PathResult {
-        calc_path(
+    ) -> Vec<Connection> {
+        match calc_path(
             universe,
             &universe.star_map[&start_id],
             &universe.star_map[&end_id],
-            Meters::from_light_years(jump_distance),
+            Meters::new(jump_distance),
             optimize,
             use_smart_gates,
             None,
-        )
+        ) {
+            PathResult::Found(path) => path,
+            PathResult::NotFound => vec![],
+            PathResult::Timeout => panic!("Path search timed out"),
+        }
+    }
+
+    // Tiny jump distance can't get to the target, even with NPC gate
+    #[test]
+    fn test_path_no_path() {
+        let universe = Universe::tiny_test();
+        let path = call_calc_path(&universe, 1000, 1001, 0.1, PathOptimize::Fuel, true);
+        assert!(path.is_empty());
     }
 
     // Gate uses less fuel than jump
     #[test]
     fn test_path_fuel_prefer_gate_over_jump() {
         let universe = Universe::tiny_test();
-        assert_eq!(
-            call_calc_path(&universe, 1, 4, 25.0, PathOptimize::Fuel, true),
-            PathResult::Found(vec![universe.star_map[&1].connections[0].clone()])
-        );
+        let path = call_calc_path(&universe, 1000, 1003, 25.0, PathOptimize::Fuel, true);
+
+        assert_eq!(path.len(), 1);
+        assert_eq!(path[0].target, 1003);
+        assert_eq!(path[0].conn_type, ConnType::NpcGate);
     }
 
     // Gate + short-jump uses less fuel than long-jump
     #[test]
     fn test_path_fuel_prefer_more_hops_over_more_fuel() {
         let universe = Universe::tiny_test();
-        assert_eq!(
-            call_calc_path(&universe, 4, 2, 25.0, PathOptimize::Fuel, false),
-            PathResult::Found(vec![
-                universe.star_map[&4].connections[0].clone(),
-                universe.star_map[&1].connections[1].clone(),
-            ])
-        );
+        let path = call_calc_path(&universe, 1003, 1001, 25.0, PathOptimize::Fuel, false);
+
+        assert_eq!(path.len(), 2);
+
+        assert_eq!(path[0].target, 1000);
+        assert_eq!(path[0].conn_type, ConnType::NpcGate);
+
+        assert_eq!(path[1].target, 1001);
+        assert_eq!(path[1].conn_type, ConnType::Jump);
+        assert_eq!(path[1].distance, Meters::new(10.0));
     }
 
     // One long jump is shorter than a gate and a short jump
     #[test]
     fn test_path_distance() {
         let universe = Universe::tiny_test();
-        assert_eq!(
-            call_calc_path(&universe, 2, 4, 25.0, PathOptimize::Distance, false),
-            PathResult::Found(vec![universe.star_map[&2].connections[2].clone(),])
-        );
+        let path = call_calc_path(&universe, 1001, 1003, 25.0, PathOptimize::Distance, false);
+
+        assert_eq!(path.len(), 1);
+        assert_eq!(path[0].target, 1003);
+        assert_eq!(path[0].conn_type, ConnType::Jump);
     }
 
     // Jump instead of smart-gate if smart-gate is disabled
     #[test]
     fn test_path_hops_jump_if_smart_gate_disabled() {
         let universe = Universe::tiny_test();
-        assert_eq!(
-            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, false),
-            PathResult::Found(vec![universe.star_map[&4].connections[4].clone()])
-        );
+        let path = call_calc_path(&universe, 1003, 1002, 25.0, PathOptimize::Hops, false);
+
+        assert_eq!(path.len(), 1);
+        assert_eq!(path[0].target, 1002);
+        assert_eq!(path[0].conn_type, ConnType::Jump);
     }
 
     // Take smart gate if enabled
     #[test]
     fn test_path_hops_use_smart_gate_if_smart_gate_enabled() {
         let universe = Universe::tiny_test();
-        assert_eq!(
-            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, true),
-            PathResult::Found(vec![universe.star_map[&4].connections[1].clone()])
-        );
+        let path = call_calc_path(&universe, 1003, 1002, 25.0, PathOptimize::Hops, true);
+
+        assert_eq!(path.len(), 1);
+        assert_eq!(path[0].target, 1002);
+        assert_eq!(path[0].conn_type, ConnType::SmartGate);
     }
 }
 
