@@ -127,11 +127,13 @@ fn main() -> anyhow::Result<()> {
             let smart_gates: Vec<raw::RawSmartGate> =
                 serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
             for gate in smart_gates.iter() {
-                let Some(to_star) = star_map.get(&gate.to).cloned() else {
+                let from_id = data::SolarSystemId::from(gate.from);
+                let to_id = data::SolarSystemId::from(gate.to);
+                let Some(to_star) = star_map.get(&to_id).cloned() else {
                     warn!("Smart gate has unknown target {}", gate.to);
                     continue;
                 };
-                let Some(from_star) = star_map.get_mut(&gate.from) else {
+                let Some(from_star) = star_map.get_mut(&from_id) else {
                     warn!("Smart gate has unknown source {}", gate.from);
                     continue;
                 };
@@ -141,7 +143,7 @@ fn main() -> anyhow::Result<()> {
                     id: conn_count,
                     conn_type: data::ConnType::SmartGate,
                     distance,
-                    target: gate.to,
+                    target: to_id,
                 });
                 conn_count += 1;
             }

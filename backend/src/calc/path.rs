@@ -129,8 +129,17 @@ mod tests {
     fn test_path_fuel_prefer_gate_over_jump() {
         let universe = Universe::tiny_test();
         assert_eq!(
-            call_calc_path(&universe, 1, 4, 25.0, PathOptimize::Fuel, true),
-            PathResult::Found(vec![universe.star_map[&1].connections[0].clone()])
+            call_calc_path(
+                &universe,
+                SolarSystemId(1),
+                SolarSystemId(4),
+                25.0,
+                PathOptimize::Fuel,
+                true
+            ),
+            PathResult::Found(vec![
+                universe.star_map[&SolarSystemId(1)].connections[0].clone()
+            ])
         );
     }
 
@@ -139,10 +148,17 @@ mod tests {
     fn test_path_fuel_prefer_more_hops_over_more_fuel() {
         let universe = Universe::tiny_test();
         assert_eq!(
-            call_calc_path(&universe, 4, 2, 25.0, PathOptimize::Fuel, false),
+            call_calc_path(
+                &universe,
+                SolarSystemId(4),
+                SolarSystemId(2),
+                25.0,
+                PathOptimize::Fuel,
+                false
+            ),
             PathResult::Found(vec![
-                universe.star_map[&4].connections[0].clone(),
-                universe.star_map[&1].connections[1].clone(),
+                universe.star_map[&SolarSystemId(4)].connections[0].clone(),
+                universe.star_map[&SolarSystemId(1)].connections[1].clone(),
             ])
         );
     }
@@ -152,8 +168,17 @@ mod tests {
     fn test_path_distance() {
         let universe = Universe::tiny_test();
         assert_eq!(
-            call_calc_path(&universe, 2, 4, 25.0, PathOptimize::Distance, false),
-            PathResult::Found(vec![universe.star_map[&2].connections[2].clone(),])
+            call_calc_path(
+                &universe,
+                SolarSystemId(2),
+                SolarSystemId(4),
+                25.0,
+                PathOptimize::Distance,
+                false
+            ),
+            PathResult::Found(vec![
+                universe.star_map[&SolarSystemId(2)].connections[2].clone(),
+            ])
         );
     }
 
@@ -162,8 +187,17 @@ mod tests {
     fn test_path_hops_jump_if_smart_gate_disabled() {
         let universe = Universe::tiny_test();
         assert_eq!(
-            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, false),
-            PathResult::Found(vec![universe.star_map[&4].connections[4].clone()])
+            call_calc_path(
+                &universe,
+                SolarSystemId(4),
+                SolarSystemId(3),
+                25.0,
+                PathOptimize::Hops,
+                false
+            ),
+            PathResult::Found(vec![
+                universe.star_map[&SolarSystemId(4)].connections[4].clone()
+            ])
         );
     }
 
@@ -172,8 +206,17 @@ mod tests {
     fn test_path_hops_use_smart_gate_if_smart_gate_enabled() {
         let universe = Universe::tiny_test();
         assert_eq!(
-            call_calc_path(&universe, 4, 3, 25.0, PathOptimize::Hops, true),
-            PathResult::Found(vec![universe.star_map[&4].connections[1].clone()])
+            call_calc_path(
+                &universe,
+                SolarSystemId(4),
+                SolarSystemId(3),
+                25.0,
+                PathOptimize::Hops,
+                true
+            ),
+            PathResult::Found(vec![
+                universe.star_map[&SolarSystemId(4)].connections[1].clone()
+            ])
         );
     }
 }

@@ -50,11 +50,14 @@ mod tests {
         assert_eq!(
             calc_exit(
                 &universe,
-                &universe.star_map[&1],
+                &universe.star_map[&SolarSystemId(1)],
                 Meters::from_light_years(10.0)
             ),
             vec![
-                (universe.star_map[&1].clone(), universe.star_map[&2].clone()),
+                (
+                    universe.star_map[&SolarSystemId(1)].clone(),
+                    universe.star_map[&SolarSystemId(2)].clone()
+                ),
                 // via SmartGate
                 // (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
             ]

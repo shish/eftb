@@ -5,7 +5,52 @@ use rkyv::{Archive, Deserialize, Serialize};
 use crate::units::Meters;
 
 pub type ConnectionId = u32;
-pub type SolarSystemId = u32;
+
+#[derive(
+    Debug,
+    Archive,
+    Deserialize,
+    Serialize,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Default,
+    serde::Serialize,
+    serde::Deserialize,
+)]
+#[archive(compare(PartialEq, PartialOrd))]
+#[archive_attr(derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord))]
+pub struct SolarSystemId(pub u32);
+
+impl std::str::FromStr for SolarSystemId {
+    type Err = std::num::ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(SolarSystemId::from(s.parse::<u32>()?))
+    }
+}
+
+impl std::fmt::Display for SolarSystemId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<u32> for SolarSystemId {
+    fn from(id: u32) -> Self {
+        SolarSystemId(id)
+    }
+}
+
+impl From<SolarSystemId> for u32 {
+    fn from(id: SolarSystemId) -> Self {
+        id.0
+    }
+}
 
 #[derive(Debug, Archive, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[rkyv(compare(PartialEq))]
@@ -107,11 +152,11 @@ impl Universe {
         let json = star_map_json.solar_systems;
         let star_id_to_name: HashMap<SolarSystemId, String> = json
             .iter()
-            .map(|star| (star.solar_system_id, star.name.clone()))
+            .map(|star| (SolarSystemId(star.id), star.name.clone()))
             .collect();
         let star_name_to_id: HashMap<String, SolarSystemId> = json
             .iter()
-            .map(|star| (star.name.clone(), star.solar_system_id))
+            .map(|star| (star.name.clone(), SolarSystemId(star.id)))
             .collect();
 
         Ok(Universe {
@@ -161,22 +206,22 @@ impl Universe {
          */
         #[rustfmt::skip]
         let stars = [
-            MockStar { id: 1, name: "A", x: 0.0, y: 0.0 },
-            MockStar { id: 2, name: "B", x: 10.0, y: 0.0 },
-            MockStar { id: 3, name: "C", x: 20.0, y: 0.0 },
-            MockStar { id: 4, name: "D", x: 10.0, y: 20.0 },
+            MockStar { id: SolarSystemId(1), name: "A", x: 0.0, y: 0.0 },
+            MockStar { id: SolarSystemId(2), name: "B", x: 10.0, y: 0.0 },
+            MockStar { id: SolarSystemId(3), name: "C", x: 20.0, y: 0.0 },
+            MockStar { id: SolarSystemId(4), name: "D", x: 10.0, y: 20.0 },
         ];
 
         #[rustfmt::skip]
         let conns = [
-            MockConn { conn_type: ConnType::NpcGate, s1: 1, s2: 4 },
-            MockConn { conn_type: ConnType::SmartGate, s1: 4, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 2 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 1, s2: 4 },
-            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 3 },
-            MockConn { conn_type: ConnType::Jump, s1: 2, s2: 4 },
-            MockConn { conn_type: ConnType::Jump, s1: 3, s2: 4 },
+            MockConn { conn_type: ConnType::NpcGate, s1: SolarSystemId(1), s2: SolarSystemId(4) },
+            MockConn { conn_type: ConnType::SmartGate, s1: SolarSystemId(4), s2: SolarSystemId(3) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(1), s2: SolarSystemId(2) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(1), s2: SolarSystemId(3) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(1), s2: SolarSystemId(4) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(2), s2: SolarSystemId(3) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(2), s2: SolarSystemId(4) },
+            MockConn { conn_type: ConnType::Jump, s1: SolarSystemId(3), s2: SolarSystemId(4) },
         ];
 
         let mut star_map: HashMap<SolarSystemId, Star> = stars
@@ -245,14 +290,14 @@ mod tests {
     #[test]
     fn test_distance() {
         let a = Star {
-            id: 1,
+            id: SolarSystemId(1),
             x: 0.0,
             y: 0.0,
             z: 0.0,
             ..Default::default()
         };
         let b = Star {
-            id: 2,
+            id: SolarSystemId(2),
             x: 1.0,
             y: 0.0,
             z: 0.0,
@@ -271,37 +316,37 @@ mod tests {
             id: 1,
             conn_type: ConnType::Jump,
             distance: Meters::new(2.0),
-            target: 1,
+            target: SolarSystemId(2),
         };
         let b = Connection {
             id: 2,
             conn_type: ConnType::NpcGate,
             distance: Meters::new(2.0),
-            target: 1,
+            target: SolarSystemId(1),
         };
         let c = Connection {
             id: 3,
             conn_type: ConnType::SmartGate,
             distance: Meters::new(2.0),
-            target: 1,
+            target: SolarSystemId(1),
         };
         let d = Connection {
             id: 4,
             conn_type: ConnType::Jump,
             distance: Meters::new(1.0),
-            target: 1,
+            target: SolarSystemId(1),
         };
         let e = Connection {
             id: 5,
             conn_type: ConnType::NpcGate,
             distance: Meters::new(1.0),
-            target: 1,
+            target: SolarSystemId(1),
         };
         let f = Connection {
             id: 6,
             conn_type: ConnType::SmartGate,
             distance: Meters::new(1.0),
-            target: 1,
+            target: SolarSystemId(1),
         };
         let mut conns = vec![
             a.clone(),
@@ -318,11 +363,11 @@ mod tests {
     #[test]
     fn test_tiny_test_star1_sorting() {
         let universe = Universe::tiny_test();
-        let star1 = &universe.star_map[&1];
+        let star1 = &universe.star_map[&SolarSystemId(1)];
 
         // First connection should be the NPC gate to star 4
         assert_eq!(star1.connections[0].conn_type, ConnType::NpcGate);
-        assert_eq!(star1.connections[0].target, 4);
+        assert_eq!(star1.connections[0].target, SolarSystemId(4));
 
         // All NPC gates should come before all jumps
         let mut seen_jump = false;
