@@ -16,11 +16,22 @@ import sys
 import typing as t
 from pathlib import Path
 from typing import overload
-from time import time
+import time
+import contextlib
 
 log = logging.getLogger(__name__)
 
 Namespace = argparse.Namespace
+
+
+@contextlib.contextmanager
+def log_timing(label: str):
+    start = time.perf_counter()
+    try:
+        yield
+    finally:
+        elapsed = time.perf_counter() - start
+        log.debug("%s took %.3f s", label, elapsed)
 
 
 class ResToolBase:
@@ -62,9 +73,8 @@ class ResToolBase:
     def custom_args(self, parser: argparse.ArgumentParser) -> None: ...
 
     def main(self) -> None:
-        t = time()
-        self.tool_main(self._args)
-        log.info(f"Execution time: {time() - t:.2f} seconds")
+        with log_timing("tool_main()"):
+            self.tool_main(self._args)
 
     @abc.abstractmethod
     def tool_main(self, args: argparse.Namespace) -> None: ...
@@ -72,33 +82,33 @@ class ResToolBase:
     @property
     def resources(self) -> t.Dict[str, Path]:
         if self._resources is None:
-            indexFiles: t.List[Path] = []
+            with log_timing("resources()"):
+                indexFiles: t.List[Path] = []
 
-            metaIndex = self._read_index_file(self.root / "index_stillness.txt")
-            for fn, path in metaIndex.items():
-                if fn.startswith("app:/resfileindex"):
-                    indexFiles.append(path)
-                    log.debug(f"Found index file: {path}")
+                metaIndex = self._read_index_file(self.root / "index_stillness.txt")
+                for fn, path in metaIndex.items():
+                    if fn.startswith("app:/resfileindex"):
+                        indexFiles.append(path)
+                        log.debug(f"Found resource file index: {fn}")
 
-            self._resources = {}
-            for index in indexFiles:
-                self._resources.update(self._read_index_file(index))
+                self._resources = {}
+                for index in indexFiles:
+                    self._resources.update(self._read_index_file(index))
         return self._resources
 
     @property
     def strings(self) -> dict[int, str]:
         if self._strings is None:
-            l10n_file = self.resources["res:/localizationfsd/localization_fsd_en-us.pickle"]
-            _locale, strings = pickle.loads(l10n_file.read_bytes())
-            log.debug(f"Loaded {len(strings)} localization strings from {l10n_file}")
-            self._strings = {messageID: messages[0] for messageID, messages in strings.items()}
+            with log_timing("strings()"):
+                l10n_file = self.resources["res:/localizationfsd/localization_fsd_en-us.pickle"]
+                _locale, strings = pickle.loads(l10n_file.read_bytes())
+                self._strings = {messageID: messages[0] for messageID, messages in strings.items()}
         return self._strings
 
     def _read_index_file(self, index_path: Path) -> t.Dict[str, Path]:
         """
         Reads a CSV index file and returns a dictionary mapping resource names to their paths.
         """
-        log.debug(f"Reading index file: {index_path}")
         resources: t.Dict[str, Path] = {}
         if index_path.is_file():
             with index_path.open("r", newline="") as csvfile:
@@ -128,6 +138,12 @@ class ResToolBase:
             raise FileNotFoundError(f"Resource file {resource_path.absolute()} not found.")
 
         if decode:
+            return self.decode(resource_name, resource_path)
+        else:
+            return resource_path.read_bytes()
+
+    def decode(self, resource_name: str, resource_path: Path) -> t.Any:
+        with log_timing(f"decode({resource_name})"):
             if resource_name.endswith(".pickle"):
                 data = resource_path.read_bytes()
                 struct = pickle.loads(data)
@@ -156,8 +172,6 @@ class ResToolBase:
                 return struct
             else:
                 raise ValueError("Decoding is only supported for .pickle and .fsdbinary files.")
-        else:
-            return resource_path.read_bytes()
 
     def decode_cfsd(self, data: t.Any) -> t.Any:
         """
