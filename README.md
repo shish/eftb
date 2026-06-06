@@ -8,7 +8,7 @@
 ## Testing with the CLI
 
 - `cargo run -- --help`
-- `cargo run -- path E.G1G.6GD Nod`
+- `cargo run -- path EK8-F2L O66-61C`
 
 ## Testing the web interface
 

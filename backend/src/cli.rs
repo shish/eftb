@@ -70,16 +70,15 @@ fn main() -> anyhow::Result<()> {
 
             info!("Building star map");
             let mut star_map: HashMap<data::SolarSystemId, data::Star> = HashMap::new();
-            for (id_str, raw_star) in raw_star_data.solar_systems.iter() {
-                let id = id_str.parse()?;
+            for raw_star in raw_star_data.solar_systems.iter() {
                 let star = data::Star {
-                    id,
+                    id: raw_star.solar_system_id,
                     x: raw_star.center[0],
                     y: raw_star.center[1],
                     z: raw_star.center[2],
                     connections: Vec::new(),
                 };
-                star_map.insert(id, star);
+                star_map.insert(raw_star.solar_system_id, star);
             }
 
             info!("Building connections from npc gates");

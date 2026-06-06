@@ -19,6 +19,7 @@ gen_engines = "gen_engines:main"
 gen_fuels = "gen_fuels:main"
 gen_items = "gen_items:main"
 gen_ships = "gen_ships:main"
+gen_starmap = "gen_starmap:main"
 gen_structures = "gen_structures:main"
 gen_system_names = "gen_system_names:main"
 
