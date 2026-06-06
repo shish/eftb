@@ -1,12 +1,9 @@
-use std::collections::HashMap;
 use std::time::Instant;
 
 use clap::{Parser, Subcommand};
 use eftb::data;
 use eftb::data::SolarSystemId;
-use eftb::raw;
 use eftb::units::Meters;
-use indicatif::ProgressIterator;
 use log::{info, warn};
 
 #[derive(Parser)]
@@ -64,119 +61,10 @@ fn main() -> anyhow::Result<()> {
 
     match &cli.command {
         Some(Commands::Build { max_jump_distance }) => {
-            info!("Loading raw data");
-            let raw_star_data = raw::RawStarMap::from_file("data/starmap.json")?;
-            let max_jump_dist: Meters = Meters::from_light_years(*max_jump_distance);
-
             info!("Building star map");
-            let mut star_map: HashMap<data::SolarSystemId, data::Star> = HashMap::new();
-            for raw_star in raw_star_data.solar_systems.iter() {
-                let star = data::Star {
-                    id: raw_star.solar_system_id,
-                    loc: raw_star.center,
-                    connections: Vec::new(),
-                };
-                star_map.insert(raw_star.solar_system_id, star);
-            }
-
-            info!("Building connections from npc gates");
-            let mut conn_count = 1; // Connection #0 is reserved for path init
-            for raw_jump in raw_star_data.jumps.iter() {
-                // rust only lets us borrow one mutable star at a time, so we can't add
-                // from->to and to->from gates in the same block
-                for (fid, tid) in [
-                    (raw_jump.from_system_id, raw_jump.to_system_id),
-                    (raw_jump.to_system_id, raw_jump.from_system_id),
-                ] {
-                    let Some(to_star) = star_map.get(&tid).cloned() else {
-                        warn!("Jump has unknown target {}", tid);
-                        continue;
-                    };
-                    let Some(from_star) = star_map.get_mut(&fid) else {
-                        warn!("Jump has unknown source {}", fid);
-                        continue;
-                    };
-
-                    //let to_star = star_map.get(&tid).unwrap().clone();
-                    //let from_star = star_map.get_mut(&fid).unwrap();
-                    let distance: Meters = from_star.distance(&to_star);
-                    let conn_type = match raw_jump.jump_type {
-                        0 => data::ConnType::NpcGate,
-                        1 => data::ConnType::NpcGate, // What are these ???
-                        _ => {
-                            info!(
-                                "{} -> {} is an unknown jump type ({})",
-                                fid, tid, raw_jump.jump_type
-                            );
-                            continue;
-                        }
-                    };
-                    from_star.connections.push(data::Connection {
-                        id: conn_count,
-                        conn_type,
-                        distance,
-                        target: tid,
-                    });
-                    conn_count += 1;
-                }
-            }
-
-            info!("Building connections from smart gates");
-            let smart_gates: Vec<raw::RawSmartGate> =
-                serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
-            for gate in smart_gates.iter() {
-                let Some(to_star) = star_map.get(&gate.to).cloned() else {
-                    warn!("Smart gate has unknown target {}", gate.to);
-                    continue;
-                };
-                let Some(from_star) = star_map.get_mut(&gate.from) else {
-                    warn!("Smart gate has unknown source {}", gate.from);
-                    continue;
-                };
-
-                let distance: Meters = from_star.distance(&to_star);
-                from_star.connections.push(data::Connection {
-                    id: conn_count,
-                    conn_type: data::ConnType::SmartGate,
-                    distance,
-                    target: gate.to,
-                });
-                conn_count += 1;
-            }
-
-            info!("Building connections from jumps");
-            let cloned_star_map = star_map.clone();
-            for star in star_map.values_mut().progress() {
-                for other_star in cloned_star_map.values() {
-                    if star.id == other_star.id {
-                        continue;
-                    }
-                    let distance: Meters = star.distance(other_star);
-                    if distance < max_jump_dist {
-                        star.connections.push(data::Connection {
-                            id: conn_count,
-                            conn_type: data::ConnType::Jump,
-                            distance,
-                            target: other_star.id,
-                        });
-                        conn_count += 1;
-                    }
-                }
-            }
-
-            info!("Sorting {} connections", conn_count);
-            // sort gates first, and then jumps by distance - then when we
-            // reach a jump that is too long we can stop searching
-            for star in star_map.values_mut().progress() {
-                star.connections.sort_unstable();
-            }
-
+            let max_jump_dist: Meters = Meters::from_light_years(*max_jump_distance);
+            let u = data::Universe::build(max_jump_dist)?;
             info!("Saving star map");
-            let u = data::Universe {
-                star_map,
-                star_id_to_name: HashMap::new(),
-                star_name_to_id: HashMap::new(),
-            };
             u.save()?;
             info!("Complete");
         }
