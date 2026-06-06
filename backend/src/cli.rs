@@ -73,9 +73,7 @@ fn main() -> anyhow::Result<()> {
             for raw_star in raw_star_data.solar_systems.iter() {
                 let star = data::Star {
                     id: raw_star.solar_system_id,
-                    x: raw_star.center[0],
-                    y: raw_star.center[1],
-                    z: raw_star.center[2],
+                    loc: raw_star.center,
                     connections: Vec::new(),
                 };
                 star_map.insert(raw_star.solar_system_id, star);

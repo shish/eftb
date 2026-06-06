@@ -49,22 +49,24 @@ impl Ord for Connection {
     }
 }
 
+pub type Point3D = [f64; 3];
+
 #[derive(Archive, Deserialize, Serialize, Clone, Default)]
 #[rkyv(compare(PartialEq))]
 #[rkyv(derive(Debug))]
 pub struct Star {
     pub id: SolarSystemId,
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub loc: Point3D,
     pub connections: Vec<Connection>,
 }
 
 impl Star {
     pub fn distance(&self, other: &Star) -> Meters {
         Meters::new(
-            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
-                .sqrt(),
+            ((self.loc[0] - other.loc[0]).powi(2)
+                + (self.loc[1] - other.loc[1]).powi(2)
+                + (self.loc[2] - other.loc[2]).powi(2))
+            .sqrt(),
         )
     }
 }
@@ -186,9 +188,11 @@ impl Universe {
                     s.id,
                     Star {
                         id: s.id,
-                        x: Meters::from_light_years(s.x).get(),
-                        y: Meters::from_light_years(s.y).get(),
-                        z: 0.0,                  // Z is not used in this test
+                        loc: [
+                            Meters::from_light_years(s.x).get(),
+                            Meters::from_light_years(s.y).get(),
+                            0.0, // Z is not used in this test
+                        ],
                         connections: Vec::new(), // Connections will be added later
                     },
                 )
@@ -246,16 +250,12 @@ mod tests {
     fn test_distance() {
         let a = Star {
             id: 1,
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
+            loc: [0.0, 0.0, 0.0],
             ..Default::default()
         };
         let b = Star {
             id: 2,
-            x: 1.0,
-            y: 0.0,
-            z: 0.0,
+            loc: [1.0, 0.0, 0.0],
             ..Default::default()
         };
         assert_eq!(a.distance(&b), Meters::new(1.0));
