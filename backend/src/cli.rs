@@ -79,8 +79,8 @@ fn main() -> anyhow::Result<()> {
             let distance: Meters = start.distance(end);
             println!(
                 "Distance between {} and {} is {} LY",
-                universe.star_id_to_name[&start.id],
-                universe.star_id_to_name[&end.id],
+                start.name,
+                end.name,
                 distance.to_light_years() as i32
             );
         }
@@ -118,8 +118,8 @@ fn main() -> anyhow::Result<()> {
                     for conn in path {
                         println!(
                             "{} -> {} ({:?}, {} ly)",
-                            universe.star_id_to_name[&last_id],
-                            universe.star_id_to_name[&conn.target],
+                            universe.star_map[&last_id].name,
+                            universe.star_map[&conn.target].name,
                             conn.conn_type,
                             conn.distance.to_light_years() as i32
                         );
@@ -150,8 +150,8 @@ fn main() -> anyhow::Result<()> {
             for (from, to) in exits {
                 println!(
                     "{} -> {} ({} ly)",
-                    universe.star_id_to_name[&from.id],
-                    universe.star_id_to_name[&to.id],
+                    from.name,
+                    to.name,
                     from.distance(&to).to_light_years() as i32
                 );
             }
@@ -170,13 +170,13 @@ fn main() -> anyhow::Result<()> {
             info!("Loaded star map");
 
             let star = universe.star_by_name(name)?;
-            println!("{} ({}):", universe.star_id_to_name[&star.id], star.id);
+            println!("{} ({}):", star.name, star.id);
             println!("  Connections:");
             for conn in &star.connections {
                 if conn.conn_type != data::ConnType::Jump {
                     println!(
                         "    {} ({:?}, {} ly)",
-                        universe.star_id_to_name[&conn.target],
+                        universe.star_map[&conn.target].name,
                         conn.conn_type,
                         conn.distance.to_light_years() as i32
                     );
@@ -189,7 +189,7 @@ fn main() -> anyhow::Result<()> {
                     if conn.conn_type == data::ConnType::Jump && d < *jump_distance {
                         println!(
                             "    {} ({} ly)",
-                            universe.star_id_to_name[&conn.target], d as i32
+                            universe.star_map[&conn.target].name, d as i32
                         );
                     }
                 }
@@ -208,7 +208,7 @@ fn main() -> anyhow::Result<()> {
                 if visited.contains(&id) {
                     continue;
                 }
-                println!("{}", universe.star_id_to_name[&id]);
+                println!("{}", universe.star_map[&id].name);
                 visited.push(id);
                 for conn in &universe.star_map[&id].connections {
                     if conn.conn_type != data::ConnType::Jump {

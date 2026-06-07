@@ -51,6 +51,7 @@ pub type Point3D = [f64; 3];
 
 #[derive(Clone, Default)]
 pub struct Star {
+    pub name: String,
     pub id: SolarSystemId,
     pub loc: Point3D,
     pub connections: Vec<Connection>,
@@ -86,7 +87,6 @@ impl std::hash::Hash for Star {
 #[derive(Debug, Clone)]
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
-    pub star_id_to_name: HashMap<SolarSystemId, String>,
     pub star_name_to_id: HashMap<String, SolarSystemId>,
 }
 impl Universe {
@@ -107,6 +107,7 @@ impl Universe {
         let mut star_map: HashMap<SolarSystemId, Star> = HashMap::new();
         for raw_star in raw_star_data.solar_systems.iter() {
             let star = Star {
+                name: raw_star.name.clone(),
                 id: raw_star.solar_system_id,
                 loc: raw_star.center,
                 connections: Vec::new(),
@@ -205,10 +206,6 @@ impl Universe {
         }
 
         let json = raw_star_data.solar_systems;
-        let star_id_to_name: HashMap<SolarSystemId, String> = json
-            .iter()
-            .map(|star| (star.solar_system_id, star.name.clone()))
-            .collect();
         let star_name_to_id: HashMap<String, SolarSystemId> = json
             .iter()
             .map(|star| (star.name.clone(), star.solar_system_id))
@@ -216,7 +213,6 @@ impl Universe {
 
         Ok(Universe {
             star_map,
-            star_id_to_name,
             star_name_to_id,
         })
     }
@@ -260,7 +256,6 @@ mod tests {
     fn test_tiny_universe() {
         let universe = Universe::tiny_test();
         assert_eq!(universe.star_map.len(), 4);
-        assert_eq!(universe.star_id_to_name.len(), 4);
         assert_eq!(universe.star_name_to_id.len(), 4);
 
         assert_eq!(universe.star_map[&1000].connections.len(), 4);

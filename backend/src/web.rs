@@ -158,7 +158,7 @@ fn calc_path(
                 result.push(PathStep {
                     from: WebStar {
                         id: last_id,
-                        name: universe.star_id_to_name[&last_id].clone(),
+                        name: universe.star_map[&last_id].name.clone(),
                     },
                     conn_type: match conn.conn_type {
                         ConnType::Jump => "jump".to_string(),
@@ -168,7 +168,7 @@ fn calc_path(
                     distance: conn.distance.to_light_years(),
                     to: WebStar {
                         id: conn.target,
-                        name: universe.star_id_to_name[&conn.target].clone(),
+                        name: universe.star_map[&conn.target].name.clone(),
                     },
                 });
                 last_id = conn.target;
@@ -210,8 +210,8 @@ fn calc_exit(
     let mut result: Vec<(String, String, f64)> = Vec::new();
     for (from, to) in exits {
         result.push((
-            universe.star_id_to_name[&from.id].clone(),
-            universe.star_id_to_name[&to.id].clone(),
+            from.name.clone(),
+            to.name.clone(),
             from.distance(&to).to_light_years(),
         ));
     }
