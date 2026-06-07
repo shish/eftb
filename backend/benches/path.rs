@@ -3,9 +3,9 @@ use eftb::units::Meters;
 
 fn path(c: &mut Criterion) {
     let universe = eftb::data::Universe::load().unwrap();
-    // ~1200LY across dense space, takes ~0.05s on my laptop
-    let start = universe.star_by_name(&"E9R-5PC".to_string()).unwrap();
-    let end = universe.star_by_name(&"E1J-V83".to_string()).unwrap();
+    // ~1700LY across dense space, takes ~20ms on my laptop
+    let start = universe.star_by_name(&"OKL-N56".to_string()).unwrap();
+    let end = universe.star_by_name(&"EBD-716".to_string()).unwrap();
     let jump_distance = Meters::from_light_years(200.0);
     c.bench_function("calc_path", |b| {
         b.iter(|| {
@@ -65,5 +65,10 @@ fn successors(c: &mut Criterion) {
     }
 }
 
-criterion_group!(benches, path, heuristic, successors);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().significance_level(0.1).sample_size(200);
+    targets = path, heuristic, successors
+}
+//criterion_group!(benches, path, heuristic, successors);
 criterion_main!(benches);
