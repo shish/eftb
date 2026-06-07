@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 use clap::{Parser, Subcommand};
-use eftb::data;
+use eftb::data::u64_to_ssid;
 use eftb::data::SolarSystemId;
 use eftb::raw;
 use eftb::units::Meters;
@@ -90,12 +90,12 @@ fn main() -> anyhow::Result<()> {
                     (raw_jump.from_system_id, raw_jump.to_system_id),
                     (raw_jump.to_system_id, raw_jump.from_system_id),
                 ] {
-                    let Some(to_star) = star_map.get(&tid).cloned() else {
-                        warn!("Jump has unknown target {}", tid);
+                    let Some(to_star) = star_map.get(&u64_to_ssid(tid)).cloned() else {
+                        warn!("Jump has unknown target {}", u64_to_ssid(tid));
                         continue;
                     };
-                    let Some(from_star) = star_map.get_mut(&fid) else {
-                        warn!("Jump has unknown source {}", fid);
+                    let Some(from_star) = star_map.get_mut(&u64_to_ssid(fid)) else {
+                        warn!("Jump has unknown source {}", u64_to_ssid(fid));
                         continue;
                     };
 
@@ -117,7 +117,7 @@ fn main() -> anyhow::Result<()> {
                         id: conn_count,
                         conn_type,
                         distance,
-                        target: tid,
+                        target: u64_to_ssid(tid),
                     });
                     conn_count += 1;
                 }
@@ -127,12 +127,12 @@ fn main() -> anyhow::Result<()> {
             let smart_gates: Vec<raw::RawSmartGate> =
                 serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
             for gate in smart_gates.iter() {
-                let Some(to_star) = star_map.get(&gate.to).cloned() else {
-                    warn!("Smart gate has unknown target {}", gate.to);
+                let Some(to_star) = star_map.get(&u64_to_ssid(gate.to)).cloned() else {
+                    warn!("Smart gate has unknown target {}", u64_to_ssid(gate.to));
                     continue;
                 };
-                let Some(from_star) = star_map.get_mut(&gate.from) else {
-                    warn!("Smart gate has unknown source {}", gate.from);
+                let Some(from_star) = star_map.get_mut(&u64_to_ssid(gate.from)) else {
+                    warn!("Smart gate has unknown source {}", u64_to_ssid(gate.from));
                     continue;
                 };
 
@@ -141,7 +141,7 @@ fn main() -> anyhow::Result<()> {
                     id: conn_count,
                     conn_type: data::ConnType::SmartGate,
                     distance,
-                    target: gate.to,
+                    target: u64_to_ssid(gate.to),
                 });
                 conn_count += 1;
             }
