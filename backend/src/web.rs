@@ -66,7 +66,11 @@ struct StarsReturn {
 
 #[get("/stars")]
 fn get_stars(universe: &State<data::Universe>) -> Json<StarsReturn> {
-    let names = universe.star_name_to_idx.keys().cloned().collect();
+    let names = universe
+        .stars
+        .iter()
+        .map(|star| star.name.clone())
+        .collect();
     Json(StarsReturn {
         version: 1,
         data: names,

@@ -80,11 +80,12 @@ pub fn calc_path(
         distance: Meters::from_light_years(0.0),
         target: universe.star_id_to_idx[&start.id],
     };
+    let end_idx = universe.star_id_to_idx[&end.id];
     let path = pathfinding::astar(
         &init_conn,
         |conn| successors(universe, conn, jump_distance, optimize, use_smart_gates),
         |conn| heuristic(universe, conn, end),
-        |conn| conn.target == universe.star_id_to_idx[&end.id],
+        |conn| conn.target == end_idx,
         timeout,
     );
 
