@@ -68,5 +68,10 @@ fn successors(c: &mut Criterion) {
     }
 }
 
-criterion_group!(benches, path, heuristic, successors);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().significance_level(0.1).sample_size(1000);
+    targets = path, heuristic, successors
+}
+//criterion_group!(benches, path, heuristic, successors);
 criterion_main!(benches);
