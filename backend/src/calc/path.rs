@@ -18,8 +18,8 @@ pub fn successors(
     use_smart_gates: bool,
 ) -> Vec<(Connection, f64)> {
     let star = universe
-        .star_map
-        .get(&conn.target)
+        .stars
+        .get(conn.target)
         .expect("Target star not found in universe");
     star.connections
         .iter()
@@ -55,9 +55,7 @@ pub fn successors(
 /// - Must not return greater than the actual cost, or the path will be suboptimal
 ///   - Remember that in "optimise for fuel" mode, actual cost might be 1
 pub fn heuristic(universe: &Universe, conn: &Connection, end: &Star) -> f64 {
-    universe.star_map[&conn.target]
-        .distance(end)
-        .to_light_years()
+    universe.stars[conn.target].distance(end).to_light_years()
 }
 
 #[derive(Debug, PartialEq)]
@@ -80,13 +78,13 @@ pub fn calc_path(
         id: 0,
         conn_type: ConnType::Jump,
         distance: Meters::from_light_years(0.0),
-        target: start.id,
+        target: universe.star_id_to_idx[&start.id],
     };
     let path = pathfinding::astar(
         &init_conn,
         |conn| successors(universe, conn, jump_distance, optimize, use_smart_gates),
         |conn| heuristic(universe, conn, end),
-        |conn| conn.target == end.id,
+        |conn| conn.target == universe.star_id_to_idx[&end.id],
         timeout,
     );
 
@@ -107,16 +105,16 @@ mod tests {
 
     fn call_calc_path(
         universe: &Universe,
-        start_id: SolarSystemId,
-        end_id: SolarSystemId,
+        start_idx: StarIdx,
+        end_idx: StarIdx,
         jump_distance: f64,
         optimize: PathOptimize,
         use_smart_gates: bool,
     ) -> Vec<Connection> {
         match calc_path(
             universe,
-            &universe.star_map[&start_id],
-            &universe.star_map[&end_id],
+            &universe.stars[start_idx],
+            &universe.stars[end_idx],
             Meters::new(jump_distance),
             optimize,
             use_smart_gates,
@@ -132,7 +130,7 @@ mod tests {
     #[test]
     fn test_path_no_path() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1000, 1001, 0.1, PathOptimize::Fuel, true);
+        let path = call_calc_path(&universe, 0, 1, 0.1, PathOptimize::Fuel, true);
         assert!(path.is_empty());
     }
 
@@ -140,10 +138,10 @@ mod tests {
     #[test]
     fn test_path_fuel_prefer_gate_over_jump() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1000, 1003, 25.0, PathOptimize::Fuel, true);
+        let path = call_calc_path(&universe, 0, 3, 25.0, PathOptimize::Fuel, true);
 
         assert_eq!(path.len(), 1);
-        assert_eq!(path[0].target, 1003);
+        assert_eq!(path[0].target, 3);
         assert_eq!(path[0].conn_type, ConnType::NpcGate);
     }
 
@@ -151,14 +149,14 @@ mod tests {
     #[test]
     fn test_path_fuel_prefer_more_hops_over_more_fuel() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1003, 1001, 25.0, PathOptimize::Fuel, false);
+        let path = call_calc_path(&universe, 3, 1, 25.0, PathOptimize::Fuel, false);
 
         assert_eq!(path.len(), 2);
 
-        assert_eq!(path[0].target, 1000);
+        assert_eq!(path[0].target, 0);
         assert_eq!(path[0].conn_type, ConnType::NpcGate);
 
-        assert_eq!(path[1].target, 1001);
+        assert_eq!(path[1].target, 1);
         assert_eq!(path[1].conn_type, ConnType::Jump);
         assert_eq!(path[1].distance, Meters::new(10.0));
     }
@@ -167,10 +165,10 @@ mod tests {
     #[test]
     fn test_path_distance() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1001, 1003, 25.0, PathOptimize::Distance, false);
+        let path = call_calc_path(&universe, 1, 3, 25.0, PathOptimize::Distance, false);
 
         assert_eq!(path.len(), 1);
-        assert_eq!(path[0].target, 1003);
+        assert_eq!(path[0].target, 3);
         assert_eq!(path[0].conn_type, ConnType::Jump);
     }
 
@@ -178,10 +176,10 @@ mod tests {
     #[test]
     fn test_path_hops_jump_if_smart_gate_disabled() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1003, 1002, 25.0, PathOptimize::Hops, false);
+        let path = call_calc_path(&universe, 3, 2, 25.0, PathOptimize::Hops, false);
 
         assert_eq!(path.len(), 1);
-        assert_eq!(path[0].target, 1002);
+        assert_eq!(path[0].target, 2);
         assert_eq!(path[0].conn_type, ConnType::Jump);
     }
 
@@ -189,10 +187,10 @@ mod tests {
     #[test]
     fn test_path_hops_use_smart_gate_if_smart_gate_enabled() {
         let universe = Universe::tiny_test();
-        let path = call_calc_path(&universe, 1003, 1002, 25.0, PathOptimize::Hops, true);
+        let path = call_calc_path(&universe, 3, 2, 25.0, PathOptimize::Hops, true);
 
         assert_eq!(path.len(), 1);
-        assert_eq!(path[0].target, 1002);
+        assert_eq!(path[0].target, 2);
         assert_eq!(path[0].conn_type, ConnType::SmartGate);
     }
 }

@@ -66,7 +66,7 @@ struct StarsReturn {
 
 #[get("/stars")]
 fn get_stars(universe: &State<data::Universe>) -> Json<StarsReturn> {
-    let names = universe.star_name_to_id.keys().cloned().collect();
+    let names = universe.star_name_to_idx.keys().cloned().collect();
     Json(StarsReturn {
         version: 1,
         data: names,
@@ -153,12 +153,12 @@ fn calc_path(
     match result {
         eftb::calc::path::PathResult::Found(path) => {
             let mut result = Vec::new();
-            let mut last_id = start.id;
+            let mut last_idx = universe.star_id_to_idx[&start.id];
             for conn in path {
                 result.push(PathStep {
                     from: WebStar {
-                        id: last_id,
-                        name: universe.star_map[&last_id].name.clone(),
+                        id: universe.stars[last_idx].id,
+                        name: universe.stars[last_idx].name.clone(),
                     },
                     conn_type: match conn.conn_type {
                         ConnType::Jump => "jump".to_string(),
@@ -167,11 +167,11 @@ fn calc_path(
                     },
                     distance: conn.distance.to_light_years(),
                     to: WebStar {
-                        id: conn.target,
-                        name: universe.star_map[&conn.target].name.clone(),
+                        id: universe.stars[conn.target].id,
+                        name: universe.stars[conn.target].name.clone(),
                     },
                 });
-                last_id = conn.target;
+                last_idx = conn.target;
             }
             Ok(Json(PathReturn {
                 version: 2,

@@ -2,7 +2,6 @@ use std::time::Instant;
 
 use clap::{Parser, Subcommand};
 use eftb::data;
-use eftb::data::SolarSystemId;
 use eftb::units::Meters;
 use log::{info, warn};
 
@@ -114,16 +113,16 @@ fn main() -> anyhow::Result<()> {
             match path {
                 eftb::calc::path::PathResult::Found(path) => {
                     println!("Path from {} to {}:", start_name, end_name);
-                    let mut last_id = start.id;
+                    let mut last_idx = universe.star_id_to_idx[&start.id];
                     for conn in path {
                         println!(
                             "{} -> {} ({:?}, {} ly)",
-                            universe.star_map[&last_id].name,
-                            universe.star_map[&conn.target].name,
+                            universe.stars[last_idx].name,
+                            universe.stars[conn.target].name,
                             conn.conn_type,
                             conn.distance.to_light_years() as i32
                         );
-                        last_id = conn.target;
+                        last_idx = conn.target;
                     }
                 }
                 eftb::calc::path::PathResult::NotFound => {
@@ -176,7 +175,7 @@ fn main() -> anyhow::Result<()> {
                 if conn.conn_type != data::ConnType::Jump {
                     println!(
                         "    {} ({:?}, {} ly)",
-                        universe.star_map[&conn.target].name,
+                        universe.stars[conn.target].name,
                         conn.conn_type,
                         conn.distance.to_light_years() as i32
                     );
@@ -187,10 +186,7 @@ fn main() -> anyhow::Result<()> {
                 for conn in &star.connections {
                     let d = conn.distance.to_light_years();
                     if conn.conn_type == data::ConnType::Jump && d < *jump_distance {
-                        println!(
-                            "    {} ({} ly)",
-                            universe.star_map[&conn.target].name, d as i32
-                        );
+                        println!("    {} ({} ly)", universe.stars[conn.target].name, d as i32);
                     }
                 }
             }
@@ -201,16 +197,16 @@ fn main() -> anyhow::Result<()> {
             info!("Loaded star map");
 
             let star = universe.star_by_name(name)?;
-            let mut visited: Vec<SolarSystemId> = Vec::new();
-            let mut to_visit: Vec<SolarSystemId> = vec![star.id];
+            let mut visited: Vec<data::StarIdx> = Vec::new();
+            let mut to_visit: Vec<data::StarIdx> = vec![universe.star_id_to_idx[&star.id]];
 
-            while let Some(id) = to_visit.pop() {
-                if visited.contains(&id) {
+            while let Some(idx) = to_visit.pop() {
+                if visited.contains(&idx) {
                     continue;
                 }
-                println!("{}", universe.star_map[&id].name);
-                visited.push(id);
-                for conn in &universe.star_map[&id].connections {
+                println!("{}", universe.stars[idx].name);
+                visited.push(idx);
+                for conn in &universe.stars[idx].connections {
                     if conn.conn_type != data::ConnType::Jump {
                         to_visit.push(conn.target);
                     }

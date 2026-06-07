@@ -2,13 +2,13 @@ use crate::data::*;
 use crate::units::Meters;
 
 pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Meters) -> Vec<(Star, Star)> {
-    let mut gate_network: Vec<SolarSystemId> = Vec::new();
-    let mut to_add_to_network: Vec<SolarSystemId> = Vec::new();
+    let mut gate_network: Vec<StarIdx> = Vec::new();
+    let mut to_add_to_network: Vec<StarIdx> = Vec::new();
 
-    to_add_to_network.push(start.id);
+    to_add_to_network.push(universe.star_id_to_idx[&start.id]);
     while let Some(current) = to_add_to_network.pop() {
         gate_network.push(current);
-        for conn in &universe.star_map[&current].connections {
+        for conn in &universe.stars[current].connections {
             if (
                 conn.conn_type == ConnType::NpcGate
                 // || conn.conn_type == ConnType::SmartGate
@@ -22,11 +22,11 @@ pub fn calc_exit(universe: &Universe, start: &Star, jump_distance: Meters) -> Ve
 
     let mut exits: Vec<(Star, Star)> = Vec::new();
 
-    gate_network.iter().for_each(|id| {
-        let star = &universe.star_map[id];
+    gate_network.iter().for_each(|idx| {
+        let star = &universe.stars[*idx];
         for conn in &star.connections {
             if conn.conn_type == ConnType::Jump {
-                let other = &universe.star_map[&conn.target];
+                let other = &universe.stars[conn.target];
                 let distance = star.distance(other);
 
                 if distance <= jump_distance {
@@ -48,14 +48,11 @@ mod tests {
         let universe = Universe::tiny_test();
 
         assert_eq!(
-            calc_exit(&universe, &universe.star_map[&1000], Meters::new(10.0)),
+            calc_exit(&universe, &universe.stars[0], Meters::new(10.0)),
             vec![
-                (
-                    universe.star_map[&1000].clone(),
-                    universe.star_map[&1001].clone()
-                ),
+                (universe.stars[0].clone(), universe.stars[1].clone()),
                 // via SmartGate
-                // (universe.star_map[&1002].clone(), universe.star_map[&1001].clone()),
+                // (universe.star_map[&3].clone(), universe.star_map[&2].clone()),
             ]
         );
     }

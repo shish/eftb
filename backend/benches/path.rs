@@ -48,7 +48,7 @@ fn successors(c: &mut Criterion) {
         id: 0,
         conn_type: eftb::data::ConnType::NpcGate,
         distance: Meters::from_light_years(100.0),
-        target: start.id,
+        target: universe.star_id_to_idx[&start.id],
     };
     let jump_distance = Meters::from_light_years(100.0);
 

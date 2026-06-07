@@ -8,6 +8,7 @@ use crate::units::Meters;
 
 pub type ConnectionId = u32;
 pub type SolarSystemId = u32;
+pub type StarIdx = usize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
@@ -21,7 +22,7 @@ pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
     pub distance: Meters,
-    pub target: SolarSystemId,
+    pub target: StarIdx,
 }
 impl PartialEq for Connection {
     fn eq(&self, other: &Self) -> bool {
@@ -86,8 +87,9 @@ impl std::hash::Hash for Star {
 
 #[derive(Debug, Clone)]
 pub struct Universe {
-    pub star_map: HashMap<SolarSystemId, Star>,
-    pub star_name_to_id: HashMap<String, SolarSystemId>,
+    pub stars: Vec<Star>,
+    pub star_id_to_idx: HashMap<SolarSystemId, StarIdx>,
+    pub star_name_to_idx: HashMap<String, StarIdx>,
 }
 impl Universe {
     pub fn build(max_jump_dist: Meters) -> anyhow::Result<Universe> {
@@ -104,15 +106,21 @@ impl Universe {
         max_jump_dist: Meters,
     ) -> anyhow::Result<Universe> {
         info!("Building star map");
-        let mut star_map: HashMap<SolarSystemId, Star> = HashMap::new();
-        for raw_star in raw_star_data.solar_systems.iter() {
+        let n = raw_star_data.solar_systems.len();
+        let mut star_id_to_idx: HashMap<SolarSystemId, StarIdx> = HashMap::with_capacity(n);
+        let mut stars: Vec<Star> = Vec::with_capacity(n);
+        let mut star_name_to_idx: HashMap<String, StarIdx> = HashMap::with_capacity(n);
+
+        for (idx, raw_star) in raw_star_data.solar_systems.iter().enumerate() {
             let star = Star {
                 name: raw_star.name.clone(),
                 id: raw_star.solar_system_id,
                 loc: raw_star.center,
                 connections: Vec::new(),
             };
-            star_map.insert(raw_star.solar_system_id, star);
+            stars.push(star);
+            star_id_to_idx.insert(raw_star.solar_system_id, idx);
+            star_name_to_idx.insert(raw_star.name.clone(), idx);
         }
 
         info!("Building connections from npc gates");
@@ -124,34 +132,21 @@ impl Universe {
                 (raw_jump.from_system_id, raw_jump.to_system_id),
                 (raw_jump.to_system_id, raw_jump.from_system_id),
             ] {
-                let Some(to_star) = star_map.get(&tid).cloned() else {
+                let Some(to_star_idx) = star_id_to_idx.get(&tid).cloned() else {
                     warn!("Jump has unknown target {}", tid);
                     continue;
                 };
-                let Some(from_star) = star_map.get_mut(&fid) else {
+                let Some(from_star_idx) = star_id_to_idx.get(&fid).cloned() else {
                     warn!("Jump has unknown source {}", fid);
                     continue;
                 };
 
-                //let to_star = star_map.get(&tid).unwrap().clone();
-                //let from_star = star_map.get_mut(&fid).unwrap();
-                let distance: Meters = from_star.distance(&to_star);
-                let conn_type = match raw_jump.jump_type {
-                    0 => ConnType::NpcGate,
-                    1 => ConnType::NpcGate, // What are these ???
-                    _ => {
-                        info!(
-                            "{} -> {} is an unknown jump type ({})",
-                            fid, tid, raw_jump.jump_type
-                        );
-                        continue;
-                    }
-                };
-                from_star.connections.push(Connection {
+                let distance = stars[from_star_idx].distance(&stars[to_star_idx]);
+                stars[from_star_idx].connections.push(Connection {
                     id: conn_count,
-                    conn_type,
-                    distance,
-                    target: tid,
+                    conn_type: ConnType::NpcGate,
+                    distance: distance,
+                    target: to_star_idx,
                 });
                 conn_count += 1;
             }
@@ -159,39 +154,38 @@ impl Universe {
 
         info!("Building connections from smart gates");
         for gate in raw_smart_gates.iter() {
-            let Some(to_star) = star_map.get(&gate.to).cloned() else {
+            let Some(to_star_idx) = star_id_to_idx.get(&gate.to).cloned() else {
                 warn!("Smart gate has unknown target {}", gate.to);
                 continue;
             };
-            let Some(from_star) = star_map.get_mut(&gate.from) else {
+            let Some(from_star_idx) = star_id_to_idx.get(&gate.from).cloned() else {
                 warn!("Smart gate has unknown source {}", gate.from);
                 continue;
             };
 
-            let distance: Meters = from_star.distance(&to_star);
-            from_star.connections.push(Connection {
+            let distance = stars[from_star_idx].distance(&stars[to_star_idx]);
+            stars[from_star_idx].connections.push(Connection {
                 id: conn_count,
                 conn_type: ConnType::SmartGate,
-                distance,
-                target: gate.to,
+                distance: distance,
+                target: to_star_idx,
             });
             conn_count += 1;
         }
 
         info!("Building connections from jumps");
-        let cloned_star_map = star_map.clone();
-        for star in star_map.values_mut().progress() {
-            for other_star in cloned_star_map.values() {
-                if star.id == other_star.id {
+        for from_star_idx in (0..n).progress() {
+            for to_star_idx in 0..n {
+                if from_star_idx == to_star_idx {
                     continue;
                 }
-                let distance: Meters = star.distance(other_star);
+                let distance = stars[from_star_idx].distance(&stars[to_star_idx]);
                 if distance < max_jump_dist {
-                    star.connections.push(Connection {
+                    stars[from_star_idx].connections.push(Connection {
                         id: conn_count,
                         conn_type: ConnType::Jump,
-                        distance,
-                        target: other_star.id,
+                        distance: distance,
+                        target: to_star_idx,
                     });
                     conn_count += 1;
                 }
@@ -201,31 +195,23 @@ impl Universe {
         info!("Sorting {} connections", conn_count);
         // sort gates first, and then jumps by distance - then when we
         // reach a jump that is too long we can stop searching
-        for star in star_map.values_mut().progress() {
+        for star in stars.iter_mut().progress() {
             star.connections.sort_unstable();
         }
 
-        let json = raw_star_data.solar_systems;
-        let star_name_to_id: HashMap<String, SolarSystemId> = json
-            .iter()
-            .map(|star| (star.name.clone(), star.solar_system_id))
-            .collect();
-
         Ok(Universe {
-            star_map,
-            star_name_to_id,
+            stars,
+            star_id_to_idx,
+            star_name_to_idx,
         })
     }
 
     pub fn star_by_name(&self, name: &String) -> anyhow::Result<&Star> {
-        let star_id = self
-            .star_name_to_id
+        let star_idx = self
+            .star_name_to_idx
             .get(name)
             .ok_or_else(|| anyhow::anyhow!("Star not found: {}", name))?;
-
-        self.star_map
-            .get(star_id)
-            .ok_or_else(|| anyhow::anyhow!("Star not found: {}", name))
+        Ok(&self.stars[*star_idx])
     }
 
     #[cfg(test)]
@@ -255,13 +241,13 @@ mod tests {
     #[test]
     fn test_tiny_universe() {
         let universe = Universe::tiny_test();
-        assert_eq!(universe.star_map.len(), 4);
-        assert_eq!(universe.star_name_to_id.len(), 4);
+        assert_eq!(universe.stars.len(), 4);
+        assert_eq!(universe.star_name_to_idx.len(), 4);
 
-        assert_eq!(universe.star_map[&1000].connections.len(), 4);
-        assert_eq!(universe.star_map[&1001].connections.len(), 3);
-        assert_eq!(universe.star_map[&1002].connections.len(), 4);
-        assert_eq!(universe.star_map[&1003].connections.len(), 5);
+        assert_eq!(universe.stars[0].connections.len(), 4);
+        assert_eq!(universe.stars[1].connections.len(), 3);
+        assert_eq!(universe.stars[2].connections.len(), 4);
+        assert_eq!(universe.stars[3].connections.len(), 5);
     }
 
     #[test]
@@ -336,11 +322,11 @@ mod tests {
     #[test]
     fn test_tiny_test_star1_sorting() {
         let universe = Universe::tiny_test();
-        let star1 = &universe.star_map[&1000];
+        let star1 = &universe.stars[0];
 
         // First connection should be the NPC gate to star 4
         assert_eq!(star1.connections[0].conn_type, ConnType::NpcGate);
-        assert_eq!(star1.connections[0].target, 1003);
+        assert_eq!(star1.connections[0].target, 3);
 
         // All NPC gates should come before all jumps
         let mut seen_jump = false;
