@@ -61,9 +61,10 @@ fn main() -> anyhow::Result<()> {
     match &cli.command {
         Some(Commands::Build { max_jump_distance }) => {
             info!("Building star map");
+            let now = Instant::now();
             let max_jump_dist: Meters = Meters::from_light_years(*max_jump_distance);
             data::Universe::build(max_jump_dist)?;
-            info!("Complete");
+            info!("Built in {:.2} seconds", now.elapsed().as_secs_f64());
         }
         Some(Commands::Dist {
             start_name,
