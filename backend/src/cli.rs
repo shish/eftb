@@ -63,9 +63,7 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::Build { max_jump_distance }) => {
             info!("Building star map");
             let max_jump_dist: Meters = Meters::from_light_years(*max_jump_distance);
-            let u = data::Universe::build(max_jump_dist)?;
-            info!("Saving star map");
-            u.save()?;
+            data::Universe::build(max_jump_dist)?;
             info!("Complete");
         }
         Some(Commands::Dist {
@@ -73,7 +71,7 @@ fn main() -> anyhow::Result<()> {
             end_name,
         }) => {
             info!("Loading star map");
-            let universe = data::Universe::load()?;
+            let universe = data::Universe::build(Meters::new(0.0))?;
             info!("Loaded star map");
 
             let start = universe.star_by_name(start_name)?;
@@ -95,12 +93,11 @@ fn main() -> anyhow::Result<()> {
         }) => {
             info!("Loading star map");
             let now = Instant::now();
-            let universe = data::Universe::load()?;
-            info!("Loaded star map in {:.3}", now.elapsed().as_secs_f64());
-
+            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
+            let universe = data::Universe::build(jump_distance)?;
             let start = universe.star_by_name(start_name)?;
             let end = universe.star_by_name(end_name)?;
-            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
+            info!("Loaded star map in {:.3}", now.elapsed().as_secs_f64());
 
             info!("Finding path");
             let now = Instant::now();
@@ -142,11 +139,11 @@ fn main() -> anyhow::Result<()> {
             jump_distance,
         }) => {
             info!("Loading star map");
-            let universe = data::Universe::load()?;
+            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
+            let universe = data::Universe::build(jump_distance)?;
             info!("Loaded star map");
 
             let start = universe.star_by_name(start_name)?;
-            let jump_distance: Meters = Meters::from_light_years(*jump_distance);
 
             info!("Finding exits");
             let exits = eftb::calc_exit(&universe, start, jump_distance);
@@ -164,7 +161,12 @@ fn main() -> anyhow::Result<()> {
             jump_distance,
         }) => {
             info!("Loading star map");
-            let universe = data::Universe::load()?;
+            let max_jump_distance: Meters = if let Some(jd) = *jump_distance {
+                Meters::from_light_years(jd)
+            } else {
+                Meters::new(0.0)
+            };
+            let universe = data::Universe::build(max_jump_distance)?;
             info!("Loaded star map");
 
             let star = universe.star_by_name(name)?;
@@ -195,7 +197,7 @@ fn main() -> anyhow::Result<()> {
         }
         Some(Commands::Constellation { name }) => {
             info!("Loading star map");
-            let universe = data::Universe::load()?;
+            let universe = data::Universe::build(Meters::new(0.0))?;
             info!("Loaded star map");
 
             let star = universe.star_by_name(name)?;

@@ -226,7 +226,8 @@ fn calc_exit(
 
 #[launch]
 fn rocket() -> _ {
-    let universe = data::Universe::load().expect("Failed to load universe data");
+    let universe = data::Universe::build(Meters::from_light_years(500.0))
+        .expect("Failed to load universe data");
 
     rocket::build()
         .manage(universe)

@@ -2,7 +2,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use eftb::units::Meters;
 
 fn path(c: &mut Criterion) {
-    let universe = eftb::data::Universe::load().unwrap();
+    let universe = eftb::data::Universe::build(Meters::from_light_years(500.0)).unwrap();
     // ~1700LY across dense space, takes ~20ms on my laptop
     let start = universe.star_by_name(&"OKL-N56".to_string()).unwrap();
     let end = universe.star_by_name(&"EBD-716".to_string()).unwrap();
@@ -23,7 +23,7 @@ fn path(c: &mut Criterion) {
 }
 
 fn heuristic(c: &mut Criterion) {
-    let universe = eftb::data::Universe::load().unwrap();
+    let universe = eftb::data::Universe::build(Meters::from_light_years(500.0)).unwrap();
     let start = universe.star_by_name(&"U75-4J4".to_string()).unwrap();
     let end = universe.star_by_name(&"OVD-1SM".to_string()).unwrap();
 
@@ -42,7 +42,7 @@ fn heuristic(c: &mut Criterion) {
 }
 
 fn successors(c: &mut Criterion) {
-    let universe = eftb::data::Universe::load().unwrap();
+    let universe = eftb::data::Universe::build(Meters::from_light_years(500.0)).unwrap();
     let start = universe.star_by_name(&"U75-4J4".to_string()).unwrap();
     let conn = &eftb::data::Connection {
         id: 0,

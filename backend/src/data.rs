@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use indicatif::ProgressIterator;
 use log::{info, warn};
-use rkyv::{Archive, Deserialize, Serialize};
 
 use crate::raw;
 use crate::units::Meters;
@@ -10,18 +9,14 @@ use crate::units::Meters;
 pub type ConnectionId = u32;
 pub type SolarSystemId = u32;
 
-#[derive(Debug, Archive, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[rkyv(compare(PartialEq))]
-#[rkyv(derive(Debug))]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ConnType {
     NpcGate,
     SmartGate,
     Jump,
 }
 
-#[derive(Debug, Archive, Deserialize, Serialize, Clone)]
-#[rkyv(compare(PartialEq))]
-#[rkyv(derive(Debug))]
+#[derive(Debug, Clone)]
 pub struct Connection {
     pub id: ConnectionId,
     pub conn_type: ConnType,
@@ -54,9 +49,7 @@ impl Ord for Connection {
 
 pub type Point3D = [f64; 3];
 
-#[derive(Archive, Deserialize, Serialize, Clone, Default)]
-#[rkyv(compare(PartialEq))]
-#[rkyv(derive(Debug))]
+#[derive(Clone, Default)]
 pub struct Star {
     pub id: SolarSystemId,
     pub loc: Point3D,
@@ -90,8 +83,7 @@ impl std::hash::Hash for Star {
     }
 }
 
-#[derive(Debug, Archive, Deserialize, Serialize, Clone)]
-#[rkyv(derive(Debug))]
+#[derive(Debug, Clone)]
 pub struct Universe {
     pub star_map: HashMap<SolarSystemId, Star>,
     pub star_id_to_name: HashMap<SolarSystemId, String>,
@@ -227,21 +219,6 @@ impl Universe {
             star_id_to_name,
             star_name_to_id,
         })
-    }
-
-    pub fn load() -> anyhow::Result<Universe> {
-        let bytes = std::fs::read("data/universe.rkyv")?;
-        let archived = rkyv::access::<rkyv::Archived<Universe>, rkyv::rancor::Error>(&bytes)
-            .map_err(|e| anyhow::anyhow!("Invalid archive format: {}", e))?;
-        let universe: Universe = rkyv::deserialize::<Universe, rkyv::rancor::Error>(archived)?;
-
-        Ok(universe)
-    }
-
-    pub fn save(&self) -> anyhow::Result<()> {
-        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(self)?;
-        std::fs::write("data/universe.rkyv", bytes.as_ref())?;
-        Ok(())
     }
 
     pub fn star_by_name(&self, name: &String) -> anyhow::Result<&Star> {
