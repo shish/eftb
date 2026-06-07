@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "files": { "includes": ["**", "!src/routeTree.gen.ts", "!!**/dist"] },
+  "files": { "includes": ["**", "!src/routeTree.gen.ts", "!src/consts/*_data.ts", "!!**/dist"] },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "indentStyle": "space",

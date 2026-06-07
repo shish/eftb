@@ -3,10 +3,10 @@
 
 export UV_PROJECT=../tools
 
-all: src/consts/bounds.ts
-src/consts/bounds.ts: ../tools/src/gen_bounds.py ../tools/src/restool.py
+all: src/consts/bounds_data.ts
+src/consts/bounds_data.ts: ../tools/src/gen_bounds.py ../tools/src/restool.py
 	uv run gen_bounds \
-	    -o src/consts/bounds.ts
+	    -o src/consts/bounds_data.ts
 
 all: src/consts/engines_data.ts
 src/consts/engines_data.ts: ../tools/src/gen_engines.py ../tools/src/restool.py

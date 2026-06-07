@@ -238,5 +238,7 @@ function SummaryCell({
           ).toLocaleString()}
         </td>
       );
+    default:
+      throw new Error(mode satisfies never);
   }
 }
