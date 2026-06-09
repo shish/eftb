@@ -67,6 +67,32 @@ impl Star {
             .sqrt(),
         )
     }
+
+    pub fn bucket(&self, bucket_size: Meters) -> String {
+        format!(
+            "{}-{}-{}",
+            (self.loc[0] / bucket_size.get()).floor() as i64,
+            (self.loc[1] / bucket_size.get()).floor() as i64,
+            (self.loc[2] / bucket_size.get()).floor() as i64,
+        )
+    }
+
+    pub fn nearby_buckets(&self, bucket_size: Meters) -> Vec<String> {
+        let mut buckets = Vec::new();
+        let base_x = (self.loc[0] / bucket_size.get()).floor() as i64;
+        let base_y = (self.loc[1] / bucket_size.get()).floor() as i64;
+        let base_z = (self.loc[2] / bucket_size.get()).floor() as i64;
+
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                for dz in -1..=1 {
+                    buckets.push(format!("{}-{}-{}", base_x + dx, base_y + dy, base_z + dz));
+                }
+            }
+        }
+
+        buckets
+    }
 }
 impl std::fmt::Debug for Star {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -111,6 +137,7 @@ impl Universe {
         let mut star_id_to_idx: HashMap<SolarSystemId, StarIdx> = HashMap::with_capacity(n);
         let mut stars: Vec<Star> = Vec::with_capacity(n);
         let mut star_name_to_idx: HashMap<String, StarIdx> = HashMap::with_capacity(n);
+        let mut star_bucket_to_idx: HashMap<String, Vec<StarIdx>> = HashMap::new();
 
         for (idx, raw_star) in raw_star_data.solar_systems.iter().enumerate() {
             let star = Star {
@@ -119,13 +146,18 @@ impl Universe {
                 loc: raw_star.center,
                 connections: Vec::new(),
             };
+            star_bucket_to_idx
+                .entry(star.bucket(max_jump_dist))
+                .or_insert_with(Vec::new)
+                .push(idx);
             stars.push(star);
             star_id_to_idx.insert(raw_star.solar_system_id, idx);
             star_name_to_idx.insert(raw_star.name.clone(), idx);
         }
         info!(
-            "Built star map with {} stars in {:.2}s",
+            "Built star map with {} stars in {} buckets in {:.2}s",
             stars.len(),
+            star_bucket_to_idx.len(),
             t.elapsed().as_secs_f64()
         );
 
@@ -189,19 +221,24 @@ impl Universe {
 
         let t = std::time::Instant::now();
         for from_star_idx in (0..n).progress() {
-            for to_star_idx in 0..n {
-                if from_star_idx == to_star_idx {
+            for nearby_bucket in stars[from_star_idx].nearby_buckets(max_jump_dist) {
+                if !star_bucket_to_idx.contains_key(&nearby_bucket) {
                     continue;
                 }
-                let distance = stars[from_star_idx].distance(&stars[to_star_idx]);
-                if distance < max_jump_dist {
-                    stars[from_star_idx].connections.push(Connection {
-                        id: conn_count,
-                        conn_type: ConnType::Jump,
-                        distance: distance,
-                        target: to_star_idx,
-                    });
-                    conn_count += 1;
+                for to_star_idx in star_bucket_to_idx[&nearby_bucket].iter() {
+                    if from_star_idx == *to_star_idx {
+                        continue;
+                    }
+                    let distance = stars[from_star_idx].distance(&stars[*to_star_idx]);
+                    if distance < max_jump_dist {
+                        stars[from_star_idx].connections.push(Connection {
+                            id: conn_count,
+                            conn_type: ConnType::Jump,
+                            distance: distance,
+                            target: *to_star_idx,
+                        });
+                        conn_count += 1;
+                    }
                 }
             }
         }
