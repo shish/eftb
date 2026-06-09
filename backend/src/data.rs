@@ -93,10 +93,11 @@ pub struct Universe {
 }
 impl Universe {
     pub fn build(max_jump_dist: Meters) -> anyhow::Result<Universe> {
-        info!("Loading raw data");
+        let t = std::time::Instant::now();
         let raw_star_data = raw::RawStarMap::from_file("data/starmap.json")?;
         let raw_smart_gates: Vec<raw::RawSmartGate> =
             serde_json::from_str(&std::fs::read_to_string("data/smartgates.json")?)?;
+        info!("Loaded raw data in {:.2}s", t.elapsed().as_secs_f64());
         Universe::build_from_raw(raw_star_data, raw_smart_gates, max_jump_dist)
     }
 
@@ -105,7 +106,7 @@ impl Universe {
         raw_smart_gates: Vec<raw::RawSmartGate>,
         max_jump_dist: Meters,
     ) -> anyhow::Result<Universe> {
-        info!("Building star map");
+        let t = std::time::Instant::now();
         let n = raw_star_data.solar_systems.len();
         let mut star_id_to_idx: HashMap<SolarSystemId, StarIdx> = HashMap::with_capacity(n);
         let mut stars: Vec<Star> = Vec::with_capacity(n);
@@ -122,8 +123,13 @@ impl Universe {
             star_id_to_idx.insert(raw_star.solar_system_id, idx);
             star_name_to_idx.insert(raw_star.name.clone(), idx);
         }
+        info!(
+            "Built star map with {} stars in {:.2}s",
+            stars.len(),
+            t.elapsed().as_secs_f64()
+        );
 
-        info!("Building connections from npc gates");
+        let t = std::time::Instant::now();
         let mut conn_count = 1; // Connection #0 is reserved for path init
         for raw_jump in raw_star_data.jumps.iter() {
             // rust only lets us borrow one mutable star at a time, so we can't add
@@ -151,8 +157,12 @@ impl Universe {
                 conn_count += 1;
             }
         }
+        info!(
+            "Built connections from npc gates in {:.2}s",
+            t.elapsed().as_secs_f64()
+        );
 
-        info!("Building connections from smart gates");
+        let t = std::time::Instant::now();
         for gate in raw_smart_gates.iter() {
             let Some(to_star_idx) = star_id_to_idx.get(&gate.to).cloned() else {
                 warn!("Smart gate has unknown target {}", gate.to);
@@ -172,8 +182,12 @@ impl Universe {
             });
             conn_count += 1;
         }
+        info!(
+            "Built connections from smart gates in {:.2}s",
+            t.elapsed().as_secs_f64()
+        );
 
-        info!("Building connections from jumps");
+        let t = std::time::Instant::now();
         for from_star_idx in (0..n).progress() {
             for to_star_idx in 0..n {
                 if from_star_idx == to_star_idx {
@@ -191,13 +205,22 @@ impl Universe {
                 }
             }
         }
+        info!(
+            "Built connections from jumps in {:.2}s",
+            t.elapsed().as_secs_f64()
+        );
 
-        info!("Sorting {} connections", conn_count);
         // sort gates first, and then jumps by distance - then when we
         // reach a jump that is too long we can stop searching
+        let t = std::time::Instant::now();
         for star in stars.iter_mut().progress() {
             star.connections.sort_unstable();
         }
+        info!(
+            "Sorted {} connections in {:.2}s",
+            conn_count,
+            t.elapsed().as_secs_f64()
+        );
 
         Ok(Universe {
             stars,
