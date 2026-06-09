@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use indicatif::ProgressIterator;
 use log::{info, warn};
+use rayon::prelude::*;
 
 use crate::raw;
 use crate::units::Meters;
@@ -250,9 +251,9 @@ impl Universe {
         // sort gates first, and then jumps by distance - then when we
         // reach a jump that is too long we can stop searching
         let t = std::time::Instant::now();
-        for star in stars.iter_mut().progress() {
+        stars.par_iter_mut().for_each(|star| {
             star.connections.sort_unstable();
-        }
+        });
         info!(
             "Sorted {} connections in {:.2}s",
             conn_count,
