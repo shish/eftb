@@ -256,11 +256,11 @@ class ResTool(ResToolBase):
         ex_parser = subparsers.add_parser("extract")
         ex_parser.add_argument("resource", help="the relative name of the resource file.")
         ex_parser.add_argument(
-            "--unpickle",
-            "-u",
+            "--decode",
+            "-d",
             action="store_true",
             default=False,
-            help="unpickle the resource file.",
+            help="decode the resource file.",
         )
         ex_parser.add_argument("--output", "-o", help="file to output to", default=None)
 
@@ -273,8 +273,8 @@ class ResTool(ResToolBase):
             if not args.resource.startswith("res:"):
                 args.resource = "res:" + args.resource
 
-            data = self.extract_resource(args.resource, decode=args.unpickle)
-            if args.unpickle:
+            data = self.extract_resource(args.resource, decode=args.decode)
+            if args.decode:
                 data = (json.dumps(data, indent=4) + "\n").encode("utf-8")
 
             if args.output is None:
