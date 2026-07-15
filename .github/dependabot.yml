@@ -1,10 +1,14 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
+    assignees:
+      - shish
     directory: /
     schedule:
       interval: monthly
   - package-ecosystem: npm
+    assignees:
+      - shish
     directory: /frontend
     schedule:
       interval: monthly
@@ -17,6 +21,8 @@ updates:
           - minor
           - patch
   - package-ecosystem: cargo
+    assignees:
+      - shish
     directory: /backend
     schedule:
       interval: monthly
@@ -29,6 +35,8 @@ updates:
           - minor
           - patch
   - package-ecosystem: pip
+    assignees:
+      - shish
     directory: /tools
     schedule:
       interval: monthly
@@ -41,6 +49,8 @@ updates:
           - minor
           - patch
   - package-ecosystem: docker
+    assignees:
+      - shish
     directory: /
     schedule:
       interval: monthly
