@@ -248,6 +248,41 @@ class ResTool(ResToolBase):
 
     ADD_OUTPUT = False
 
+    @staticmethod
+    def _resource_to_relpath(resource_name: str) -> Path:
+        normalized = resource_name.replace("\\", "/")
+        if ":/" in normalized:
+            scheme, rest = normalized.split(":/", maxsplit=1)
+            return Path(scheme) / Path(rest)
+        return Path(normalized.lstrip("/"))
+
+    def extract_all(self, target_dir: Path, decode: bool) -> None:
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        total = 0
+        decoded = 0
+        decode_failures = 0
+
+        for resource_name, _resource_path in self.resources.items():
+            output_path = target_dir / self._resource_to_relpath(resource_name)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(self.extract_resource(resource_name, decode=False))
+            total += 1
+
+            if decode and (resource_name.endswith(".pickle") or resource_name.endswith(".fsdbinary")):
+                try:
+                    decoded_struct = self.extract_resource(resource_name, decode=True)
+                    json_output_path = output_path.with_suffix(".json")
+                    json_output_path.write_text(json.dumps(decoded_struct, indent=2) + "\n", encoding="utf-8")
+                    decoded += 1
+                except Exception as ex:
+                    decode_failures += 1
+                    log.warning("Failed to decode %s: %s", resource_name, ex)
+
+        log.info("Extracted %d resources to %s", total, target_dir)
+        if decode:
+            log.info("Decoded %d resources to JSON (%d failed)", decoded, decode_failures)
+
     def custom_args(self, parser: argparse.ArgumentParser) -> None:
         subparsers = parser.add_subparsers(dest="cmd")
 
@@ -263,6 +298,16 @@ class ResTool(ResToolBase):
             help="decode the resource file.",
         )
         ex_parser.add_argument("--output", "-o", help="file to output to", default=None)
+
+        all_parser = subparsers.add_parser("extract_all")
+        all_parser.add_argument("target", type=Path, help="target directory to extract resources into")
+        all_parser.add_argument(
+            "--decode",
+            "-d",
+            action="store_true",
+            default=False,
+            help="also decode .pickle and .fsdbinary resources into .json",
+        )
 
     def tool_main(self, args: argparse.Namespace) -> None:
         if args.cmd == "list":
@@ -284,6 +329,9 @@ class ResTool(ResToolBase):
             else:
                 with open(args.output, "wb") as output_file:
                     output_file.write(data)
+
+        if args.cmd == "extract_all":
+            self.extract_all(args.target, decode=args.decode)
 
 
 def main() -> None:
