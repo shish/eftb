@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+includes:
+  backend:
+    taskfile: ./backend/Taskfile.yml
+    dir: ./backend
+  frontend:
+    taskfile: ./frontend/Taskfile.yml
+    dir: ./frontend
+  tools:
+    taskfile: ./tools/Taskfile.yml
+    dir: ./tools
+
+tasks:
+  build:
+    desc: Build backend and frontend
+    deps: [backend:build, frontend:build]
+
+  run:
+    desc: Run backend and frontend development servers
+    deps: [backend:run, frontend:run]
+
+  check:
+    desc: Run all checks across backend, frontend, and tools
+    deps: [backend:check, frontend:check, tools:check]

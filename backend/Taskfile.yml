@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+includes:
+  common: ../tools/common.yml
+
+env:
+  UV_PROJECT: ../tools
+
+tasks:
+  run:
+    desc: Run the backend development server
+    cmds:
+      - cargo run --bin web
+    deps:
+      - build
+
+  build:
+    desc: Generate all backend data files
+    deps: [gen-starmap]
+
+  check:
+    desc: Check formatting and lints
+    cmds:
+      - cargo fmt -- --check
+      - cargo clippy
+
+  gen-starmap:
+    desc: Generate data/starmap.json
+    sources:
+      - ../tools/src/gen_starmap.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - data/starmap.json
+    cmds:
+      - uv run gen_starmap -o data/starmap.json

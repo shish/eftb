@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+includes:
+  common: ../tools/common.yml
+
+tasks:
+  check:
+    desc: Run all checks (lint, format-check, typecheck)
+    deps: [lint, format-check, typecheck]
+
+  lint:
+    desc: Run ruff linter
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: Format source files with ruff
+    cmds:
+      - uv run ruff format .
+
+  format-check:
+    desc: Check formatting with ruff without modifying files
+    cmds:
+      - uv run ruff format --check .
+
+  typecheck:
+    desc: Run mypy type checker
+    cmds:
+      - uv run ty check .

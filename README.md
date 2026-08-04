@@ -3,7 +3,7 @@
 ## How to prepare the data
 
 1. Have EVE Frontier installed
-2. Fetch and compile static data with `make`
+2. Fetch and compile static data with `task`
 
 ## Testing with the CLI
 
@@ -12,8 +12,7 @@
 
 ## Testing the web interface
 
-- run the backend: `cargo run --bin web`
-- run the frontend: `npm run dev`
+- run the backend: `task run`
 - open `http://localhost:5173` in your browser
 
 ## Running in production

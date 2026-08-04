@@ -1,0 +1,111 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+includes:
+  common: ../tools/common.yml
+
+env:
+  UV_PROJECT: ../tools
+
+tasks:
+  run:
+    desc: Run the frontend development server
+    cmds:
+      - npm run dev
+    deps:
+      - build
+
+  build:
+    desc: Generate all frontend data files
+    deps:
+      - gen-bounds
+      - gen-engines
+      - gen-fuels
+      - gen-ships
+      - gen-structures
+      - gen-system-names
+      - gen-items
+
+  check:
+    desc: Run Biome linter/formatter check and TypeScript type check
+    cmds:
+      - npx biome check .
+      - npx tsc --noEmit
+
+  gen-bounds:
+    desc: Generate src/consts/bounds_data.ts
+    sources:
+      - ../tools/src/gen_bounds.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/bounds_data.ts
+    cmds:
+      - uv run gen_bounds -o src/consts/bounds_data.ts
+
+  gen-engines:
+    desc: Generate src/consts/engines_data.ts
+    sources:
+      - ../tools/src/gen_engines.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/engines_data.ts
+    cmds:
+      - uv run gen_engines -o src/consts/engines_data.ts
+
+  gen-fuels:
+    desc: Generate src/consts/fuels_data.ts
+    sources:
+      - ../tools/src/gen_fuels.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/fuels_data.ts
+    cmds:
+      - uv run gen_fuels -o src/consts/fuels_data.ts
+
+  gen-ships:
+    desc: Generate src/consts/ships_data.ts
+    sources:
+      - ../tools/src/gen_ships.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/ships_data.ts
+    cmds:
+      - uv run gen_ships -o src/consts/ships_data.ts
+
+  gen-structures:
+    desc: Generate src/consts/structures_data.ts
+    sources:
+      - ../tools/src/gen_structures.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/structures_data.ts
+    cmds:
+      - uv run gen_structures -o src/consts/structures_data.ts
+
+  gen-system-names:
+    desc: Generate src/consts/system_names.json
+    sources:
+      - ../tools/src/gen_system_names.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/system_names.json
+    cmds:
+      - uv run gen_system_names -o src/consts/system_names.json
+
+  gen-items:
+    desc: Generate src/consts/items_data.ts
+    sources:
+      - ../tools/src/gen_items.py
+      - ../tools/src/restool.py
+      - '{{ .INDEX_FILE }}'
+    generates:
+      - src/consts/items_data.ts
+    cmds:
+      - uv run gen_items -o src/consts/items_data.ts

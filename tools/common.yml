@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  INDEX_FILE:
+    sh: |
+      if [ -f "$EF_INSTALL_DIR/index_stillness.txt" ]; then
+        echo "$EF_INSTALL_DIR/index_stillness.txt"
+      elif [ -f "/home/shish/tmp/frontier/index_stillness.txt" ]; then
+        echo "/home/shish/tmp/frontier/index_stillness.txt"
+      elif [ -f "C:/CCP/EVE Frontier/index_stillness.txt" ]; then
+        echo "C:/CCP/EVE Frontier/index_stillness.txt"
+      else
+        echo "ERROR: could not find index_stillness.txt in any known location" >&2
+        exit 1
+      fi
