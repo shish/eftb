@@ -149,7 +149,7 @@ impl Universe {
             };
             star_bucket_to_idx
                 .entry(star.bucket(max_jump_dist))
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(idx);
             stars.push(star);
             star_id_to_idx.insert(raw_star.solar_system_id, idx);
@@ -184,7 +184,7 @@ impl Universe {
                 stars[from_star_idx].connections.push(Connection {
                     id: conn_count,
                     conn_type: ConnType::NpcGate,
-                    distance: distance,
+                    distance,
                     target: to_star_idx,
                 });
                 conn_count += 1;
@@ -210,7 +210,7 @@ impl Universe {
             stars[from_star_idx].connections.push(Connection {
                 id: conn_count,
                 conn_type: ConnType::SmartGate,
-                distance: distance,
+                distance,
                 target: to_star_idx,
             });
             conn_count += 1;
@@ -235,7 +235,7 @@ impl Universe {
                         stars[from_star_idx].connections.push(Connection {
                             id: conn_count,
                             conn_type: ConnType::Jump,
-                            distance: distance,
+                            distance,
                             target: *to_star_idx,
                         });
                         conn_count += 1;
