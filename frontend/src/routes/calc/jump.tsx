@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { ShipFuelSelect } from "../../components/ShipFuelSelect";
-import { getEngine, type Ship, type ShipName, ships } from "../../consts/ships";
-import { items } from "../../consts/items";
 import { type Fuel, type FuelName, fuels } from "../../consts/fuels";
+import { items } from "../../consts/items";
+import { getEngine, type Ship, type ShipName, ships } from "../../consts/ships";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/jump")({

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { getEngine, type ShipName, ships } from "../consts/ships";
 import { type FuelName, fuels } from "../consts/fuels";
+import { getEngine, type ShipName, ships } from "../consts/ships";
 
 export function ShipFuelSelect({
   onMassChange,

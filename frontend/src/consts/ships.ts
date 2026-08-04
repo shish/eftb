@@ -1,7 +1,7 @@
-import _ships from "./ships_data";
-import type { EngineName, Engine } from "./engines";
-import type { FuelType } from "./fuels";
+import type { Engine, EngineName } from "./engines";
 import { engines } from "./engines";
+import type { FuelType } from "./fuels";
+import _ships from "./ships_data";
 
 export type ShipType =
   | "Shuttle"

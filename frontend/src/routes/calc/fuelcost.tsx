@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext } from "react";
-import { type Ship, type ShipName, ships } from "../../consts/ships";
 import { type Fuel, type FuelName, fuels } from "../../consts/fuels";
+import { type Ship, type ShipName, ships } from "../../consts/ships";
 import { SettingsContext } from "../../providers/settings";
 
 export const Route = createFileRoute("/calc/fuelcost")({

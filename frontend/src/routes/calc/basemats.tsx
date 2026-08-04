@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
-import { items, type ItemName } from "../../consts/items";
-import { posboms, type BaseBom, type StructureName } from "../../consts/structures";
+import { type ItemName, items } from "../../consts/items";
+import { type BaseBom, posboms, type StructureName } from "../../consts/structures";
 
 export const Route = createFileRoute("/calc/basemats")({
   component: CargoCalculator,
